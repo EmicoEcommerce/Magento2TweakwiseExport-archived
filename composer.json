@@ -13,7 +13,7 @@
             "registration.php"
         ],
         "psr-4": {
-            "Magento\\Bundle\\": ""
+            "Emico\\TweakwiseExport\\": ""
         }
     },
     "extra": {
