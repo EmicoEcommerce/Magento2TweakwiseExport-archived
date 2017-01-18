@@ -5,4 +5,3 @@ Features:
 - Real time, periodically and triggered export from eav tables to Tweakwise feed
 - Combined product stock calculation options, sum, min, max
 - Multi store support
--
