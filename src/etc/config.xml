@@ -8,4 +8,18 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <tweakwise>
+            <export>
+                <enabled>0</enabled>
+                <validate>0</validate>
+                <real_time>0</real_time>
+                <server_url>https://navigator-api.tweakwise.com/task/trigger/</server_url>
+                <import_api_key />
+                <stock_calculation>sum</stock_calculation>
+                <product_selection>4</product_selection>
+                <out_of_stock_children>1</out_of_stock_children>
+            </export>
+        </tweakwise>
+    </default>
 </config>
