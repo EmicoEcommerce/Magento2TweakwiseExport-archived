@@ -8,18 +8,39 @@
 
 namespace Emico\TweakwiseExport\Console\Command;
 
+use Emico\TweakwiseExport\Model\Config;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportCommand extends Command
 {
     /**
+     * @var Config
+     */
+    protected $config;
+
+    /**
+     * ExportCommand constructor.
+     *
+     * @param Config $config
+     */
+    public function __construct(Config $config)
+    {
+        $this->config = $config;
+        parent::__construct();
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function configure()
     {
-        $this->setName('tweakwise:export:export')
+        $this->setName('tweakwise:export')
+            ->addArgument('file', InputArgument::OPTIONAL, 'Export to specific file', $this->config->getDefaultFeedPath())
+            ->addOption('validate', 'c', InputOption::VALUE_NONE, 'Validate feed and rollback if fails.')
             ->setDescription('Export tweakwise feed');
     }
 

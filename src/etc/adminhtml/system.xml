@@ -36,7 +36,7 @@
                         <field id="validate">0</field>
                     </depends>
                 </field>
-                <field id="server_url" translate="label,comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="api_server_url" translate="label,comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Server API Url</label>
                     <comment>Default: https://navigator-api.tweakwise.com/task/trigger/</comment>
                     <validate>validate-url</validate>
@@ -45,7 +45,7 @@
                         <field id="real_time">0</field>
                     </depends>
                 </field>
-                <field id="import_api_key" translate="label,comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="api_import_key" translate="label,comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Tweakwise Import API Key</label>
                     <comment>API protection parameter see Tweakwise import task tab API.</comment>
                     <validate>validate-url</validate>

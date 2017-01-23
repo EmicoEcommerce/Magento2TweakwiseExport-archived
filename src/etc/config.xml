@@ -14,8 +14,8 @@
                 <enabled>0</enabled>
                 <validate>0</validate>
                 <real_time>0</real_time>
-                <server_url>https://navigator-api.tweakwise.com/task/trigger/</server_url>
-                <import_api_key />
+                <api_server_url>https://navigator-api.tweakwise.com/task/trigger/</api_server_url>
+                <api_import_key />
                 <stock_calculation>sum</stock_calculation>
                 <product_selection>4</product_selection>
                 <out_of_stock_children>1</out_of_stock_children>
