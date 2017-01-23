@@ -15,4 +15,10 @@
             </argument>
         </arguments>
     </type>
+    <type name="Emico\TweakwiseExport\Model\Export">
+        <arguments>
+            <argument name="validator" xsi:type="object">Emico\TweakwiseExport\Model\Validate\Validator\Proxy</argument>
+            <argument name="writer" xsi:type="object">Emico\TweakwiseExport\Model\Write\Writer\Proxy</argument>
+        </arguments>
+    </type>
 </config>
