@@ -9,6 +9,7 @@
 namespace Emico\TweakwiseExport\Model\Validate;
 
 use Emico\TweakwiseExport\Exception\ValidationException;
+use Magento\Framework\Profiler;
 
 class Validator
 {
@@ -18,6 +19,11 @@ class Validator
      */
     public function validate($file)
     {
+        try {
+            Profiler::start('tweakwise::export::validate');
 
+        } finally {
+            Profiler::stop('tweakwise::export::validate');
+        }
     }
 }

@@ -9,6 +9,7 @@
 namespace Emico\TweakwiseExport\Model\Write;
 
 use Emico\TweakwiseExport\Exception\WriteException;
+use Magento\Framework\Profiler;
 
 class Writer
 {
@@ -18,6 +19,11 @@ class Writer
      */
     public function write($resource)
     {
+        try {
+            Profiler::start('tweakwise::export::write');
 
+        } finally {
+            Profiler::stop('tweakwise::export::write');
+        }
     }
 }

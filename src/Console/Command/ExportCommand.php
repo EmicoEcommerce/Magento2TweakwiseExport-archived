@@ -9,6 +9,8 @@
 namespace Emico\TweakwiseExport\Console\Command;
 
 use Emico\TweakwiseExport\Model\Config;
+use Emico\TweakwiseExport\Model\Export;
+use Emico\TweakwiseExport\Model\Validate\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,13 +25,27 @@ class ExportCommand extends Command
     protected $config;
 
     /**
+     * @var Export
+     */
+    protected $export;
+
+    /**
+     * @var Validator
+     */
+    protected $validator;
+
+    /**
      * ExportCommand constructor.
      *
      * @param Config $config
+     * @param Export $export
+     * @param Validator $validator
      */
-    public function __construct(Config $config)
+    public function __construct(Config $config, Export $export, Validator $validator)
     {
         $this->config = $config;
+        $this->export = $export;
+        $this->validator = $validator;
         parent::__construct();
     }
 
@@ -49,6 +65,9 @@ class ExportCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $feedFile = (string) $input->getArgument('file');
+        $validate = (bool) $input->getOption('validate');
 
+        $this->export->generateToFile($feedFile, $validate);
     }
 }

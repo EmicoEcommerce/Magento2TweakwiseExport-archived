@@ -43,17 +43,24 @@ class Export
     protected $writer;
 
     /**
+     * @var Logger
+     */
+    protected $log;
+
+    /**
      * Export constructor.
      *
      * @param Config $config
      * @param Validator $validator
      * @param Writer $writer
+     * @param Logger $log
      */
-    public function __construct(Config $config, Validator $validator, Writer $writer)
+    public function __construct(Config $config, Validator $validator, Writer $writer, Logger $log)
     {
         $this->config = $config;
         $this->validator = $validator;
         $this->writer = $writer;
+        $this->log = $log;
     }
 
     /**
@@ -112,25 +119,41 @@ class Export
             }
             fclose($sourceHandle);
         } else {
-            $tmpFeedFile = $feedFile . '.tmp';
-            $sourceHandle = @fopen($tmpFeedFile, 'w');
-            if (!$sourceHandle) {
-                throw new FeedException(sprintf('Could not open feed path "%s" for writing', $feedFile));
-            }
-
-            try {
-                $this->generateFeed($sourceHandle);
-            } finally {
-                fclose($sourceHandle);
-            }
-
-            if ($this->config->isValidate()) {
-                $this->validator->validate($tmpFeedFile);
-            }
-
-            rename($tmpFeedFile, $feedFile);
-            $this->getFeed($sourceHandle);
+            $this->generateToFile($feedFile, $this->config->isValidate());
+            $this->getFeed($targetHandle);
         }
+
+        return $this;
+    }
+
+    /**
+     * @param string $feedFile
+     * @param bool $validate
+     * @return $this
+     * @throws FeedException
+     */
+    public function generateToFile($feedFile, $validate)
+    {
+        $tmpFeedFile = $feedFile . '.tmp';
+        $sourceHandle = @fopen($tmpFeedFile, 'w');
+        if (!$sourceHandle) {
+            throw new FeedException(sprintf('Could not open feed path "%s" for writing', $feedFile));
+        }
+
+        try {
+            $this->generateFeed($sourceHandle);
+            $this->log->debug('Feed exported to ' . $tmpFeedFile);
+        } finally {
+            fclose($sourceHandle);
+        }
+
+        if ($validate) {
+            $this->validator->validate($tmpFeedFile);
+            $this->log->debug('Feed validated ' . $tmpFeedFile);
+        }
+
+        rename($tmpFeedFile, $feedFile);
+        $this->log->debug('Feed renamed ' . $tmpFeedFile);
 
         return $this;
     }
