@@ -68,6 +68,9 @@ class ExportCommand extends Command
         $feedFile = (string) $input->getArgument('file');
         $validate = (bool) $input->getOption('validate');
 
+        $startTime = microtime(true);
         $this->export->generateToFile($feedFile, $validate);
+        $generateTime = microtime(true) - $startTime;
+        $output->writeln(sprintf('Feed written to %s in %ss', $feedFile, round($generateTime, 4)));
     }
 }
