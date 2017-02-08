@@ -59,6 +59,7 @@ class Writer
             Profiler::start('tweakwise::export::write');
             $this->resource = $resource;
             $this->startDocument();
+            $this->writeCategories();
             $this->endDocument();
         } finally {
             $this->close();
