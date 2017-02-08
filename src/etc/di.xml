@@ -51,6 +51,7 @@
                 <item name="path" xsi:type="string">path</item>
                 <item name="level" xsi:type="string">level</item>
                 <item name="position" xsi:type="string">position</item>
+                <item name="is_active" xsi:type="string">is_active</item>
             </argument>
         </arguments>
     </virtualType>
