@@ -21,7 +21,7 @@ class Writer
     {
         try {
             Profiler::start('tweakwise::export::write');
-
+            fwrite($resource, 'test');
         } finally {
             Profiler::stop('tweakwise::export::write');
         }

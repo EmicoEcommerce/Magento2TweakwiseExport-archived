@@ -64,6 +64,36 @@ class Export
     }
 
     /**
+     * @param callable $action
+     * @param string|null $lockFile Defaults to default feed path
+     * @return $this
+     */
+    protected function executeLocked(callable $action, $lockFile = null)
+    {
+        if (!$lockFile) {
+            $lockFile = $this->config->getDefaultFeedPath() . '.lock';
+        }
+
+        $lockHandle = @fopen($lockFile, 'w');
+        if (!$lockHandle) {
+            $this->log->throwException(new LockException(sprintf('Could not lock feed export on lockfile "%s"', $lockFile)));
+        }
+
+        if (flock($lockHandle, LOCK_EX)) {
+            try {
+                $action();
+            } finally {
+                flock($lockHandle, LOCK_UN);
+                fclose($lockHandle);
+            }
+        } else {
+            $this->log->throwException(new LockException(sprintf('Unable to obtain lock on %s', $lockFile)));
+        }
+
+        return $this;
+    }
+
+    /**
      * Generate and write feed content to handle
      *
      * @param resource $targetHandle
@@ -73,27 +103,13 @@ class Export
      */
     public function generateFeed($targetHandle)
     {
-        $lockFile = $this->config->getDefaultFeedPath() . '.lock';
-        $lockHandle = @fopen($lockFile, 'w');
-        if (!$lockHandle) {
-            throw new LockException(sprintf('Could not lock feed export "%s"', $lockFile));
-        }
-
-        if (flock($lockHandle, LOCK_EX)) {
-            try {
-                $this->writer->write($targetHandle);
-            } finally {
-                flock($lockHandle, LOCK_UN);
-                fclose($lockHandle);
-            }
-        } else {
-            throw new LockException('Unable to obtain lock');
-        }
-
+        $this->executeLocked(function () use ($targetHandle) {
+            $this->writer->write($targetHandle);
+        });
         return $this;
     }
 
-    /**
+    /**generateFeed
      * Get latest generated feed and write to resource or create new if real time is enabled.
      *
      * @param resource $targetHandle
@@ -111,7 +127,7 @@ class Export
         if (file_exists($feedFile)) {
             $sourceHandle = @fopen($feedFile, 'r');
             if (!$sourceHandle) {
-                throw new FeedException(sprintf('Could not open feed path "%s" for reading', $feedFile));
+                $this->log->throwException(new FeedException(sprintf('Could not open feed path "%s" for reading', $feedFile)));
             }
 
             while (!feof($sourceHandle)) {
@@ -134,27 +150,28 @@ class Export
      */
     public function generateToFile($feedFile, $validate)
     {
-        $tmpFeedFile = $feedFile . '.tmp';
-        $sourceHandle = @fopen($tmpFeedFile, 'w');
-        if (!$sourceHandle) {
-            throw new FeedException(sprintf('Could not open feed path "%s" for writing', $feedFile));
-        }
+        $this->executeLocked(function () use ($feedFile, $validate) {
+            $tmpFeedFile = $feedFile . '.tmp';
+            $sourceHandle = @fopen($tmpFeedFile, 'w');
+            if (!$sourceHandle) {
+                $this->log->throwException(new FeedException(sprintf('Could not open feed path "%s" for writing', $feedFile)));
+            }
 
-        try {
-            $this->generateFeed($sourceHandle);
-            $this->log->debug('Feed exported to ' . $tmpFeedFile);
-        } finally {
-            fclose($sourceHandle);
-        }
+            try {
+                $this->writer->write($sourceHandle);
+                $this->log->debug('Feed exported to ' . $tmpFeedFile);
+            } finally {
+                fclose($sourceHandle);
+            }
 
-        if ($validate) {
-            $this->validator->validate($tmpFeedFile);
-            $this->log->debug('Feed validated ' . $tmpFeedFile);
-        }
+            if ($validate) {
+                $this->validator->validate($tmpFeedFile);
+                $this->log->debug('Feed validated ' . $tmpFeedFile);
+            }
 
-        rename($tmpFeedFile, $feedFile);
-        $this->log->debug('Feed renamed ' . $tmpFeedFile);
-
+            rename($tmpFeedFile, $feedFile);
+            $this->log->debug('Feed renamed ' . $tmpFeedFile);
+        });
         return $this;
     }
 }

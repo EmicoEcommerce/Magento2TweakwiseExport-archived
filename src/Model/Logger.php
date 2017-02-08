@@ -8,6 +8,7 @@
 
 namespace Emico\TweakwiseExport\Model;
 
+use Exception;
 use Psr\Log\LoggerInterface;
 
 class Logger implements LoggerInterface
@@ -97,5 +98,17 @@ class Logger implements LoggerInterface
     public function log($level, $message, array $context = [])
     {
         $this->log->log($level, '[TweakWise] ' . $message, $context);
+    }
+
+    /**
+     * Log exception message in Tweakwise tag and throw exception
+     *
+     * @param Exception $exception
+     * @throws Exception
+     */
+    public function throwException(Exception $exception)
+    {
+        $this->log->error($exception->getMessage());
+        throw $exception;
     }
 }
