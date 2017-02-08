@@ -8,33 +8,14 @@
 
 namespace Emico\TweakwiseExport\Model\Write;
 
-class Categories implements WriterInterface
+class Products implements WriterInterface
 {
-    /**
-     * @var EavIterator
-     */
-    protected $iterator;
-
-    /**
-     * Categories constructor.
-     *
-     * @param EavIterator $iterator
-     */
-    public function __construct(EavIterator $iterator)
-    {
-        $this->iterator = $iterator;
-    }
-
     /**
      * {@inheritdoc}
      */
     public function write(Writer $writer, XmlWriter $xml)
     {
-        $xml->startAttribute('categories');
-        foreach ($this->iterator as $data) {
-            var_dump($data);
-        }
-        $xml->endAttribute();
+        $xml->writeElement('products', 'ook?');
         $writer->flush();
         return $this;
     }

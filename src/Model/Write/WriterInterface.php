@@ -8,7 +8,12 @@
 
 namespace Emico\TweakwiseExport\Model\Write;
 
-class WriterInterface
+interface WriterInterface
 {
-
+    /**
+     * @param Writer $writer
+     * @param XmlWriter $xml
+     * @return $this
+     */
+    public function write(Writer $writer, XmlWriter $xml);
 }

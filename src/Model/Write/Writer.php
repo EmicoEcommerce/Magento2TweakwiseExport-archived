@@ -38,15 +38,45 @@ class Writer
     protected $appState;
 
     /**
+     * @var WriterInterface[]
+     */
+    protected $writers;
+
+    /**
      * Writer constructor.
      *
      * @param StoreManager $storeManager
      * @param AppState $appState
+     * @param WriterInterface[] $writers
      */
-    public function __construct(StoreManager $storeManager, AppState $appState)
+    public function __construct(StoreManager $storeManager, AppState $appState, $writers)
     {
         $this->storeManager = $storeManager;
         $this->appState = $appState;
+        $this->writers = $writers;
+    }
+
+    /**
+     * @param WriterInterface[] $writers
+     * @return $this
+     */
+    public function setWriters($writers)
+    {
+        $this->writers = [];
+        foreach ($writers as $writer) {
+            $this->addWriter($writer);
+        }
+        return $this;
+    }
+
+    /**
+     * @param WriterInterface $writer
+     * @return $this
+     */
+    public function addWriter(WriterInterface $writer)
+    {
+        $this->writers[] = $writer;
+        return $this;
     }
 
     /**
@@ -59,7 +89,10 @@ class Writer
             Profiler::start('tweakwise::export::write');
             $this->resource = $resource;
             $this->startDocument();
-            $this->writeCategories();
+            $xml = $this->getXml();
+            foreach ($this->writers as $writer) {
+                $writer->write($this, $xml);
+            }
             $this->endDocument();
         } finally {
             $this->close();
@@ -112,7 +145,7 @@ class Writer
      * Flush current content of writer to resource
      * @return $this
      */
-    protected function flush()
+    public function flush()
     {
         $output = $this->getXml()->flush();
         fwrite($this->resource, $output);

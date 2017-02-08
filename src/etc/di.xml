@@ -15,6 +15,7 @@
             </argument>
         </arguments>
     </type>
+
     <type name="Emico\TweakwiseExport\Model\Export">
         <arguments>
             <argument name="validator" xsi:type="object">Emico\TweakwiseExport\Model\Validate\Validator\Proxy</argument>
@@ -26,6 +27,37 @@
         <arguments>
             <argument name="validator" xsi:type="object">Emico\TweakwiseExport\Model\Validate\Validator\Proxy</argument>
             <argument name="export" xsi:type="object">Emico\TweakwiseExport\Model\Export\Proxy</argument>
+        </arguments>
+    </type>
+
+    <type name="Emico\TweakwiseExport\Model\Write\Writer">
+        <arguments>
+            <argument name="storeManager" xsi:type="object">Magento\Store\Model\StoreManager\Proxy</argument>
+            <argument name="appState" xsi:type="object">Magento\Framework\App\State\Proxy</argument>
+            <argument name="writers" xsi:type="array">
+                <item name="categories" xsi:type="object">Emico\TweakwiseExport\Model\Write\Categories</item>
+                <item name="products" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="Emico\TweakwiseExport\Model\Write\EavIterator\Categories" type="Emico\TweakwiseExport\Model\Write\EavIterator">
+        <arguments>
+            <argument name="eavConfig" xsi:type="object">Magento\Eav\Model\Config</argument>
+            <argument name="entityCode" xsi:type="string">catalog_category</argument>
+            <argument name="attributes" xsi:type="array">
+                <item name="parent_id" xsi:type="string">parent_id</item>
+                <item name="name" xsi:type="string">name</item>
+                <item name="path" xsi:type="string">path</item>
+                <item name="level" xsi:type="string">level</item>
+                <item name="position" xsi:type="string">position</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Emico\TweakwiseExport\Model\Write\Categories">
+        <arguments>
+            <argument name="iterator" xsi:type="object">Emico\TweakwiseExport\Model\Write\EavIterator\Categories</argument>
         </arguments>
     </type>
 </config>
