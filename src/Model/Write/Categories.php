@@ -9,6 +9,7 @@
 namespace Emico\TweakwiseExport\Model\Write;
 
 use Emico\TweakwiseExport\Model\Config;
+use Emico\TweakwiseExport\Model\Helper;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManager;
 
@@ -30,17 +31,24 @@ class Categories implements WriterInterface
     protected $config;
 
     /**
+     * @var Helper
+     */
+    protected $helper;
+
+    /**
      * Categories constructor.
      *
      * @param EavIterator $iterator
      * @param StoreManager $storeManager
      * @param Config $config
+     * @param Helper $helper
      */
-    public function __construct(EavIterator $iterator, StoreManager $storeManager, Config $config)
+    public function __construct(EavIterator $iterator, StoreManager $storeManager, Config $config, Helper $helper)
     {
         $this->iterator = $iterator;
         $this->storeManager = $storeManager;
         $this->config = $config;
+        $this->helper = $helper;
     }
 
     /**
@@ -76,12 +84,10 @@ class Categories implements WriterInterface
         $this->iterator->setStoreId($storeId);
 
         foreach ($this->iterator as $data) {
-            // Always write root category
             if (!isset($data['is_active']) || !$data['is_active']) {
                 continue;
             }
 
-            $exportedCategories[$data['entity_id']] = true;
             // Set parent id to root category if none
             if (!isset($data['parent_id'])) {
                 $data['parent_id'] = 0;
@@ -94,21 +100,13 @@ class Categories implements WriterInterface
                 continue;
             }
 
+            // Set category as exported
+            $exportedCategories[$data['entity_id']] = true;
             $this->writeCategory($xml, $storeId, $data);
 
             $writer->flush();
         }
         return $this;
-    }
-
-    /**
-     * @param int $storeId
-     * @param int $entityId
-     * @return string
-     */
-    protected function getTweakwiseId($storeId, $entityId)
-    {
-        return $storeId ? $storeId . '-' . $entityId : $entityId;
     }
 
     /**
@@ -119,7 +117,7 @@ class Categories implements WriterInterface
      */
     protected function writeCategory(XmlWriter $xml, $storeId, array $data)
     {
-        $tweakwiseId = $this->getTweakwiseId($storeId, $data['entity_id']);
+        $tweakwiseId = $this->helper->getTweakwiseId($storeId, $data['entity_id']);
 
         $xml->startElement('category');
         $xml->writeElement('categoryid', $tweakwiseId);
@@ -128,7 +126,7 @@ class Categories implements WriterInterface
 
         if (isset($data['parent_id']) && $data['parent_id']) {
             $xml->startElement('parents');
-            $xml->writeElement('categoryid', $this->getTweakwiseId($storeId, $data['parent_id']));
+            $xml->writeElement('categoryid', $this->helper->getTweakwiseId($storeId, $data['parent_id']));
             $xml->endElement(); // </parents>
         }
 

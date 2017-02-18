@@ -26,28 +26,15 @@ class XMLWriter extends BaseXMLWriter
             $this->startCdata();
         }
 
+        if ($value) {
+            $value = $this->xmlPrepare($value);
+        }
         $this->text($value);
 
         if (!is_numeric($value) && !empty($value)) {
             $this->endCdata();
         }
         parent::endElement();
-
-        return $this;
-    }
-
-    /**
-     * @param string $name
-     * @param mixed $value
-     * @return $this
-     */
-    public function writeAttribute($name, $value)
-    {
-        parent::startElement('attribute');
-        parent::writeAttribute('datatype', is_numeric($value) ? 'numeric' : 'text');
-        $this->writeElement('name', $name);
-        $this->writeElement('value', $this->xmlPrepare($value));
-        parent::endElement(); // </attribute>
 
         return $this;
     }
