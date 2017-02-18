@@ -112,6 +112,14 @@ class Config
     /**
      * @return string
      */
+    public function getKey()
+    {
+        return (string) $this->config->getValue('tweakwise/export/feed_key');
+    }
+
+    /**
+     * @return string
+     */
     public function getDefaultFeedPath()
     {
         $dir = $this->directoryList->getPath('var') . DIRECTORY_SEPARATOR . 'feeds';

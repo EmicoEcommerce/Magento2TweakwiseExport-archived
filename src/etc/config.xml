@@ -12,6 +12,7 @@
         <tweakwise>
             <export>
                 <enabled>0</enabled>
+                <key />
                 <validate>0</validate>
                 <real_time>0</real_time>
                 <api_server_url>https://navigator-api.tweakwise.com/task/trigger/</api_server_url>

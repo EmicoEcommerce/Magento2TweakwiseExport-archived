@@ -15,7 +15,9 @@ class Products implements WriterInterface
      */
     public function write(Writer $writer, XmlWriter $xml)
     {
-        $xml->writeElement('products', 'ook?');
+        $xml->startElement('products');
+
+        $xml->endElement(); // products
         $writer->flush();
         return $this;
     }

@@ -109,7 +109,7 @@ class Export
         return $this;
     }
 
-    /**generateFeed
+    /**
      * Get latest generated feed and write to resource or create new if real time is enabled.
      *
      * @param resource $targetHandle
@@ -131,7 +131,7 @@ class Export
             }
 
             while (!feof($sourceHandle)) {
-                fwrite($sourceHandle, fread($sourceHandle, self::FEED_COPY_BUFFER_SIZE));
+                fwrite($targetHandle, fread($sourceHandle, self::FEED_COPY_BUFFER_SIZE));
             }
             fclose($sourceHandle);
         } else {
