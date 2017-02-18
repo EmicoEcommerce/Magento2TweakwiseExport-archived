@@ -10,6 +10,7 @@ namespace Emico\TweakwiseExport\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Store\Model\Store;
 
 class Config
 {
@@ -41,10 +42,14 @@ class Config
     }
 
     /**
+     * @param Store $store
      * @return bool
      */
-    public function isEnabled()
+    public function isEnabled(Store $store = null)
     {
+        if ($store) {
+            return $store->getConfig('tweakwise/export/enabled');
+        }
         return (bool) $this->config->getValue('tweakwise/export/enabled');
     }
 

@@ -35,6 +35,11 @@ class EavIterator implements IteratorAggregate
     protected $attributes = [];
 
     /**
+     * @var int
+     */
+    protected $storeId = 0;
+
+    /**
      * EavIterator constructor.
      *
      * @param EavConfig $eavConfig
@@ -56,6 +61,16 @@ class EavIterator implements IteratorAggregate
     {
         $attribute = $this->eavConfig->getAttribute($this->entityCode, $attributeCode);
         $this->attributes[$attribute->getAttributeCode()] = $attribute;
+        return $this;
+    }
+
+    /**
+     * @param int $storeId
+     * @return $this
+     */
+    public function setStoreId($storeId)
+    {
+        $this->storeId = (int) $storeId;
         return $this;
     }
 
@@ -150,6 +165,12 @@ class EavIterator implements IteratorAggregate
                 ]
             )
             ->where('attribute_id = ?', $attribute->getId());
+
+        if ($this->storeId) {
+            $select->where('store_id = 0 OR store_id = ?', $this->storeId);
+        } else {
+            $select->where('store_id = 0');
+        }
 
         return $select;
     }

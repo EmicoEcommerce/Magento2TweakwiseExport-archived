@@ -8,6 +8,10 @@
 
 namespace Emico\TweakwiseExport\Model\Write;
 
+use Emico\TweakwiseExport\Model\Config;
+use Magento\Store\Model\Store;
+use Magento\Store\Model\StoreManager;
+
 class Categories implements WriterInterface
 {
     /**
@@ -16,18 +20,27 @@ class Categories implements WriterInterface
     protected $iterator;
 
     /**
-     * @var int
+     * @var StoreManager
      */
-    protected $exportedCategories = [];
+    protected $storeManager;
+
+    /**
+     * @var Config
+     */
+    protected $config;
 
     /**
      * Categories constructor.
      *
      * @param EavIterator $iterator
+     * @param StoreManager $storeManager
+     * @param Config $config
      */
-    public function __construct(EavIterator $iterator)
+    public function __construct(EavIterator $iterator, StoreManager $storeManager, Config $config)
     {
         $this->iterator = $iterator;
+        $this->storeManager = $storeManager;
+        $this->config = $config;
     }
 
     /**
@@ -35,22 +48,56 @@ class Categories implements WriterInterface
      */
     public function write(Writer $writer, XmlWriter $xml)
     {
-        $storeId = 1;
-        $this->exportedCategories = [];
         $xml->startAttribute('categories');
 
-        foreach ($this->iterator as $data) {
-            // Always write root category
-            if ($data['entity_id'] == 1) {
-                $this->writeCategory($xml, $storeId, $data);
-            } elseif ($data['is_active']) {
-                $this->writeCategory($xml, $storeId, $data);
+        $this->writeCategory($xml, null, ['entity_id' => 1, 'name' => 'Root', 'position' => 0]);
+        foreach ($this->storeManager->getStores() as $store) {
+            if ($this->config->isEnabled($store)) {
+                $this->exportStore($writer, $xml, $store);
             }
-            $writer->flush();
         }
 
         $xml->endAttribute();
         $writer->flush();
+        return $this;
+    }
+
+    /**
+     * @param Writer $writer
+     * @param XmlWriter $xml
+     * @param Store $store
+     * @return $this
+     */
+    protected function exportStore(Writer $writer, XmlWriter $xml, Store $store)
+    {
+        // Set root category as exported
+        $exportedCategories = [0 => true];
+        $storeId = $store->getId();
+        $this->iterator->setStoreId($storeId);
+
+        foreach ($this->iterator as $data) {
+            // Always write root category
+            if (!isset($data['is_active']) || !$data['is_active']) {
+                continue;
+            }
+
+            $exportedCategories[$data['entity_id']] = true;
+            // Set parent id to root category if none
+            if (!isset($data['parent_id'])) {
+                $data['parent_id'] = 0;
+            }
+
+            if ($data['parent_id'] == 1) {
+                $data['parent_id'] = 0;
+            }
+            if (!isset($exportedCategories[$data['parent_id']])) {
+                continue;
+            }
+
+            $this->writeCategory($xml, $storeId, $data);
+
+            $writer->flush();
+        }
         return $this;
     }
 
@@ -61,7 +108,7 @@ class Categories implements WriterInterface
      */
     protected function getTweakwiseId($storeId, $entityId)
     {
-        return $storeId . '-' . $entityId;
+        return $storeId ? $storeId . '-' . $entityId : $entityId;
     }
 
     /**
@@ -74,10 +121,8 @@ class Categories implements WriterInterface
     {
         $tweakwiseId = $this->getTweakwiseId($storeId, $data['entity_id']);
 
-        $this->exportedCategories[$tweakwiseId] = true;
-
         $xml->startElement('category');
-        $xml->writeElement('categoryid', $data['entity_id']);
+        $xml->writeElement('categoryid', $tweakwiseId);
         $xml->writeElement('rank', $data['position']);
         $xml->writeElement('name', $data['name']);
 
