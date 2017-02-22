@@ -11,6 +11,8 @@ namespace Emico\TweakwiseExport\Console\Command;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Export;
 use Emico\TweakwiseExport\Model\Validate\Validator;
+use Magento\Framework\App\Area;
+use Magento\Framework\App\State;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,17 +37,24 @@ class ExportCommand extends Command
     protected $validator;
 
     /**
+     * @var State
+     */
+    protected $state;
+
+    /**
      * ExportCommand constructor.
      *
      * @param Config $config
      * @param Export $export
      * @param Validator $validator
+     * @param State $state
      */
-    public function __construct(Config $config, Export $export, Validator $validator)
+    public function __construct(Config $config, Export $export, Validator $validator, State $state)
     {
         $this->config = $config;
         $this->export = $export;
         $this->validator = $validator;
+        $this->state = $state;
         parent::__construct();
     }
 
@@ -65,6 +74,7 @@ class ExportCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->state->setAreaCode(Area::AREA_CRONTAB);
         $feedFile = (string) $input->getArgument('file');
         $validate = (bool) $input->getOption('validate');
 
