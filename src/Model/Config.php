@@ -30,6 +30,11 @@ class Config
     protected $directoryList;
 
     /**
+     * @var array
+     */
+    protected $skipAttributes;
+
+    /**
      * Export constructor.
      *
      * @param ScopeConfigInterface $config
@@ -115,6 +120,24 @@ class Config
     public function getKey()
     {
         return (string) $this->config->getValue('tweakwise/export/feed_key');
+    }
+
+    /**
+     * @param string|null $attribute
+     * @return bool|string[]
+     */
+    public function getSkipAttribute($attribute = null)
+    {
+        if (!$this->skipAttributes) {
+            $skipAttributes = explode(',', $this->config->getValue('tweakwise/export/exclude_child_attributes'));
+            $this->skipAttributes = array_flip($skipAttributes);
+        }
+
+        if ($attribute === null) {
+            return array_keys($this->skipAttributes);
+        }
+
+        return isset($this->skipAttributes[$attribute]);
     }
 
     /**

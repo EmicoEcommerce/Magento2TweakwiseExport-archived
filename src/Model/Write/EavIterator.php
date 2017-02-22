@@ -38,6 +38,11 @@ class EavIterator implements IteratorAggregate
     protected $storeId = 0;
 
     /**
+     * @var int[]
+     */
+    protected $entityIds;
+
+    /**
      * EavIterator constructor.
      *
      * @param EavConfig $eavConfig
@@ -70,6 +75,24 @@ class EavIterator implements IteratorAggregate
     {
         $this->storeId = (int) $storeId;
         return $this;
+    }
+
+    /**
+     * @param int[] $entityIds
+     * @return $this
+     */
+    public function setEntityIds(array $entityIds)
+    {
+        $this->entityIds = $entityIds;
+        return $this;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getEntityIds()
+    {
+        return $this->entityIds;
     }
 
     /**
@@ -183,10 +206,16 @@ class EavIterator implements IteratorAggregate
         foreach ($this->attributes as $attributeCode) {
             $attribute = $eavConfig->getAttribute($this->entityCode, $attributeCode);
             if ($attribute->isStatic()) {
-                $selects[] = $this->getStaticAttributeSelect($attribute);
+                $select = $this->getStaticAttributeSelect($attribute);
             } else {
-                $selects[] = $this->getAttributeSelect($attribute);
+                $select = $this->getAttributeSelect($attribute);
             }
+
+            if ($this->entityIds) {
+                $select->where('entity_id IN (?)', $this->entityIds);
+            }
+
+            $selects[] = $select;
         }
         return $selects;
     }

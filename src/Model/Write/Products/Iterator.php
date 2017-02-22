@@ -108,7 +108,7 @@ class Iterator extends EavIterator
         $this->dbContext = $dbContext;
         $this->config = $config;
 
-        $this->initializeAttributes();
+        $this->initializeAttributes($this);
     }
 
     /**
@@ -123,17 +123,18 @@ class Iterator extends EavIterator
     /**
      * Select all attributes who should be exported
      *
+     * @param EavIterator $iterator
      * @return $this
      */
-    protected function initializeAttributes()
+    protected function initializeAttributes(EavIterator $iterator)
     {
         // Add default attributes
-        $this->selectAttribute('name');
-        $this->selectAttribute('sku');
-        $this->selectAttribute('url_key');
-        $this->selectAttribute('status');
-        $this->selectAttribute('visibility');
-        $this->selectAttribute('type_id');
+        $iterator->selectAttribute('name');
+        $iterator->selectAttribute('sku');
+        $iterator->selectAttribute('url_key');
+        $iterator->selectAttribute('status');
+        $iterator->selectAttribute('visibility');
+        $iterator->selectAttribute('type_id');
 
         // Add configured attributes
         $type = $this->eavConfig->getEntityType($this->entityCode);
@@ -144,7 +145,7 @@ class Iterator extends EavIterator
                 continue;
             }
 
-            $this->selectAttribute($attribute->getAttributeCode());
+            $iterator->selectAttribute($attribute->getAttributeCode());
         }
         return $this;
     }
@@ -156,13 +157,10 @@ class Iterator extends EavIterator
     {
         $batch = [];
         foreach (parent::getIterator() as $entity) {
-            if (!$entity['status']) {
+            if ($this->skipEntity($entity)) {
                 continue;
             }
 
-            if (!in_array($entity['visibility'], $this->visibility->getVisibleInSiteIds())) {
-                continue;
-            }
             $batch[$entity['entity_id']] = $entity;
 
             if (count($batch) == self::BATCH_SIZE) {
@@ -202,6 +200,46 @@ class Iterator extends EavIterator
     protected function getTableName($modelEntity)
     {
         return $this->getResources()->getTableName($modelEntity);
+    }
+
+    /**
+     * @param array $entity
+     * @return bool
+     */
+    protected function skipEntity(array $entity)
+    {
+        if (!$entity['status']) {
+            return true;
+        }
+
+        if (!in_array($entity['visibility'], $this->visibility->getVisibleInSiteIds())) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array $entity
+     * @param array $stockMap
+     * @return bool
+     */
+    protected function skipEntityChild(array $entity, array $stockMap)
+    {
+        if (!$entity['status']) {
+            return true;
+        }
+
+        if (!$this->config->isOutOfStockChildren()) {
+            return false;
+        }
+
+        $entityId = (int) $entity['entity_id'];
+        if (!isset($stockMap[$entityId])) {
+            return true;
+        }
+
+        return $stockMap[$entityId] <= 0.0001;
     }
 
     /**
@@ -266,16 +304,16 @@ class Iterator extends EavIterator
     }
 
     /**
-     * @param array $groupedEntityIds
-     * @param array $allEntityIds
+     * @param array $parentChildMap
      * @return int[]
      */
-    protected function getEntityStockBatch(array $groupedEntityIds, array $allEntityIds)
+    protected function getEntityStockBatch(array $parentChildMap)
     {
-        if (count($groupedEntityIds) == 0) {
+        if (count($parentChildMap) == 0) {
             return [];
         }
 
+        $allEntityIds = array_merge(array_keys($parentChildMap), call_user_func_array('array_merge', $parentChildMap));
         $query = $this->getConnection()
             ->select()
             ->from($this->getTableName('cataloginventory_stock_item'), ['product_id', 'qty'])
@@ -289,52 +327,81 @@ class Iterator extends EavIterator
         }
 
         $result = [];
-        foreach ($groupedEntityIds as $group) {
-            foreach ($group as $parentId => $childIds) {
-                $parentResult = [];
-                if (isset($map[$parentId])) {
-                    $parentResult[] = max(0, $map[$parentId]);
-                }
-
-                foreach ($childIds as $childId) {
-                    if (isset($map[$childId])) {
-                        $parentResult[] = max(0, $map[$childId]);
-                    }
-                }
-
-                switch ($this->config->getStockCalculation()) {
-                    case StockCalculation::OPTION_MAX:
-                        $result[$parentId] = max($parentResult);
-                        break;
-                    case StockCalculation::OPTION_MIN:
-                        $result[$parentId] = min($parentResult);
-                        break;
-                    case StockCalculation::OPTION_SUM:
-                    default:
-                        $result[$parentId] = array_sum($parentResult);
-                        break;
-                }
-
+        foreach ($parentChildMap as $parentId => $childIds) {
+            $parentResult = [];
+            if (isset($map[$parentId])) {
+                $parentResult[] = max(0, $map[$parentId]);
             }
+
+            foreach ($childIds as $childId) {
+                if (isset($map[$childId])) {
+                    $parentResult[] = max(0, $map[$childId]);
+                }
+            }
+
+            $result[$parentId] = $parentResult;
         }
 
         return $result;
     }
 
     /**
-     * @param array $groupedEntityIds
-     * @param array $allEntityIds
+     * @param array $childrenIds
+     * @return EavIterator
+     */
+    protected function createChildIterator(array $childrenIds)
+    {
+        $iterator = new EavIterator($this->eavConfig, $this->entityCode, []);
+        $iterator->setStoreId($this->storeId);
+        $iterator->setEntityIds($childrenIds);
+
+        $this->initializeAttributes($iterator);
+        return $iterator;
+    }
+
+    /**
+     * @param array $parentChildMap
      * @return array[]
      */
-    protected function getEntityExtraAttributesBatch(array $groupedEntityIds, array $allEntityIds)
+    protected function getEntityExtraAttributesBatch(array $parentChildMap, array $stockMap)
     {
-        if (count($groupedEntityIds) == 0) {
+        if (count($parentChildMap) == 0) {
             return [];
         }
 
-        
+        $map = [];
+        foreach ($parentChildMap as $parent => $childIds) {
+            foreach ($childIds as $id) {
+                $map[$id] = $parent;
+            }
+        }
 
-        return [];
+        $iterator = new EavIterator($this->eavConfig, $this->entityCode, []);
+        $iterator->setEntityIds(array_keys($map));
+        $this->initializeAttributes($iterator);
+
+        $parentIds = array_keys($parentChildMap);
+        $result = array_combine($parentIds, array_fill(0, count($parentIds), []));
+        foreach ($iterator as $entity) {
+            if ($this->skipEntityChild($entity, $stockMap)) {
+                continue;
+            }
+
+            $parentId = $map[$entity['entity_id']];
+            foreach ($entity as $attribute => $value) {
+                if ($attribute == 'entity_id') {
+                    continue;
+                }
+
+                if ($this->skipChildAttribute($attribute)) {
+                    continue;
+                }
+
+                $result[$parentId][] = ['attribute' => $attribute, 'value' => $value];
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -348,23 +415,26 @@ class Iterator extends EavIterator
         $categories = $this->getEntityCategoriesBatch($entityIds);
 
         $groupedEntityIds = $this->groupEntityIdsByType($entities);
-        $allEntityIds = $entityIds;
-        array_walk_recursive($groupedEntityIds, function ($v) use (&$allEntityIds) { $allEntityIds[] = $v; });
-        $stock = $this->getEntityStockBatch($groupedEntityIds, $allEntityIds);
-        $extraAttributes = $this->getEntityExtraAttributesBatch($groupedEntityIds, $allEntityIds);
+        $stock = $this->getEntityStockBatch($groupedEntityIds);
+        $extraAttributes = $this->getEntityExtraAttributesBatch($groupedEntityIds, $stock);
 
         foreach ($entities as $entityId => $entity) {
 
             $name = $entity['name'];
             $entityCategories = isset($categories[$entityId]) ? $categories[$entityId] : [];
-            $entityStock = isset($stock[$entityId]) ? $stock[$entityId] : 0;
-            $entityPrice = isset($prices[$entityId]) ? $prices[$entityId] : 0;
+            $entityStock = isset($stock[$entityId]) ? $stock[$entityId] : [];
             $attributes = isset($extraAttributes[$entityId]) ? $extraAttributes[$entityId] : [];
 
             // Combine price data
-            $entity['old_price'] = $entityPrice['old_price'];
-            $entity['min_price'] = $entityPrice['min_price'];
-            $entity['max_price'] = $entityPrice['max_price'];
+            if (isset($prices[$entityId])) {
+                $entity['old_price'] = $prices[$entityId]['old_price'];
+                $entity['min_price'] = $prices[$entityId]['min_price'];
+                $entity['max_price'] = $prices[$entityId]['max_price'];
+                $entityPrice = $prices[$entityId]['price'];
+            } else {
+                $entityPrice = 0;
+            }
+
 
             // Combine extra attributes
             foreach ($entity as $attribute => $value) {
@@ -374,11 +444,25 @@ class Iterator extends EavIterator
                 $attributes[] = ['attribute' => $attribute, 'value' => $value];
             }
 
+            // Combine stock
+            switch ($this->config->getStockCalculation()) {
+                case StockCalculation::OPTION_MAX:
+                    $entityStock = max($entityStock);
+                    break;
+                case StockCalculation::OPTION_MIN:
+                    $entityStock = min($entityStock);
+                    break;
+                case StockCalculation::OPTION_SUM:
+                default:
+                    $entityStock = array_sum($entityStock);
+                    break;
+            }
+
             // yield return single entity response from batch
             yield [
                 'entity_id' => $entityId,
                 'name' => $name,
-                'price' => $entityPrice['price'],
+                'price' => $entityPrice,
                 'stock' => $entityStock,
                 'categories' => $entityCategories,
                 'attributes' => $attributes,
@@ -465,8 +549,9 @@ class Iterator extends EavIterator
             $groups[$entity['type_id']][$entity['entity_id']] = [];
         }
 
+        $childrenIds = [];
         $types = $this->productType;
-        foreach ($groups as $typeId => &$group) {
+        foreach ($groups as $typeId => $group) {
             // Create fake product type to trick type factory to use getTypeId
             /** @var Product $fakeProduct */
             $fakeProduct = new DataObject(['type_id' => $typeId]);
@@ -478,21 +563,27 @@ class Iterator extends EavIterator
 
             $parentIds = array_keys($group);
             if ($type instanceof BundleType) {
-                $childrenIds = $this->getBundleChildIds($parentIds);
+                $childrenIds = array_merge($childrenIds, $this->getBundleChildIds($parentIds));
             } elseif ($type instanceof GroupType) {
-                $childrenIds = $this->getLinkChildIds($parentIds, Link::LINK_TYPE_GROUPED);
+                $childrenIds = array_merge($childrenIds, $this->getLinkChildIds($parentIds, Link::LINK_TYPE_GROUPED));
             } elseif ($type instanceof ConfigurableType) {
-                $childrenIds = $this->getConfigurableChildIds($parentIds);
+                $childrenIds = array_merge($childrenIds, $this->getConfigurableChildIds($parentIds));
             } else {
-                $childrenIds = [];
                 foreach ($parentIds as $parentId) {
                     $childrenIds[$parentId] = $type->getChildrenIds($parentId, false);
                 }
             }
-
-            $group = $childrenIds;
         }
 
-        return $groups;
+        return $childrenIds;
+    }
+
+    /**
+     * @param string $attribute
+     * @return bool
+     */
+    protected function skipChildAttribute($attribute)
+    {
+        return $this->config->getSkipAttribute($attribute);
     }
 }
