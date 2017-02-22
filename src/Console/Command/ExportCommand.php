@@ -70,7 +70,8 @@ class ExportCommand extends Command
 
         $startTime = microtime(true);
         $this->export->generateToFile($feedFile, $validate);
-        $generateTime = microtime(true) - $startTime;
-        $output->writeln(sprintf('Feed written to %s in %ss', $feedFile, round($generateTime, 4)));
+        $generateTime = round(microtime(true) - $startTime, 2);
+        $memoryUsage = round(memory_get_peak_usage(true) / 1024 / 1024, 2);
+        $output->writeln(sprintf('Feed written to %s in %ss using %sMb memory', $feedFile, $generateTime, $memoryUsage));
     }
 }
