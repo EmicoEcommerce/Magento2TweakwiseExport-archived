@@ -8,9 +8,7 @@
 
 namespace Emico\TweakwiseExport\Model\Write;
 
-use AppendIterator;
 use IteratorAggregate;
-use IteratorIterator;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Framework\DB\Select;

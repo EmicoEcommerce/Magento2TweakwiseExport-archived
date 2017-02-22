@@ -8,6 +8,8 @@
 
 namespace Emico\TweakwiseExport\Model;
 
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+
 class Helper
 {
     /**
@@ -29,5 +31,26 @@ class Helper
     public function getStoreId($id)
     {
         return substr($id, 5);
+    }
+
+    /**
+     * @param Attribute $attribute
+     * @return bool
+     */
+    public function shouldExportAttribute(Attribute $attribute)
+    {
+        if (
+            !$attribute->getUsedInProductListing() &&
+            !$attribute->getIsFilterable() &&
+            !$attribute->getIsFilterableInSearch() &&
+            !$attribute->getIsFilterableInGrid() &&
+            !$attribute->getIsSearchable() &&
+            !$attribute->getIsVisibleInAdvancedSearch() &&
+            !$attribute->getUsedForSortBy()
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }

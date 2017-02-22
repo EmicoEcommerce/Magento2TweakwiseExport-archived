@@ -63,7 +63,7 @@
                 </field>
                 <field id="stock_calculation" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Combined product stock calculation mode</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <source_model>Emico\TweakwiseExport\Model\Config\Source\StockCalculation</source_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
@@ -80,6 +80,14 @@
                     <label>Export out of stock combined product children</label>
                     <comment>Would you like to export out of stock children attributes in parent products?</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="exclude_child_attributes" translate="label,comment" type="multiselect" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Exclude child attributes</label>
+                    <comment>Attributes which should not be combined in parent.</comment>
+                    <source_model>Emico\TweakwiseExport\Model\Config\Source\ProductAttributes</source_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>

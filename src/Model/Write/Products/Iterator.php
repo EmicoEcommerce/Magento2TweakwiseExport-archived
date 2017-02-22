@@ -8,6 +8,7 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products;
 
+use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\EavIterator;
 use Generator;
 use Magento\Catalog\Model\Product;
@@ -44,20 +45,28 @@ class Iterator extends EavIterator
     protected $visibility;
 
     /**
+     * @var Helper
+     */
+    protected $helper;
+
+
+    /**
      * Iterator constructor.
      *
      * @param EavConfig $eavConfig
      * @param ProductCollectionFactory $productCollectionFactory
      * @param StoreManager $storeManager
      * @param Visibility $visibility
+     * @param Helper $helper
      */
-    public function __construct(EavConfig $eavConfig, ProductCollectionFactory $productCollectionFactory, StoreManager $storeManager, Visibility $visibility)
+    public function __construct(EavConfig $eavConfig, ProductCollectionFactory $productCollectionFactory, StoreManager $storeManager, Visibility $visibility, Helper $helper)
     {
         parent::__construct($eavConfig, Product::ENTITY, []);
 
         $this->productCollectionFactory = $productCollectionFactory;
         $this->storeManager = $storeManager;
         $this->visibility = $visibility;
+        $this->helper = $helper;
 
         $this->initializeAttributes();
     }
@@ -88,18 +97,10 @@ class Iterator extends EavIterator
 
         // Add configured attributes
         $type = $this->eavConfig->getEntityType($this->entityCode);
+
         /** @var Attribute $attribute */
         foreach ($type->getAttributeCollection() as $attribute) {
-            if (
-                !$attribute->getUsedInProductListing() &&
-                !$attribute->getIsFilterable() &&
-                !$attribute->getIsFilterableInSearch() &&
-                !$attribute->getIsFilterableInGrid() &&
-
-                !$attribute->getIsSearchable() &&
-                !$attribute->getIsVisibleInAdvancedSearch() &&
-                !$attribute->getUsedForSortBy()
-            ) {
+            if (!$this->helper->shouldExportAttribute($attribute)) {
                 continue;
             }
 
