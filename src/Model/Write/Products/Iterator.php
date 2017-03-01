@@ -397,7 +397,7 @@ class Iterator extends EavIterator
                     continue;
                 }
 
-                $result[$parentId][] = ['attribute' => $attribute, 'value' => $value];
+                $result[$parentId][$attribute . $value] = ['attribute' => $attribute, 'value' => $value];
             }
         }
 
@@ -441,7 +441,7 @@ class Iterator extends EavIterator
                 if (in_array($attribute, ['name', 'entity_id'])) {
                     continue;
                 }
-                $attributes[] = ['attribute' => $attribute, 'value' => $value];
+                $attributes[$attribute . $value] = ['attribute' => $attribute, 'value' => $value];
             }
 
             // Combine stock
@@ -465,7 +465,7 @@ class Iterator extends EavIterator
                 'price' => $entityPrice,
                 'stock' => $entityStock,
                 'categories' => $entityCategories,
-                'attributes' => $attributes,
+                'attributes' => array_values($attributes),
             ];
         }
     }
