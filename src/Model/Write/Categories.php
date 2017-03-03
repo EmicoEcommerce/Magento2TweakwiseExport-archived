@@ -85,15 +85,14 @@ class Categories implements WriterInterface
         $this->iterator->setStoreId($storeId);
 
         foreach ($this->iterator as $data) {
-            if (!isset($data['is_active']) || !$data['is_active']) {
-                continue;
-            }
-
             // Store root category extend name so it is clear in tweakwise
+            // Always export store root category whether it is enabled or not
             if ($data['parent_id'] == 1) {
                 $data['name'] = $store->getName() . ' - ' . $data['name'] ;
+            } elseif (!isset($data['is_active']) || !$data['is_active']) {
+                continue;
             }
-
+            
             if (!isset($exportedCategories[$data['parent_id']])) {
                 continue;
             }
