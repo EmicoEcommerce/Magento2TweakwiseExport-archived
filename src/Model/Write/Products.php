@@ -10,7 +10,9 @@ namespace Emico\TweakwiseExport\Model\Write;
 
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Helper;
+use Emico\TweakwiseExport\Model\Logger;
 use Emico\TweakwiseExport\Model\Write\Products\Iterator;
+use Magento\Framework\Profiler;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManager;
 
@@ -37,19 +39,26 @@ class Products implements WriterInterface
     protected $helper;
 
     /**
+     * @var Logger
+     */
+    protected $log;
+
+    /**
      * Products constructor.
      *
      * @param Config $config
      * @param Iterator $iterator
      * @param StoreManager $storeManager
      * @param Helper $helper
+     * @param Logger $log
      */
-    public function __construct(Config $config, Iterator $iterator, StoreManager $storeManager, Helper $helper)
+    public function __construct(Config $config, Iterator $iterator, StoreManager $storeManager, Helper $helper, Logger $log)
     {
         $this->config = $config;
         $this->iterator = $iterator;
         $this->storeManager = $storeManager;
         $this->helper = $helper;
+        $this->log = $log;
     }
 
     /**
@@ -59,9 +68,20 @@ class Products implements WriterInterface
     {
         $xml->startElement('items');
 
+        /** @var Store $store */
         foreach ($this->storeManager->getStores() as $store) {
             if ($this->config->isEnabled($store)) {
-                $this->exportStore($writer, $xml, $store);
+                $profileKey = 'tweakwise::export::products::' . $store->getCode();
+                try {
+                    Profiler::start($profileKey);
+                    $this->exportStore($writer, $xml, $store);
+                } finally {
+                    Profiler::stop($profileKey);
+                }
+
+                $this->log->debug(sprintf('Export products for store %s', $store->getName()));
+            } else {
+                $this->log->debug(sprintf('Skip products for store %s (disabled)', $store->getName()));
             }
         }
 
@@ -110,7 +130,11 @@ class Products implements WriterInterface
         $xml->startElement('categories');
         foreach ($data['categories'] as $categoryId) {
             $categoryTweakwiseId = $this->helper->getTweakwiseId($storeId, $categoryId);
-            $xml->writeElement('categoryid', $categoryTweakwiseId);
+            if ($xml->hasCategoryExport($categoryTweakwiseId)) {
+                $xml->writeElement('categoryid', $categoryTweakwiseId);
+            } else {
+                $this->log->debug(sprintf('Skip product (%s) category (%s) relation', $tweakwiseId, $categoryTweakwiseId));
+            }
         }
         $xml->endElement(); // categories
 
@@ -122,6 +146,8 @@ class Products implements WriterInterface
         $xml->endElement(); // attributes
 
         $xml->endElement(); // </item>
+
+        $this->log->debug(sprintf('Export product [%s] %s', $tweakwiseId, $data['name']));
         return $this;
     }
 

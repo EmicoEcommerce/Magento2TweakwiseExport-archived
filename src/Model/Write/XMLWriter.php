@@ -13,6 +13,11 @@ use XMLWriter as BaseXMLWriter;
 class XMLWriter extends BaseXMLWriter
 {
     /**
+     * @var int[]
+     */
+    protected $categories = [];
+
+    /**
      * Write value in a single element. $value must be a scalar value
      *
      * @param string $elementName
@@ -48,5 +53,26 @@ class XMLWriter extends BaseXMLWriter
         $result = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '', $value);
 
         return $result;
+    }
+
+    /**
+     * @param int $categoryId
+     * @return $this
+     */
+    public function addCategoryExport($categoryId)
+    {
+        $categoryId = (int) $categoryId;
+        $this->categories[$categoryId] = true;
+        return $this;
+    }
+
+    /**
+     * @param int $categoryId
+     * @return bool
+     */
+    public function hasCategoryExport($categoryId)
+    {
+        $categoryId = (int) $categoryId;
+        return isset($this->categories[$categoryId]);
     }
 }
