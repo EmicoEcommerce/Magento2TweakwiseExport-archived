@@ -19,6 +19,9 @@ class Helper
      */
     public function getTweakwiseId($storeId, $entityId)
     {
+        if (!$storeId) {
+            return $entityId;
+        }
         // Prefix 1 is to make sure it stays the same length when casting to int
         return '1' . str_pad($storeId, 4, '0', STR_PAD_LEFT) . $entityId;
     }

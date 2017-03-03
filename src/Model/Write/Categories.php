@@ -56,7 +56,8 @@ class Categories implements WriterInterface
      */
     public function write(Writer $writer, XmlWriter $xml)
     {
-        $xml->startAttribute('categories');
+        $xml->startElement('categories');
+        $writer->flush();
 
         $this->writeCategory($xml, null, ['entity_id' => 1, 'name' => 'Root', 'position' => 0]);
         foreach ($this->storeManager->getStores() as $store) {
@@ -65,7 +66,7 @@ class Categories implements WriterInterface
             }
         }
 
-        $xml->endAttribute();
+        $xml->endElement(); // categories
         $writer->flush();
         return $this;
     }
@@ -79,7 +80,7 @@ class Categories implements WriterInterface
     protected function exportStore(Writer $writer, XmlWriter $xml, Store $store)
     {
         // Set root category as exported
-        $exportedCategories = [0 => true];
+        $exportedCategories = [1 => true];
         $storeId = $store->getId();
         $this->iterator->setStoreId($storeId);
 
@@ -93,9 +94,6 @@ class Categories implements WriterInterface
                 $data['parent_id'] = 0;
             }
 
-            if ($data['parent_id'] == 1) {
-                $data['parent_id'] = 0;
-            }
             if (!isset($exportedCategories[$data['parent_id']])) {
                 continue;
             }
@@ -126,7 +124,12 @@ class Categories implements WriterInterface
 
         if (isset($data['parent_id']) && $data['parent_id']) {
             $xml->startElement('parents');
-            $xml->writeElement('categoryid', $this->helper->getTweakwiseId($storeId, $data['parent_id']));
+
+            $parentId = $data['parent_id'];
+            if ($parentId != 1) {
+                $parentId = $this->helper->getTweakwiseId($storeId, $data['parent_id']);
+            }
+            $xml->writeElement('categoryid', $parentId);
             $xml->endElement(); // </parents>
         }
 
