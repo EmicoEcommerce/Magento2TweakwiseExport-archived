@@ -26,6 +26,7 @@ use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DataObject;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
+use Magento\Framework\Profiler;
 use Magento\GroupedProduct\Model\Product\Type\Grouped as GroupType;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link;
 use Magento\Store\Model\StoreManager;
@@ -411,12 +412,40 @@ class Iterator extends EavIterator
     protected function processBatch(array $entities)
     {
         $entityIds = array_keys($entities);
-        $prices = $this->getEntityPriceBatch($entityIds);
-        $categories = $this->getEntityCategoriesBatch($entityIds);
+        try {
+            Profiler::start('tweakwise::export::products::getEntityPriceBatch');
+            $prices = $this->getEntityPriceBatch($entityIds);
+        } finally {
+            Profiler::stop('tweakwise::export::products::getEntityPriceBatch');
+        }
 
-        $groupedEntityIds = $this->groupEntityIdsByType($entities);
-        $stock = $this->getEntityStockBatch($groupedEntityIds);
-        $extraAttributes = $this->getEntityExtraAttributesBatch($groupedEntityIds, $stock);
+        try {
+            Profiler::start('tweakwise::export::products::getEntityCategoriesBatch');
+            $categories = $this->getEntityCategoriesBatch($entityIds);
+        } finally {
+            Profiler::stop('tweakwise::export::products::getEntityCategoriesBatch');
+        }
+
+        try {
+            Profiler::start('tweakwise::export::products::groupEntityIdsByType');
+            $groupedEntityIds = $this->groupEntityIdsByType($entities);
+        } finally {
+            Profiler::stop('tweakwise::export::products::groupEntityIdsByType');
+        }
+
+        try {
+            Profiler::start('tweakwise::export::products::getEntityStockBatch');
+            $stock = $this->getEntityStockBatch($groupedEntityIds);
+        } finally {
+            Profiler::stop('tweakwise::export::products::getEntityStockBatch');
+        }
+
+        try {
+            Profiler::start('tweakwise::export::products::getEntityExtraAttributesBatch');
+            $extraAttributes = $this->getEntityExtraAttributesBatch($groupedEntityIds, $stock);
+        } finally {
+            Profiler::stop('tweakwise::export::products::getEntityExtraAttributesBatch');
+        }
 
         foreach ($entities as $entityId => $entity) {
 
@@ -493,6 +522,7 @@ class Iterator extends EavIterator
 
     /**
      * @param int[] $parentIds
+     * @param int $typeId
      * @return array[]
      */
     protected function getLinkChildIds(array $parentIds, $typeId)
