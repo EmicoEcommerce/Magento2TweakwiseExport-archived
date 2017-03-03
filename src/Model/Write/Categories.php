@@ -102,12 +102,23 @@ class Categories implements WriterInterface
         // Set root category as exported
         $exportedCategories = [1 => true];
         $storeId = $store->getId();
+        $storeRootCategoryId = $store->getRootCategoryId();
         $this->iterator->setStoreId($storeId);
 
         foreach ($this->iterator as $data) {
+            // Skip magento root since we injected our fake root
+            if ($data['entity_id'] == 1) {
+                continue;
+            }
+
             // Store root category extend name so it is clear in tweakwise
             // Always export store root category whether it is enabled or not
             if ($data['parent_id'] == 1) {
+                // Skip category if not root of current store
+                if ($data['entity_id'] != $storeRootCategoryId) {
+                    continue;
+                }
+
                 $data['name'] = $store->getName() . ' - ' . $data['name'] ;
             } elseif (!isset($data['is_active']) || !$data['is_active']) {
                 continue;
