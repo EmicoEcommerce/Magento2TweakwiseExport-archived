@@ -57,14 +57,14 @@ class Validator
         foreach ($xml->xpath('/tweakwise/categories/category/parents/categoryid') as $categoryIdElement) {
             $categoryId = (string) $categoryIdElement;
             if (!isset($categoryIds[$categoryId])) {
-                throw new ValidationException(__('Category parent reference %s not found', $categoryId));
+                throw new ValidationException(__(sprintf('Category parent reference %s not found', $categoryId)));
             }
         }
 
         foreach ($xml->xpath('/tweakwise/items/item/categories/categoryid') as $categoryIdElement) {
             $categoryId = (string) $categoryIdElement;
             if (!isset($categoryIds[$categoryId])) {
-                throw new ValidationException(__('Product category reference %s not found', $categoryId));
+                throw new ValidationException(__(sprintf('Product category reference %s not found', $categoryId)));
             }
         }
     }
