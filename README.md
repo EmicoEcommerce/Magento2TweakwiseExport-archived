@@ -8,10 +8,7 @@ composer require emico/tweakwise-export
 
 Install package using zip file
 ```sh
-unzip tweakwise-export.zip
-mkdir -p app/code/Emico/TweakwiseExport
-mv tweakwise-export/src/* app/code/Emico/TweakwiseExport
-cp -f tweakwise-export/composer.json app/code/Emico/TweakwiseExport/composer.json
+Extract tweakwise-export.zip src folder to app/code/Emico/TweakwiseExport/
 ```
 
 Run installers
