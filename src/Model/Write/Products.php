@@ -57,7 +57,7 @@ class Products implements WriterInterface
      */
     public function write(Writer $writer, XmlWriter $xml)
     {
-        $xml->startElement('products');
+        $xml->startElement('items');
 
         foreach ($this->storeManager->getStores() as $store) {
             if ($this->config->isEnabled($store)) {
@@ -65,7 +65,7 @@ class Products implements WriterInterface
             }
         }
 
-        $xml->endElement(); // products
+        $xml->endElement(); // items
         $writer->flush();
         return $this;
     }
@@ -97,7 +97,7 @@ class Products implements WriterInterface
      */
     protected function writeProduct(XmlWriter $xml, $storeId, array $data)
     {
-        $xml->startElement('product');
+        $xml->startElement('item');
 
         // Write product base data
         $tweakwiseId = $this->helper->getTweakwiseId($storeId, $data['entity_id']);
@@ -121,7 +121,7 @@ class Products implements WriterInterface
         }
         $xml->endElement(); // attributes
 
-        $xml->endElement(); // </product>
+        $xml->endElement(); // </item>
         return $this;
     }
 

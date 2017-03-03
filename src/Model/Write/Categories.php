@@ -89,9 +89,9 @@ class Categories implements WriterInterface
                 continue;
             }
 
-            // Set parent id to root category if none
-            if (!isset($data['parent_id'])) {
-                $data['parent_id'] = 0;
+            // Store root category extend name so it is clear in tweakwise
+            if ($data['parent_id'] == 1) {
+                $data['name'] = $store->getName() . ' - ' . $data['name'] ;
             }
 
             if (!isset($exportedCategories[$data['parent_id']])) {
