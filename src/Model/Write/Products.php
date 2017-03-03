@@ -12,6 +12,10 @@ use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Logger;
 use Emico\TweakwiseExport\Model\Write\Products\Iterator;
+use Magento\Catalog\Model\Product;
+use Magento\Eav\Model\Config as EavConfig;
+use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
+use Magento\Eav\Model\Entity\Attribute\Source\SourceInterface;
 use Magento\Framework\Profiler;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManager;
@@ -44,6 +48,16 @@ class Products implements WriterInterface
     protected $log;
 
     /**
+     * @var EavConfig
+     */
+    protected $eavConfig;
+
+    /**
+     * @var array
+     */
+    protected $attributeOptionMap = [];
+
+    /**
      * Products constructor.
      *
      * @param Config $config
@@ -51,14 +65,16 @@ class Products implements WriterInterface
      * @param StoreManager $storeManager
      * @param Helper $helper
      * @param Logger $log
+     * @param EavConfig $eavConfig
      */
-    public function __construct(Config $config, Iterator $iterator, StoreManager $storeManager, Helper $helper, Logger $log)
+    public function __construct(Config $config, Iterator $iterator, StoreManager $storeManager, Helper $helper, Logger $log, EavConfig $eavConfig)
     {
         $this->config = $config;
         $this->iterator = $iterator;
         $this->storeManager = $storeManager;
         $this->helper = $helper;
         $this->log = $log;
+        $this->eavConfig = $eavConfig;
     }
 
     /**
@@ -141,7 +157,7 @@ class Products implements WriterInterface
         // Write product attributes
         $xml->startElement('attributes');
         foreach ($data['attributes'] as $attributeKeyValue) {
-            $this->writeAttribute($xml, $attributeKeyValue['attribute'], $attributeKeyValue['value']);
+            $this->writeAttribute($xml, $storeId, $attributeKeyValue['attribute'], $attributeKeyValue['value']);
         }
         $xml->endElement(); // attributes
 
@@ -154,18 +170,138 @@ class Products implements WriterInterface
 
     /**
      * @param XmlWriter $xml
+     * @param int $storeId
      * @param string $name
-     * @param mixed $value
+     * @param string|string[]|int|int[]|float|float[] $value
      * @return $this
      */
-    public function writeAttribute(XmlWriter $xml, $name, $value)
+    public function writeAttribute(XmlWriter $xml, $storeId, $name, $value)
     {
-        $xml->startElement('attribute');
-        $xml->writeAttribute('datatype', is_numeric($value) ? 'numeric' : 'text');
-        $xml->writeElement('name', $name);
-        $xml->writeElement('value', $value);
-        $xml->endElement(); // </attribute>
+        $values = $this->normalizeAttributeValue($storeId, $name, $value);
+        $values = array_unique($values);
+
+        foreach ($values as $value) {
+            $xml->startElement('attribute');
+            $xml->writeAttribute('datatype', is_numeric($value) ? 'numeric' : 'text');
+            $xml->writeElement('name', $name);
+            $xml->writeElement('value', $value);
+            $xml->endElement(); // </attribute>
+        }
 
         return $this;
+    }
+
+    /**
+     * @param int $storeId
+     * @param AbstractAttribute $attribute
+     * @return string[]
+     */
+    protected function getAttributeOptionMap($storeId, AbstractAttribute $attribute)
+    {
+        $attributeKey = $storeId . '-' . $attribute->getId();
+        if (!isset($this->attributeOptionMap[$attributeKey])) {
+            $map = [];
+
+            // Set store id to trick in fetching correct options
+            $attribute->setData('store_id', $storeId);
+
+            foreach ($attribute->getSource()->getAllOptions() as $option) {
+                $map[$option['value']] = (string) $option['label'];
+            }
+
+            $this->attributeOptionMap[$attributeKey] = $map;
+        }
+
+        return $this->attributeOptionMap[$attributeKey];
+    }
+
+    /**
+     * Get scalar value from object, array or scalar value
+     *
+     * @param mixed $value
+     *
+     * @return string|array
+     */
+    protected function scalarValue($value)
+    {
+        if (is_array($value)) {
+            $data = array();
+            foreach ($value as $key => $childValue) {
+                $data[$key] = $this->scalarValue($childValue);
+            }
+
+            return $data;
+        } else if (is_object($value)) {
+            if (method_exists($value, 'toString')) {
+                $value = $value->toString();
+            } else if (method_exists($value, '__toString')) {
+                $value = (string) $value;
+            } else {
+                $value = spl_object_hash($value);
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param mixed $data
+     * @return array
+     */
+    protected function ensureArray($data)
+    {
+        return is_array($data) ? $data : [$data];
+    }
+
+    /**
+     * @param array $data
+     * @param string $delimiter
+     * @return array
+     */
+    protected function explodeValues(array $data, $delimiter = ',')
+    {
+        $result = [];
+        foreach ($data as $value) {
+            $result = array_merge($result, explode($delimiter, $value));
+        }
+        return $result;
+    }
+
+    /**
+     * Convert attribute value to array of scalar values.
+     *
+     * @param int $storeId
+     * @param string $attributeCode
+     * @param mixed $value
+     * @return array
+     */
+    protected function normalizeAttributeValue($storeId, $attributeCode, $value)
+    {
+        $values = $this->ensureArray($value);
+        $values = array_map(function($value) { return $this->scalarValue($value); }, $values);
+
+        $attribute = $this->eavConfig->getAttribute(Product::ENTITY, $attributeCode);
+        // Attribute does not exists so just return value
+        if (!$attribute->getId()) {
+            return $values;
+        }
+
+        // Explode values if source is used (multi select)
+        if ($attribute->getFrontendInput() == 'multiselect' || $attribute->getFrontendInput() == 'select') {
+            $values = $this->explodeValues($values);
+        }
+
+        $source = $attribute->getSource();
+        if (!$source instanceof SourceInterface) {
+            return $values;
+        }
+
+        $result = [];
+        foreach ($values as $value) {
+            $map = $this->getAttributeOptionMap($storeId, $attribute);
+            $result[] = isset($map[$value]) ? $map[$value] : $value;
+        }
+
+        return $result;
     }
 }
