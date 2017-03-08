@@ -2,5 +2,7 @@ parameters:
     git_dir: .
     bin_dir: vendor/bin
     tasks:
-        composer_script:
-            script: docheader
+        shell:
+            scripts:
+                - "./vendor/bin/docheader check ./src/"
+
