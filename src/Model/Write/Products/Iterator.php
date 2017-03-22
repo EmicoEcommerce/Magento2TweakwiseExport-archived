@@ -362,6 +362,7 @@ class Iterator extends EavIterator
 
     /**
      * @param array $parentChildMap
+     * @param array $stockMap
      * @return array[]
      */
     protected function getEntityExtraAttributesBatch(array $parentChildMap, array $stockMap)
