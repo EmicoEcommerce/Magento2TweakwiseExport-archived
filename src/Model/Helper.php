@@ -33,7 +33,7 @@ class Helper
      */
     public function getStoreId($id)
     {
-        return substr($id, 5);
+        return (int) substr($id, 5);
     }
 
     /**

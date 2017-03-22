@@ -1,8 +1,6 @@
 parameters:
-    git_dir: .
-    bin_dir: vendor/bin
     tasks:
-        shell:
-            scripts:
-                - "./vendor/bin/docheader check ./src/"
+        composer_script:
+            script: docheader
+            triggered_by: [php, phtml, xml]
 
