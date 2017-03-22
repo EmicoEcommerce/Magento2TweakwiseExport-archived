@@ -331,12 +331,12 @@ class Iterator extends EavIterator
         foreach ($parentChildMap as $parentId => $childIds) {
             $parentResult = [];
             if (isset($map[$parentId])) {
-                $parentResult[] = max(0, $map[$parentId]);
+                $parentResult[$parentId] = max(0, $map[$parentId]);
             }
 
             foreach ($childIds as $childId) {
                 if (isset($map[$childId])) {
-                    $parentResult[] = max(0, $map[$childId]);
+                    $parentResult[$childId] = max(0, $map[$childId]);
                 }
             }
 
@@ -385,11 +385,12 @@ class Iterator extends EavIterator
         $parentIds = array_keys($parentChildMap);
         $result = array_combine($parentIds, array_fill(0, count($parentIds), []));
         foreach ($iterator as $entity) {
-            if ($this->skipEntityChild($entity, $stockMap)) {
+            $parentId = $map[$entity['entity_id']];
+
+            if ($this->skipEntityChild($entity, $stockMap[$parentId])) {
                 continue;
             }
 
-            $parentId = $map[$entity['entity_id']];
             foreach ($entity as $attribute => $value) {
                 if ($attribute == 'entity_id') {
                     continue;
@@ -428,22 +429,22 @@ class Iterator extends EavIterator
         }
 
         try {
-            Profiler::start('tweakwise::export::products::groupEntityIdsByType');
-            $groupedEntityIds = $this->groupEntityIdsByType($entities);
+            Profiler::start('tweakwise::export::products::getEntityParentChildMap');
+            $parentChildMap = $this->getEntityParentChildMap($entities);
         } finally {
-            Profiler::stop('tweakwise::export::products::groupEntityIdsByType');
+            Profiler::stop('tweakwise::export::products::getEntityParentChildMap');
         }
 
         try {
             Profiler::start('tweakwise::export::products::getEntityStockBatch');
-            $stock = $this->getEntityStockBatch($groupedEntityIds);
+            $stock = $this->getEntityStockBatch($parentChildMap);
         } finally {
             Profiler::stop('tweakwise::export::products::getEntityStockBatch');
         }
 
         try {
             Profiler::start('tweakwise::export::products::getEntityExtraAttributesBatch');
-            $extraAttributes = $this->getEntityExtraAttributesBatch($groupedEntityIds, $stock);
+            $extraAttributes = $this->getEntityExtraAttributesBatch($parentChildMap, $stock);
         } finally {
             Profiler::stop('tweakwise::export::products::getEntityExtraAttributesBatch');
         }
@@ -569,7 +570,7 @@ class Iterator extends EavIterator
      * @param array $entities
      * @return array
      */
-    protected function groupEntityIdsByType(array $entities)
+    protected function getEntityParentChildMap(array $entities)
     {
         $groups = [];
         foreach ($entities as $entity) {
@@ -594,11 +595,11 @@ class Iterator extends EavIterator
 
             $parentIds = array_keys($group);
             if ($type instanceof BundleType) {
-                $childrenIds = array_merge($childrenIds, $this->getBundleChildIds($parentIds));
+                $childrenIds = $childrenIds + $this->getBundleChildIds($parentIds);
             } elseif ($type instanceof GroupType) {
-                $childrenIds = array_merge($childrenIds, $this->getLinkChildIds($parentIds, Link::LINK_TYPE_GROUPED));
+                $childrenIds = $childrenIds + $this->getLinkChildIds($parentIds, Link::LINK_TYPE_GROUPED);
             } elseif ($type instanceof ConfigurableType) {
-                $childrenIds = array_merge($childrenIds, $this->getConfigurableChildIds($parentIds));
+                $childrenIds = $childrenIds + $this->getConfigurableChildIds($parentIds);
             } else {
                 foreach ($parentIds as $parentId) {
                     $childrenIds[$parentId] = $type->getChildrenIds($parentId, false);
