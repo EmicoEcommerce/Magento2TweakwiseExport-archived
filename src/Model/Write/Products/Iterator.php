@@ -23,6 +23,7 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductColl
 use Magento\Catalog\Model\Indexer\Category\Product\AbstractAction as CategoryProductAbstractAction;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ConfigurableType;
 use Magento\Eav\Model\Config as EavConfig;
+use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DataObject;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
@@ -80,6 +81,7 @@ class Iterator extends EavIterator
     /**
      * Iterator constructor.
      *
+     * @param ProductMetadataInterface $productMetadata
      * @param EavConfig $eavConfig
      * @param ProductCollectionFactory $productCollectionFactory
      * @param StoreManager $storeManager
@@ -90,6 +92,7 @@ class Iterator extends EavIterator
      * @param Config $config
      */
     public function __construct(
+        ProductMetadataInterface $productMetadata,
         EavConfig $eavConfig,
         ProductCollectionFactory $productCollectionFactory,
         StoreManager $storeManager,
@@ -99,7 +102,7 @@ class Iterator extends EavIterator
         DbContext $dbContext,
         Config $config
     ) {
-        parent::__construct($eavConfig, Product::ENTITY, []);
+        parent::__construct($productMetadata, $eavConfig, Product::ENTITY, []);
 
         $this->productCollectionFactory = $productCollectionFactory;
         $this->storeManager = $storeManager;
@@ -378,7 +381,7 @@ class Iterator extends EavIterator
             }
         }
 
-        $iterator = new EavIterator($this->eavConfig, $this->entityCode, []);
+        $iterator = new EavIterator($this->productMetadata, $this->eavConfig, $this->entityCode, []);
         $iterator->setEntityIds(array_keys($map));
         $this->initializeAttributes($iterator);
 

@@ -11,6 +11,8 @@ namespace Emico\TweakwiseExport\Model\Write;
 use IteratorAggregate;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
+use Magento\Framework\App\ProductMetadata as CommunityProductMetadata;
+use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\DB\Select;
 use Magento\Framework\DB\Statement\Pdo\Mysql as MysqlStatement;
 use Zend_Db_Expr;
@@ -43,17 +45,24 @@ class EavIterator implements IteratorAggregate
     protected $entityIds;
 
     /**
+     * @var ProductMetadataInterface
+     */
+    protected $productMetadata;
+
+    /**
      * EavIterator constructor.
      *
+     * @param ProductMetadataInterface $productMetadata
      * @param EavConfig $eavConfig
      * @param string $entityCode
      * @param string[] $attributes
      */
-    public function __construct(EavConfig $eavConfig, $entityCode, array $attributes)
+    public function __construct(ProductMetadataInterface $productMetadata, EavConfig $eavConfig, $entityCode, array $attributes)
     {
         $this->eavConfig = $eavConfig;
         $this->entityCode = $entityCode;
         $this->attributes = $attributes;
+        $this->productMetadata = $productMetadata;
     }
 
     /**
@@ -171,7 +180,7 @@ class EavIterator implements IteratorAggregate
      * @param AbstractAttribute $attribute
      * @return Select
      */
-    protected function getAttributeSelect(AbstractAttribute $attribute)
+    protected function getAttributeSelectCommunity(AbstractAttribute $attribute)
     {
         $connection = $attribute->getResource()->getConnection();
         $attributeExpression = new Zend_Db_Expr($connection->quote($attribute->getAttributeCode()));
@@ -197,6 +206,34 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
+     * @param AbstractAttribute $attribute
+     * @return Select
+     */
+    protected function getAttributeSelectEnterprise(AbstractAttribute $attribute)
+    {
+        $connection = $attribute->getResource()->getConnection();
+        $attributeExpression = new Zend_Db_Expr($connection->quote($attribute->getAttributeCode()));
+        $select = $connection->select()
+            ->from(['attribute_table' => $attribute->getBackendTable()], [])
+            ->join(['main_table' => $attribute->getEntityType()->getEntityTable()], 'attribute_table.row_id = main_table.row_id', [])
+            ->columns([
+                'entity_id' => 'main_table.entity_id',
+                'store_id' => 'attribute_table.store_id',
+                'attribute' => $attributeExpression,
+                'value' => 'attribute_table.value'
+            ])
+            ->where('attribute_id = ?', $attribute->getId());
+
+        if ($this->storeId) {
+            $select->where('store_id = 0 OR store_id = ?', $this->storeId);
+        } else {
+            $select->where('store_id = 0');
+        }
+
+        return $select;
+    }
+
+    /**
      * @return Select[]
      */
     protected function getAttributeSelects()
@@ -207,8 +244,10 @@ class EavIterator implements IteratorAggregate
             $attribute = $eavConfig->getAttribute($this->entityCode, $attributeCode);
             if ($attribute->isStatic()) {
                 $select = $this->getStaticAttributeSelect($attribute);
+            } elseif ($this->productMetadata->getEdition() == CommunityProductMetadata::PRODUCT_NAME) {
+                $select = $this->getAttributeSelectCommunity($attribute);
             } else {
-                $select = $this->getAttributeSelect($attribute);
+                $select = $this->getAttributeSelectEnterprise($attribute);
             }
 
             if ($this->entityIds) {
