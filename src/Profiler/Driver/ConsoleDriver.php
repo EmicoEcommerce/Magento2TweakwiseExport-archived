@@ -72,6 +72,10 @@ class ConsoleDriver implements DriverInterface
             return;
         }
 
+        if (strpos($timerId, 'EAV:') !== false) {
+            return;
+        }
+
         try {
             $data = $this->stat->get($timerId);
         } catch (InvalidArgumentException $e) {
