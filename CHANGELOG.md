@@ -1,3 +1,12 @@
+## 1.0.0 (2017-05-19)
+
+Features:
+- Supported magento version 2.1.6
+
+Fixes:
+- issue #1: https://github.com/EmicoEcommerce/Magento2TweakwiseExport/issues/1
+- issue #2: https://github.com/EmicoEcommerce/Magento2TweakwiseExport/issues/2
+
 ## 0.1.0-beta (2017-02-01)
 
 Features:
