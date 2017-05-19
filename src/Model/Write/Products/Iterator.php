@@ -165,6 +165,7 @@ class Iterator extends EavIterator
                 foreach ($this->processBatch($batch) as $processedEntity) {
                     yield $processedEntity;
                 }
+                $batch = [];
             }
         }
 
@@ -430,7 +431,6 @@ class Iterator extends EavIterator
         }
 
         foreach ($entities as $entityId => $entity) {
-
             $name = $entity['name'];
             $entityCategories = isset($categories[$entityId]) ? $categories[$entityId] : [];
             $entityStock = isset($stock[$entityId]) ? $stock[$entityId] : [];
@@ -445,7 +445,6 @@ class Iterator extends EavIterator
             } else {
                 $entityPrice = 0;
             }
-
 
             // Combine extra attributes
             foreach ($entity as $attribute => $value) {

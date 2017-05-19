@@ -116,7 +116,7 @@ class Products implements WriterInterface
     {
         $storeId = $store->getId();
         $this->iterator->setStoreId($storeId);
-        
+
         foreach ($this->iterator as $data) {
             $this->writeProduct($xml, $storeId, $data);
             $writer->flush();

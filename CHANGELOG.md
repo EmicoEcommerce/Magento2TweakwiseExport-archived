@@ -6,6 +6,7 @@ Features:
 Fixes:
 - issue #1: https://github.com/EmicoEcommerce/Magento2TweakwiseExport/issues/1
 - issue #2: https://github.com/EmicoEcommerce/Magento2TweakwiseExport/issues/2
+- issue #3: https://github.com/EmicoEcommerce/Magento2TweakwiseExport/issues/3
 
 ## 0.1.0-beta (2017-02-01)
 
