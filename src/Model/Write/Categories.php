@@ -119,7 +119,11 @@ class Categories implements WriterInterface
                     continue;
                 }
 
-                $data['name'] = $store->getName() . ' - ' . $data['name'] ;
+                if (!isset($data['name'])) {
+                    $data['name'] = 'Root Category';
+                }
+
+                $data['name'] = $store->getName() . ' - ' . $data['name'];
             } elseif (!isset($data['is_active']) || !$data['is_active']) {
                 continue;
             }
