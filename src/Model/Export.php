@@ -12,6 +12,7 @@ use Emico\TweakwiseExport\Exception\FeedException;
 use Emico\TweakwiseExport\Exception\LockException;
 use Emico\TweakwiseExport\Model\Validate\Validator;
 use Emico\TweakwiseExport\Model\Write\Writer;
+use Magento\Framework\Profiler;
 
 /**
  * Class Export
@@ -70,24 +71,29 @@ class Export
      */
     protected function executeLocked(callable $action, $lockFile = null)
     {
-        if (!$lockFile) {
-            $lockFile = $this->config->getDefaultFeedPath() . '.lock';
-        }
-
-        $lockHandle = @fopen($lockFile, 'w');
-        if (!$lockHandle) {
-            $this->log->throwException(new LockException(sprintf('Could not lock feed export on lockfile "%s"', $lockFile)));
-        }
-
-        if (flock($lockHandle, LOCK_EX)) {
-            try {
-                $action();
-            } finally {
-                flock($lockHandle, LOCK_UN);
-                fclose($lockHandle);
+        Profiler::start('tweakwise::export');
+        try {
+            if (!$lockFile) {
+                $lockFile = $this->config->getDefaultFeedPath() . '.lock';
             }
-        } else {
-            $this->log->throwException(new LockException(sprintf('Unable to obtain lock on %s', $lockFile)));
+
+            $lockHandle = @fopen($lockFile, 'w');
+            if (!$lockHandle) {
+                $this->log->throwException(new LockException(sprintf('Could not lock feed export on lockfile "%s"', $lockFile)));
+            }
+
+            if (flock($lockHandle, LOCK_EX)) {
+                try {
+                    $action();
+                } finally {
+                    flock($lockHandle, LOCK_UN);
+                    fclose($lockHandle);
+                }
+            } else {
+                $this->log->throwException(new LockException(sprintf('Unable to obtain lock on %s', $lockFile)));
+            }
+        } finally {
+            Profiler::stop('tweakwise::export');
         }
 
         return $this;

@@ -72,7 +72,7 @@ class Categories implements WriterInterface
         /** @var Store $store */
         foreach ($this->storeManager->getStores() as $store) {
             if ($this->config->isEnabled($store)) {
-                $profileKey = 'tweakwise::export::categories::' . $store->getCode();
+                $profileKey = 'categories::' . $store->getCode();
                 try {
                     Profiler::start($profileKey);
                     $this->exportStore($writer, $xml, $store);

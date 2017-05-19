@@ -23,7 +23,7 @@ class Validator
         $internalXmlErrors = libxml_use_internal_errors(true);
 
         try {
-            Profiler::start('tweakwise::export::validate');
+            Profiler::start('validate');
             $xml = @simplexml_load_file($file);
             if (!$xml) {
                 $errors = ['Failed loading XML'];
@@ -35,7 +35,7 @@ class Validator
             $this->validateCategoryLinks($xml);
         } finally {
             libxml_use_internal_errors($internalXmlErrors);
-            Profiler::stop('tweakwise::export::validate');
+            Profiler::stop('validate');
         }
     }
 

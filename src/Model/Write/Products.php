@@ -87,7 +87,7 @@ class Products implements WriterInterface
         /** @var Store $store */
         foreach ($this->storeManager->getStores() as $store) {
             if ($this->config->isEnabled($store)) {
-                $profileKey = 'tweakwise::export::products::' . $store->getCode();
+                $profileKey = 'products::' . $store->getCode();
                 try {
                     Profiler::start($profileKey);
                     $this->exportStore($writer, $xml, $store);

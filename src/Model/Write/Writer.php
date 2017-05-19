@@ -86,7 +86,7 @@ class Writer
     public function write($resource)
     {
         try {
-            Profiler::start('tweakwise::export::write');
+            Profiler::start('write');
             $this->resource = $resource;
             $this->startDocument();
             $xml = $this->getXml();
@@ -96,7 +96,7 @@ class Writer
             $this->endDocument();
         } finally {
             $this->close();
-            Profiler::stop('tweakwise::export::write');
+            Profiler::stop('write');
         }
     }
 

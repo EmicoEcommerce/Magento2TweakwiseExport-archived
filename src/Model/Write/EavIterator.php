@@ -15,6 +15,7 @@ use Magento\Framework\App\ProductMetadata as CommunityProductMetadata;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\DB\Select;
 use Magento\Framework\DB\Statement\Pdo\Mysql as MysqlStatement;
+use Magento\Framework\Profiler;
 use Zend_Db_Expr;
 
 class EavIterator implements IteratorAggregate
@@ -112,47 +113,63 @@ class EavIterator implements IteratorAggregate
      */
     public function getIterator()
     {
-        $entityIdAttribute = $this->eavConfig->getAttribute('catalog_category', 'entity_id');
+        try {
+            Profiler::start('eav-iterator::' . $this->entityCode);
 
-        /** @var MysqlStatement $stmt */
-        $stmt = $entityIdAttribute->getResource()->getConnection()
-            ->select()
-            ->union($this->getAttributeSelects())
-            ->order('entity_id')
-            ->order('store_id')
-            ->query();
+            $entityIdAttribute = $this->eavConfig->getAttribute($this->entityCode, 'entity_id');
 
-        $entity = ['entity_id' => null];
+            $select = $entityIdAttribute->getResource()->getConnection()
+                ->select()
+                ->union($this->getAttributeSelects())
+                ->order('entity_id')
+                ->order('store_id');
 
-        // Loop over all rows and combine them to one array for entity
-        while ($row = $stmt->fetch()) {
-            if ($entity['entity_id'] != $row['entity_id']) {
-                // If current loop entity is new yield return this entity
+            Profiler::start('query');
+            try {
+                /** @var MysqlStatement $stmt */
+                $stmt = $select->query();
+            } finally {
+                Profiler::stop('query');
+            }
+
+            $entity = ['entity_id' => null];
+            Profiler::start('loop');
+            try {
+                // Loop over all rows and combine them to one array for entity
+                while ($row = $stmt->fetch()) {
+                    if ($entity['entity_id'] != $row['entity_id']) {
+                        // If current loop entity is new yield return this entity
+                        if ($entity['entity_id']) {
+                            yield $entity;
+                        }
+
+                        $entity = [
+                            'entity_id' => (int) $row['entity_id'],
+                            $row['attribute'] => $row['value'],
+                        ];
+                    } else {
+                        // Add row to current looping entity
+                        $attributeCode = $row['attribute'];
+
+                        if (isset($entity[$attributeCode])) {
+                            // Only override if store specific
+                            if ($row['store_id'] > 0) {
+                                $entity[$attributeCode] = $row['value'];
+                            }
+                        } else {
+                            $entity[$attributeCode] = $row['value'];
+                        }
+                    }
+                }
+
                 if ($entity['entity_id']) {
                     yield $entity;
                 }
-
-                $entity = [
-                    'entity_id' => (int) $row['entity_id'],
-                    $row['attribute'] => $row['value'],
-                ];
-            } else {
-                // Add row to current looping entity
-                $attributeCode = $row['attribute'];
-
-                if (isset($entity[$attributeCode])) {
-                    // Only override if store specific
-                    if ($row['store_id'] > 0) {
-                        $entity[$attributeCode] = $row['value'];
-                    }
-                } else {
-                    $entity[$attributeCode] = $row['value'];
-                }
+            } finally {
+                Profiler::stop('loop');
             }
-        }
-
-        if ($entity['entity_id']) {
-            yield $entity;
+        } finally {
+            Profiler::stop('eav-iterator::' . $this->entityCode);
         }
     }
 
