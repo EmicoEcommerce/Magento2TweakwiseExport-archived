@@ -262,7 +262,7 @@ class EavIterator implements IteratorAggregate
         foreach ($this->attributes as $attribute) {
             if ($attribute->isStatic()) {
                 $select = $this->getStaticAttributeSelect($attribute);
-            } elseif ($this->productMetadata->getEdition() == CommunityProductMetadata::PRODUCT_NAME) {
+            } elseif ($this->productMetadata->getEdition() == CommunityProductMetadata::EDITION_NAME) {
                 $select = $this->getAttributeSelectCommunity($attribute);
             } else {
                 $select = $this->getAttributeSelectEnterprise($attribute);
