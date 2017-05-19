@@ -130,6 +130,8 @@ class EavIterator implements IteratorAggregate
         $entity = ['entity_id' => null];
         while ($row = $stmt->fetch()) {
             $attributeId = $row['attribute_id'];
+            $value = $row['value'];
+
             if (!isset($this->attributes[$attributeId])) {
                 continue;
             }
@@ -145,17 +147,17 @@ class EavIterator implements IteratorAggregate
 
                 $entity = [
                     'entity_id' => (int) $row['entity_id'],
-                    $attributeCode => $row['value'],
+                    $attributeCode => $value,
                 ];
             } else {
                 // Add row to current looping entity
                 if (isset($entity[$attributeCode])) {
                     // Only override if store specific
                     if ($row['store_id'] > 0) {
-                        $entity[$attributeCode] = $row['value'];
+                        $entity[$attributeCode] = $value;
                     }
                 } else {
-                    $entity[$attributeCode] = $row['value'];
+                    $entity[$attributeCode] = $value;
                 }
             }
         }
@@ -186,7 +188,6 @@ class EavIterator implements IteratorAggregate
             } finally {
                 Profiler::stop('query');
             }
-
 
             Profiler::start('loop');
             try {

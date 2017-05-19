@@ -116,7 +116,7 @@ class Products implements WriterInterface
     {
         $storeId = $store->getId();
         $this->iterator->setStoreId($storeId);
-
+        
         foreach ($this->iterator as $data) {
             $this->writeProduct($xml, $storeId, $data);
             $writer->flush();
@@ -181,6 +181,10 @@ class Products implements WriterInterface
         $values = array_unique($values);
 
         foreach ($values as $value) {
+            if (empty($value)) {
+                continue;
+            }
+
             $xml->startElement('attribute');
             $xml->writeAttribute('datatype', is_numeric($value) ? 'numeric' : 'text');
             $xml->writeElement('name', $name);
