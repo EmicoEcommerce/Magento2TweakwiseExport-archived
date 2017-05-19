@@ -11,8 +11,10 @@ namespace Emico\TweakwiseExport\Console\Command;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Export;
 use Emico\TweakwiseExport\Model\Validate\Validator;
+use Emico\TweakwiseExport\Profiler\Driver\ConsoleDriver;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
+use Magento\Framework\Profiler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -66,6 +68,7 @@ class ExportCommand extends Command
         $this->setName('tweakwise:export')
             ->addArgument('file', InputArgument::OPTIONAL, 'Export to specific file', $this->config->getDefaultFeedPath())
             ->addOption('validate', 'c', InputOption::VALUE_NONE, 'Validate feed and rollback if fails.')
+            ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Debugging enables profiler.')
             ->setDescription('Export tweakwise feed');
     }
 
@@ -75,6 +78,11 @@ class ExportCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->state->setAreaCode(Area::AREA_CRONTAB);
+        if ($input->getOption('debug')) {
+            Profiler::enable();
+            Profiler::add(new ConsoleDriver($output));
+        }
+
         $feedFile = (string) $input->getArgument('file');
         $validate = (bool) $input->getOption('validate');
 
