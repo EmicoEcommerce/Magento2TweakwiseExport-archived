@@ -24,7 +24,6 @@ use Magento\Catalog\Model\Indexer\Category\Product\AbstractAction as CategoryPro
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ConfigurableType;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DataObject;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Magento\Framework\Profiler;
@@ -69,11 +68,6 @@ class Iterator extends EavIterator
     protected $productType;
 
     /**
-     * @var DbContext
-     */
-    protected $dbContext;
-
-    /**
      * @var Config
      */
     protected $config;
@@ -102,14 +96,13 @@ class Iterator extends EavIterator
         DbContext $dbContext,
         Config $config
     ) {
-        parent::__construct($productMetadata, $eavConfig, Product::ENTITY, []);
+        parent::__construct($productMetadata, $eavConfig, $dbContext, Product::ENTITY, []);
 
         $this->productCollectionFactory = $productCollectionFactory;
         $this->storeManager = $storeManager;
         $this->visibility = $visibility;
         $this->helper = $helper;
         $this->productType = $productType;
-        $this->dbContext = $dbContext;
         $this->config = $config;
 
         $this->initializeAttributes($this);
@@ -179,22 +172,6 @@ class Iterator extends EavIterator
         foreach ($this->processBatch($batch) as $processedEntity) {
             yield $processedEntity;
         }
-    }
-
-    /**
-     * @return \Magento\Framework\DB\Adapter\AdapterInterface
-     */
-    protected function getConnection()
-    {
-        return $this->getResources()->getConnection();
-    }
-
-    /**
-     * @return ResourceConnection
-     */
-    protected function getResources()
-    {
-        return $this->dbContext->getResources();
     }
 
     /**
@@ -381,7 +358,7 @@ class Iterator extends EavIterator
             }
         }
 
-        $iterator = new EavIterator($this->productMetadata, $this->eavConfig, $this->entityCode, []);
+        $iterator = new EavIterator($this->productMetadata, $this->eavConfig, $this->dbContext, $this->entityCode, []);
         $iterator->setEntityIds(array_keys($map));
         $this->initializeAttributes($iterator);
 

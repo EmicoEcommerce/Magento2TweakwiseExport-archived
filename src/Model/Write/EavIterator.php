@@ -11,11 +11,16 @@ namespace Emico\TweakwiseExport\Model\Write;
 use IteratorAggregate;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
+use Magento\Eav\Model\Entity\Type;
 use Magento\Framework\App\ProductMetadata as CommunityProductMetadata;
 use Magento\Framework\App\ProductMetadataInterface;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
 use Magento\Framework\DB\Statement\Pdo\Mysql as MysqlStatement;
+use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Magento\Framework\Profiler;
+use Magento\Setup\Module\I18n\Dictionary\Generator;
 use Zend_Db_Expr;
 
 class EavIterator implements IteratorAggregate
@@ -51,18 +56,25 @@ class EavIterator implements IteratorAggregate
     protected $productMetadata;
 
     /**
+     * @var DbContext
+     */
+    protected $dbContext;
+
+    /**
      * EavIterator constructor.
      *
      * @param ProductMetadataInterface $productMetadata
      * @param EavConfig $eavConfig
+     * @param DbContext $dbContext
      * @param string $entityCode
      * @param string[] $attributes
      */
-    public function __construct(ProductMetadataInterface $productMetadata, EavConfig $eavConfig, $entityCode, array $attributes)
+    public function __construct(ProductMetadataInterface $productMetadata, EavConfig $eavConfig, DbContext $dbContext, $entityCode, array $attributes)
     {
         $this->eavConfig = $eavConfig;
         $this->entityCode = $entityCode;
         $this->productMetadata = $productMetadata;
+        $this->dbContext = $dbContext;
         $this->attributes = [];
         foreach ($attributes as $attribute) {
             $this->selectAttribute($attribute);
@@ -76,7 +88,8 @@ class EavIterator implements IteratorAggregate
     public function selectAttribute($attributeCode)
     {
         $attribute = $this->eavConfig->getAttribute($this->entityCode, $attributeCode);
-        $this->attributes[$attribute->getAttributeCode()] = $attribute;
+        $attributeKey = $attribute->getId() ? $attribute->getId() : $attributeCode;
+        $this->attributes[$attributeKey] = $attribute;
         return $this;
     }
 
@@ -109,6 +122,50 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
+     * @param MysqlStatement $stmt
+     * @return array[]|Generator
+     */
+    protected function loopUnionRows(MysqlStatement $stmt)
+    {
+        $entity = ['entity_id' => null];
+        while ($row = $stmt->fetch()) {
+            $attributeId = $row['attribute_id'];
+            if (!isset($this->attributes[$attributeId])) {
+                continue;
+            }
+
+            $attribute = $this->attributes[$attributeId];
+            $attributeCode = $attribute->getAttributeCode();
+
+            if ($entity['entity_id'] != $row['entity_id']) {
+                // If current loop entity is new yield return this entity
+                if ($entity['entity_id']) {
+                    yield $entity;
+                }
+
+                $entity = [
+                    'entity_id' => (int) $row['entity_id'],
+                    $attributeCode => $row['value'],
+                ];
+            } else {
+                // Add row to current looping entity
+                if (isset($entity[$attributeCode])) {
+                    // Only override if store specific
+                    if ($row['store_id'] > 0) {
+                        $entity[$attributeCode] = $row['value'];
+                    }
+                } else {
+                    $entity[$attributeCode] = $row['value'];
+                }
+            }
+        }
+
+        if ($entity['entity_id']) {
+            yield $entity;
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getIterator()
@@ -116,9 +173,7 @@ class EavIterator implements IteratorAggregate
         try {
             Profiler::start('eav-iterator::' . $this->entityCode);
 
-            $entityIdAttribute = $this->eavConfig->getAttribute($this->entityCode, 'entity_id');
-
-            $select = $entityIdAttribute->getResource()->getConnection()
+            $select = $this->getConnection()
                 ->select()
                 ->union($this->getAttributeSelects())
                 ->order('entity_id')
@@ -132,39 +187,11 @@ class EavIterator implements IteratorAggregate
                 Profiler::stop('query');
             }
 
-            $entity = ['entity_id' => null];
+
             Profiler::start('loop');
             try {
                 // Loop over all rows and combine them to one array for entity
-                while ($row = $stmt->fetch()) {
-                    if ($entity['entity_id'] != $row['entity_id']) {
-                        // If current loop entity is new yield return this entity
-                        if ($entity['entity_id']) {
-                            yield $entity;
-                        }
-
-                        $entity = [
-                            'entity_id' => (int) $row['entity_id'],
-                            $row['attribute'] => $row['value'],
-                        ];
-                    } else {
-                        // Add row to current looping entity
-                        $attributeCode = $row['attribute'];
-
-                        if (isset($entity[$attributeCode])) {
-                            // Only override if store specific
-                            if ($row['store_id'] > 0) {
-                                $entity[$attributeCode] = $row['value'];
-                            }
-                        } else {
-                            $entity[$attributeCode] = $row['value'];
-                        }
-                    }
-                }
-
-                if ($entity['entity_id']) {
-                    yield $entity;
-                }
+                return $this->loopUnionRows($stmt);
             } finally {
                 Profiler::stop('loop');
             }
@@ -174,47 +201,66 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
-     * @param AbstractAttribute $attribute
-     * @return Select
+     * @return AdapterInterface
      */
-    protected function getStaticAttributeSelect(AbstractAttribute $attribute)
+    protected function getConnection()
     {
-        $connection = $attribute->getResource()->getConnection();
-
-        $attributeExpression = new Zend_Db_Expr($connection->quote($attribute->getAttributeCode()));
-        $select = $connection->select()
-            ->from(
-                $attribute->getBackendTable(),
-                [
-                    'entity_id',
-                    'store_id' => new Zend_Db_Expr('0'),
-                    'attribute' => $attributeExpression,
-                    'value' => $attribute->getAttributeCode()
-                ]
-            );
-
-        return $select;
+        return $this->getResources()->getConnection();
     }
 
     /**
-     * @param AbstractAttribute $attribute
+     * @return ResourceConnection
+     */
+    protected function getResources()
+    {
+        return $this->dbContext->getResources();
+    }
+
+    /**
+     * @return Type
+     */
+    protected function getEntityType()
+    {
+        return $this->eavConfig->getEntityType($this->entityCode);
+    }
+
+    /**
+     * @param AbstractAttribute[] $attributes
+     * @return Select[]
+     */
+    protected function getStaticAttributeSelect(array $attributes)
+    {
+        $connection = $this->getConnection();
+
+        $selects = [];
+        foreach ($attributes as $attributeKey => $attribute) {
+            $attributeExpression = new Zend_Db_Expr($connection->quote($attributeKey));
+            $selects[] = $connection->select()
+                ->from(
+                    $attribute->getBackendTable(),
+                    [
+                        'entity_id',
+                        'store_id' => new Zend_Db_Expr('0'),
+                        'attribute_id' => $attributeExpression,
+                        'value' => $attribute->getAttributeCode()
+                    ]
+                );
+        }
+
+        return $selects;
+    }
+
+    /**
+     * @param string $table
+     * @param AbstractAttribute[] $attributes
      * @return Select
      */
-    protected function getAttributeSelectCommunity(AbstractAttribute $attribute)
+    protected function getAttributeSelectCommunity($table, array $attributes)
     {
-        $connection = $attribute->getResource()->getConnection();
-        $attributeExpression = new Zend_Db_Expr($connection->quote($attribute->getAttributeCode()));
+        $connection = $this->getConnection();
         $select = $connection->select()
-            ->from(
-                $attribute->getBackendTable(),
-                [
-                    'entity_id',
-                    'store_id',
-                    'attribute' => $attributeExpression,
-                    'value'
-                ]
-            )
-            ->where('attribute_id = ?', $attribute->getId());
+            ->from($table, ['entity_id', 'store_id', 'attribute_id', 'value'])
+            ->where('attribute_id IN (?)', array_keys($attributes));
 
         if ($this->storeId) {
             $select->where('store_id = 0 OR store_id = ?', $this->storeId);
@@ -226,23 +272,23 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
-     * @param AbstractAttribute $attribute
+     * @param string $table
+     * @param AbstractAttribute[] $attributes
      * @return Select
      */
-    protected function getAttributeSelectEnterprise(AbstractAttribute $attribute)
+    protected function getAttributeSelectEnterprise($table, array $attributes)
     {
-        $connection = $attribute->getResource()->getConnection();
-        $attributeExpression = new Zend_Db_Expr($connection->quote($attribute->getAttributeCode()));
+        $connection = $this->getConnection();
         $select = $connection->select()
-            ->from(['attribute_table' => $attribute->getBackendTable()], [])
-            ->join(['main_table' => $attribute->getEntityType()->getEntityTable()], 'attribute_table.row_id = main_table.row_id', [])
+            ->from(['attribute_table' => $table], [])
+            ->join(['main_table' => $this->getEntityType()->getEntityTable()], 'attribute_table.row_id = main_table.row_id', [])
             ->columns([
                 'entity_id' => 'main_table.entity_id',
                 'store_id' => 'attribute_table.store_id',
-                'attribute' => $attributeExpression,
+                'attribute_id' => 'attribute_table.attribute_id',
                 'value' => 'attribute_table.value'
             ])
-            ->where('attribute_id = ?', $attribute->getId());
+            ->where('attribute_id IN (?)', array_keys($attributes));
 
         if ($this->storeId) {
             $select->where('store_id = 0 OR store_id = ?', $this->storeId);
@@ -251,6 +297,26 @@ class EavIterator implements IteratorAggregate
         }
 
         return $select;
+    }
+
+    /**
+     * @return AbstractAttribute[][]
+     */
+    protected function getAttributeGroups()
+    {
+        $attributeGroups = [];
+        foreach ($this->attributes as $attributeId => $attribute) {
+            $table = $attribute->getBackendTable();
+            if ($attribute->isStatic()) {
+                $table = '_static';
+            }
+
+            if (!isset($attributeGroups[$table])) {
+                $attributeGroups[$table] = [];
+            }
+            $attributeGroups[$table][$attributeId] = $attribute;
+        }
+        return $attributeGroups;
     }
 
     /**
@@ -259,21 +325,26 @@ class EavIterator implements IteratorAggregate
     protected function getAttributeSelects()
     {
         $selects = [];
-        foreach ($this->attributes as $attribute) {
-            if ($attribute->isStatic()) {
-                $select = $this->getStaticAttributeSelect($attribute);
-            } elseif ($this->productMetadata->getEdition() == CommunityProductMetadata::EDITION_NAME) {
-                $select = $this->getAttributeSelectCommunity($attribute);
-            } else {
-                $select = $this->getAttributeSelectEnterprise($attribute);
-            }
+        $attributeGroups = $this->getAttributeGroups();
 
-            if ($this->entityIds) {
+        foreach ($attributeGroups as $group => $attributes) {
+            if ($group == '_static') {
+                foreach ($this->getStaticAttributeSelect($attributes) as $select) {
+                    $selects[] = $select;
+                }
+            } elseif ($this->productMetadata->getEdition() == CommunityProductMetadata::EDITION_NAME) {
+                $selects[] = $this->getAttributeSelectCommunity($group, $attributes);
+            } else {
+                $selects[] = $this->getAttributeSelectEnterprise($group, $attributes);
+            }
+        }
+
+        if ($this->entityIds) {
+            foreach ($selects as $select) {
                 $select->where('entity_id IN (?)', $this->entityIds);
             }
-
-            $selects[] = $select;
         }
+
         return $selects;
     }
 }
