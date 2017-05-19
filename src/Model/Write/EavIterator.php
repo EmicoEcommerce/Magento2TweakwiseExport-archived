@@ -28,7 +28,7 @@ class EavIterator implements IteratorAggregate
     protected $eavConfig;
 
     /**
-     * @var string[]
+     * @var AbstractAttribute[]
      */
     protected $attributes = [];
 
@@ -53,7 +53,10 @@ class EavIterator implements IteratorAggregate
     {
         $this->eavConfig = $eavConfig;
         $this->entityCode = $entityCode;
-        $this->attributes = $attributes;
+        $this->attributes = [];
+        foreach ($attributes as $attribute) {
+            $this->selectAttribute($attribute);
+        }
     }
 
     /**
@@ -201,10 +204,8 @@ class EavIterator implements IteratorAggregate
      */
     protected function getAttributeSelects()
     {
-        $eavConfig = $this->eavConfig;
         $selects = [];
-        foreach ($this->attributes as $attributeCode) {
-            $attribute = $eavConfig->getAttribute($this->entityCode, $attributeCode);
+        foreach ($this->attributes as $attribute) {
             if ($attribute->isStatic()) {
                 $select = $this->getStaticAttributeSelect($attribute);
             } else {
