@@ -41,6 +41,11 @@ class EavIterator implements IteratorAggregate
     protected $attributes = [];
 
     /**
+     * @var AbstractAttribute[]
+     */
+    protected $attributesByCode = [];
+
+    /**
      * @var int
      */
     protected $storeId = 0;
@@ -90,6 +95,7 @@ class EavIterator implements IteratorAggregate
         $attribute = $this->eavConfig->getAttribute($this->entityCode, $attributeCode);
         $attributeKey = $attribute->getId() ? $attribute->getId() : $attributeCode;
         $this->attributes[$attributeKey] = $attribute;
+        $this->attributesByCode[$attributeCode] = $attribute;
         return $this;
     }
 

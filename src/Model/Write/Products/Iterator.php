@@ -451,8 +451,10 @@ class Iterator extends EavIterator
                 if (in_array($attribute, ['name', 'entity_id'])) {
                     continue;
                 }
+
                 $attributes[$attribute . $value] = ['attribute' => $attribute, 'value' => $value];
             }
+            $attributes = $this->filterEntityAttributes($attributes);
 
             // Combine stock
             switch ($this->config->getStockCalculation()) {
@@ -475,7 +477,7 @@ class Iterator extends EavIterator
                 'price' => $entityPrice,
                 'stock' => $entityStock,
                 'categories' => $entityCategories,
-                'attributes' => array_values($attributes),
+                'attributes' => $attributes,
             ];
         }
     }
@@ -596,5 +598,73 @@ class Iterator extends EavIterator
     protected function skipChildAttribute($attribute)
     {
         return $this->config->getSkipAttribute($attribute);
+    }
+
+    /**
+     * @param string $attributeCode
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function filterEntityAttributeValue($attributeCode, $value)
+    {
+        if (!isset($this->attributesByCode[$attributeCode])) {
+            return $value;
+        }
+
+        $attribute = $this->attributesByCode[$attributeCode];
+
+        // Text values are ok like this
+        if (in_array($attribute->getBackendModel(), ['static', 'varchar', 'text', 'datetime'])) {
+            return $value;
+        }
+
+        // Decimal values can be cast
+        if ($attribute->getBackendModel() == 'decimal') {
+            // Cleanup empty values
+            $value = trim($value);
+            if (empty($value)) {
+                return null;
+            }
+
+            return (float) $value;
+        }
+
+        // Convert int backend
+        if ($attribute->getBackendModel() == 'int') {
+            // If select or multi select skip
+            if ($attribute->getFrontendInput() == 'select' || $attribute->getFrontendInput() == 'multiselect') {
+                return $value;
+            }
+
+            // Cleanup empty values
+            $value = trim($value);
+            if (empty($value)) {
+                return null;
+            }
+
+            return (int) $value;
+
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param array $entity
+     * @return array
+     */
+    protected function filterEntityAttributes(array $entity)
+    {
+        $result = [];
+        foreach ($entity as $attribute) {
+            $attribute['value'] = $this->filterEntityAttributeValue($attribute['attribute'], $attribute['value']);
+            if (empty($attribute['value'])) {
+                continue;
+            }
+
+            $result[] = $attribute;
+        }
+
+        return $result;
     }
 }
