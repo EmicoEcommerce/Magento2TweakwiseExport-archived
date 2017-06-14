@@ -8,8 +8,8 @@ env:
     - MAGE2_ADMIN_PASSWORD=admin123
     - MAGE2_ADMIN_DBNAME=magento_2
   matrix:
-    - MAGE2_ENV=2.1
-    - MAGE2_ENV=2.0
+    - MAGE2_VERSION=2.1
+    - MAGE2_VERSION=2.0
 
 language: php
 

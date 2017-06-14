@@ -12,6 +12,7 @@ use Codeception\Module;
 use Codeception\TestInterface;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\CatalogSampleData\Model\Product;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class Fixtures extends Module
 {
@@ -65,7 +66,12 @@ class Fixtures extends Module
         $repository = $this->getBootstrap()->getObject(ProductRepository::class);
 
         foreach ($skus as $sku) {
-            $product = $repository->get($sku);
+            try {
+                $product = $repository->get($sku);
+            } catch (NoSuchEntityException $e) {
+                continue;
+            }
+
             if ($product->getId()) {
                 $repository->delete($product);
             }
