@@ -26,6 +26,11 @@ class Bootstrap extends Module
     protected $bootstrap;
 
     /**
+     * @var bool
+     */
+    protected $moduleReRegistered = false;
+
+    /**
      * {@inheritdoc}
      */
     public function _before(TestInterface $test)
@@ -107,8 +112,12 @@ class Bootstrap extends Module
      */
     protected function initApplication()
     {
-        // Register module again because now we have a class required.
-        require __DIR__ . '/../../../../src/registration.php';
+        if (!$this->moduleReRegistered) {
+            // Register module again because now we have a class required.
+            require __DIR__ . '/../../../../src/registration.php';
+            $this->moduleReRegistered = true;
+        }
+
         $this->bootstrap = AppBootstrap::create(BP, $_SERVER);
         $this->bootstrap->createApplication(Cron::class);
     }

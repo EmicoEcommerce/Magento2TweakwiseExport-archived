@@ -4,6 +4,6 @@ actor: FunctionalTester
 modules:
     enabled:
         - Asserts
+        - Helper\Functional
         - Helper\Magento2\Bootstrap
         - Helper\Magento2\Fixtures
-        - Helper\Functional

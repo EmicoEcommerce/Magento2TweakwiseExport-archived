@@ -13,8 +13,9 @@ use FunctionalTester;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Catalog\Model\ResourceModel\Product;
 use Magento\Framework\App\Area;
+use SimpleXMLElement;
 
-class EmptyAttributeCest
+class WriterCest
 {
     /**
      * Product SKU of empty attribute
@@ -22,17 +23,42 @@ class EmptyAttributeCest
     const PRODUCT_SKU = 'emico-tweakwise-export-sprc';
 
     /**
+     * @var SimpleXMLElement
+     */
+    protected $exportXml;
+
+    /**
      * @param FunctionalTester $i
      */
     public function _before(FunctionalTester $i)
     {
         $i->initArea(Area::AREA_CRONTAB);
-        $i->loadProductFixtures(
-            ['Emico_TweakwiseExport::../tests/fixtures/product/empty-special-price.csv'],
-            [self::PRODUCT_SKU]
-        );
 
+        if (!$this->exportXml) {
+            $i->loadProductFixtures(
+                ['Emico_TweakwiseExport::../tests/fixtures/writer.csv'],
+                [
+                    self::PRODUCT_SKU,
+                ]
+            );
+            $this->updateEmptyAttributeValue($i);
 
+            // Run Export
+            /** @var Writer $writer */
+            $writer = $i->getObject(Writer::class);
+            $resource = fopen('php://temp', 'w+');
+            $writer->write($resource);
+            rewind($resource);
+
+            $this->exportXml = simplexml_load_string(stream_get_contents($resource));
+        }
+    }
+
+    /**
+     * @param FunctionalTester $i
+     */
+    protected function updateEmptyAttributeValue(FunctionalTester $i)
+    {
         // Only with a raw insert like this we where able to insert an empty value in the special_price table for issue #6
         /** @var ProductRepository $repository */
         $repository = $i->getObject(ProductRepository::class);
@@ -56,16 +82,9 @@ class EmptyAttributeCest
     /**
      * @param FunctionalTester $i
      */
-    public function tryToTest(FunctionalTester $i)
+    public function testEmptyAttribute(FunctionalTester $i)
     {
-        /** @var Writer $writer */
-        $writer = $i->getObject(Writer::class);
-        $resource = fopen('php://temp', 'w+');
-        $writer->write($resource);
-        rewind($resource);
-
-        $xml = simplexml_load_string(stream_get_contents($resource));
-        foreach ($xml->xpath('//item/attributes/attribute') as $attributeElement) {
+        foreach ($this->exportXml->xpath('//item/attributes/attribute') as $attributeElement) {
             $name = (string) $attributeElement->name;
             if ($name != 'special_price') {
                 continue;
@@ -75,5 +94,14 @@ class EmptyAttributeCest
             $value = trim($value);
             $i->assertNotEmpty($value);
         }
+    }
+
+    /**
+     * @param FunctionalTester $i
+     */
+    public function testNotExportingDisabledProduct(FunctionalTester $i)
+    {
+
+        
     }
 }
