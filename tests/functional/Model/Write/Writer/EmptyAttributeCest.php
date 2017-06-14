@@ -64,9 +64,7 @@ class EmptyAttributeCest
         $writer->write($resource);
         rewind($resource);
 
-        $content = stream_get_contents($resource);
-        file_put_contents('/Volumes/WWW/tweakwise2-ce.dev/var/feeds/tweakwise.xml', $content);
-        $xml = simplexml_load_string($content);
+        $xml = simplexml_load_string(stream_get_contents($resource));
         foreach ($xml->xpath('//item/attributes/attribute') as $attributeElement) {
             $name = (string) $attributeElement->name;
             if ($name != 'special_price') {
