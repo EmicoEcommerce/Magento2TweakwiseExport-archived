@@ -15,6 +15,7 @@ use Emico\TweakwiseExport\Model\Write\EavIterator;
 use Generator;
 use Magento\Bundle\Model\Product\Type as BundleType;
 use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Type as ProductType;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
@@ -190,7 +191,7 @@ class Iterator extends EavIterator
      */
     protected function skipEntity(array $entity)
     {
-        if (!$entity['status']) {
+        if ($entity['status'] != Status::STATUS_ENABLED) {
             return true;
         }
 
