@@ -40,7 +40,6 @@ before_script:
   # Install Magento with dependencies
   - git clone --depth=10 -b $MAGE2_VERSION https://github.com/magento/magento2 /tmp/build
   - cd /tmp/build
-  - composer update
   - composer require emico/tweakwise-export
   - composer install
   - cp -R /home/travis/build/EmicoEcommerce/Magento2TweakwiseExport/* /tmp/build/vendor/emico/tweakwise-export
@@ -48,6 +47,8 @@ before_script:
   - php bin/magento setup:upgrade
   - php bin/magento setup:di:compile
   - php bin/magento cache:clean
+  - cd /tmp/build/vendor/emico/tweakwise-export
+  - composer install
 
 script:
   - vendor/bin/codecept run
