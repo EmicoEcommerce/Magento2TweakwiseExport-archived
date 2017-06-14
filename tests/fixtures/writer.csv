@@ -1,3 +1,5 @@
-category,name,description,sku,price,qty,attribute_set,visibility,special_price
+category,name,description,sku,price,qty,attribute_set,visibility,special_price,status
 "Gear
-Fitness Equipment","Empty Special Price Test","Fake description",emico-tweakwise-export-sprc,14,100,Gear,4,""
+Fitness Equipment","Empty Special Price Test","Fake description",etw-empty-attr,14,100,Gear,4,"",1
+"Gear
+Fitness Equipment","Disabled test","Fake description",etw-disabled,14,100,Gear,4,"",2

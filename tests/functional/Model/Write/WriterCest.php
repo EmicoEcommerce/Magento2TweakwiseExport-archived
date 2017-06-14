@@ -18,9 +18,10 @@ use SimpleXMLElement;
 class WriterCest
 {
     /**
-     * Product SKU of empty attribute
+     * Product SKU's
      */
-    const PRODUCT_SKU = 'emico-tweakwise-export-sprc';
+    const SKU_EMPTY_ATTRIBUTE = 'etw-empty-attr';
+    const SKU_DISABLED = 'etw-disabled';
 
     /**
      * @var SimpleXMLElement
@@ -38,7 +39,8 @@ class WriterCest
             $i->loadProductFixtures(
                 ['Emico_TweakwiseExport::../tests/fixtures/writer.csv'],
                 [
-                    self::PRODUCT_SKU,
+                    self::SKU_EMPTY_ATTRIBUTE,
+                    self::SKU_DISABLED,
                 ]
             );
             $this->updateEmptyAttributeValue($i);
@@ -68,7 +70,7 @@ class WriterCest
         $attribute = $resource->getAttribute('special_price');
 
         $table = $attribute->getBackend()->getTable();
-        $product = $repository->get(self::PRODUCT_SKU);
+        $product = $repository->get(self::SKU_EMPTY_ATTRIBUTE);
         $entityIdField = $attribute->getBackend()->getEntityIdField();
 
         $data = [
@@ -101,7 +103,14 @@ class WriterCest
      */
     public function testNotExportingDisabledProduct(FunctionalTester $i)
     {
+        foreach ($this->exportXml->xpath('//item/attributes/attribute') as $attributeElement) {
+            $name = (string) $attributeElement->name;
+            if ($name != 'sku') {
+                continue;
+            }
 
-        
+            $sku = (string) $attributeElement->value;
+            $i->assertNotEquals(self::SKU_DISABLED, $sku);
+        }
     }
 }
