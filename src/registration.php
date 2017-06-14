@@ -6,8 +6,12 @@
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-\Magento\Framework\Component\ComponentRegistrar::register(
-    \Magento\Framework\Component\ComponentRegistrar::MODULE,
-    'Emico_TweakwiseExport',
-    __DIR__
-);
+use Magento\Framework\Component\ComponentRegistrar;
+
+if (class_exists(ComponentRegistrar::class, false)) {
+    ComponentRegistrar::register(
+        ComponentRegistrar::MODULE,
+        'Emico_TweakwiseExport',
+        __DIR__
+    );
+}

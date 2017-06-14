@@ -1,0 +1,8 @@
+# Codeception Test Suite Configuration
+
+actor: FunctionalTester
+modules:
+    enabled:
+        - Helper\Magento2\Bootstrap
+        - Helper\Magento2\Fixtures
+        - Helper\Functional

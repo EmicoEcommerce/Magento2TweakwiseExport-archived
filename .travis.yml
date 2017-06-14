@@ -1,0 +1,47 @@
+env:
+  global:
+    - MAGE2_FAKE_URL=http://magento-2-ce.dev
+    - MAGE2_ADMIN_EMAIL=inf@emico.nl
+    - MAGE2_ADMIN_FIRST_NAME=Emico
+    - MAGE2_ADMIN_LAST_NAME=Emico
+    - MAGE2_ADMIN_USERNAME=admin
+    - MAGE2_ADMIN_PASSWORD=admin123
+    - MAGE2_ADMIN_DBNAME=magento_2
+  matrix:
+    - MAGE2_ENV=2.1
+    - MAGE2_ENV=2.0
+
+language: php
+
+php:
+  - 7.0
+  - 7.1
+
+addons:
+  hosts:
+    - magento-2-ce.dev
+
+services:
+  - mysql
+
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
+
+before_script:
+  # Ensure database exists
+  - mysql -e "CREATE DATABASE IF NOT EXISTS ${MAGE2_ADMIN_DBNAME};"
+  # Install Magento with dependencies
+  - git clone --depth=10 -b $MAGE2_VERSION https://github.com/magento/magento2 /tmp/build
+  - cd /tmp/build
+  - composer update
+  - composer require emico/tweakwise-export
+  - cp -R /home/travis/build/EmicoEcommerce/Magento2TweakwiseExport/* /tmp/build/vendor/emico/tweakwise-export
+  - php bin/magento setup:install --admin-email "$MAGE2_ADMIN_EMAIL" --admin-firstname "$MAGE2_ADMIN_FIRST_NAME" --admin-lastname "$MAGE2_ADMIN_LAST_NAME" --admin-password "$MAGE2_ADMIN_PASSWORD" --admin-user "$MAGE2_ADMIN_USERNAME" --backend-frontname admin --base-url "$MAGE2_FAKE_URL" --db-host 127.0.0.1 --db-name "$MAGE2_ADMIN_DBNAME" --db-user root --session-save files --use-rewrites 1 --use-secure 0 -vvv
+  - php bin/magento setup:upgrade
+  - php bin/magento setup:di:compile
+  - php bin/magento cache:clean
+
+script:
+  - vendor/bin/codecept run
