@@ -12,6 +12,7 @@ use Emico\TweakwiseExport\Model\Write\Writer;
 use FunctionalTester;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Framework\App\Area;
+use Magento\Indexer\Model\IndexerFactory;
 use SimpleXMLElement;
 
 class WriterCest
@@ -61,6 +62,12 @@ class WriterCest
 
             $this->exportXml = simplexml_load_string(stream_get_contents($resource));
         }
+    }
+
+    protected function reindex()
+    {
+        $collectionFactory = $this->getObjectManager()->create('Magento\Indexer\Model\Indexer\CollectionFactory');
+        return $collectionFactory->create()->getItems();
     }
 
     /**
@@ -136,5 +143,15 @@ class WriterCest
         $i->assertNull($value);
         $value = $this->getProductItem(self::SKU_VALID);
         $i->assertNotNull($value);
+    }
+
+    /**
+     * @param FunctionalTester $i
+     */
+    public function testExportMultipleCategories(FunctionalTester $i)
+    {
+        $value = $this->getProductItem(self::SKU_VALID);
+        $i->assertNotNull($value);
+        $i->assertCount(2, $value['categories']);
     }
 }

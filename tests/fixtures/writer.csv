@@ -1,6 +1,5 @@
 category,name,description,sku,price,qty,attribute_set,visibility,status,special_price
-"Fitness Equipment
-Gear
-","EmicoTweakwiseExportTest valid","Fake description",etw-valid,14,100,Gear,4,1,12
+"Gear
+Fitness Equipment","EmicoTweakwiseExportTest valid","Fake description",etw-valid,14,100,Gear,4,1,12
 "Fitness Equipment","EmicoTweakwiseExportTest empty attribute","Fake description",etw-empty-attr,14,100,Gear,4,1,
 "Fitness Equipment","EmicoTweakwiseExportTest disabled","Fake description",etw-disabled,14,100,Gear,4,2,
