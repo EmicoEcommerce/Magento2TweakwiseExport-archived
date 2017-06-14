@@ -34,6 +34,9 @@ cache:
     - $HOME/.composer/cache
 
 before_script:
+  # Configure composer auth
+  - if [ -n "$GITHUB_TOKEN" ]; then composer config github-oauth.github.com ${GITHUB_TOKEN}; fi;
+  - if [ -n "$MAGENTO_TOKEN_PRIVATE" ]; then composer config http-basic.repo.magento.com ${MAGENTO_TOKEN_PUBLIC} ${MAGENTO_TOKEN_PRIVATE}; fi;
   # Ensure database exists
   - mysql -e "CREATE DATABASE IF NOT EXISTS ${MAGE2_DB_NAME};"
   - mysql -e "GRANT ALL PRIVILEGES ON *.* TO ${MAGE2_DB_USER}@${MAGE2_DB_HOST};"
