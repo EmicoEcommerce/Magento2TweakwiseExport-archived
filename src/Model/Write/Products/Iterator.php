@@ -270,6 +270,7 @@ class Iterator extends EavIterator
         $query = $this->getConnection()
             ->select()
             ->from($this->getTableName(CategoryProductAbstractAction::MAIN_INDEX_TABLE), ['category_id', 'product_id'])
+            ->where('store_id = ?', $this->storeId)
             ->where('product_id IN(' . join(',', $entityIds) . ')')
             ->query();
 
@@ -277,7 +278,7 @@ class Iterator extends EavIterator
         while ($row = $query->fetch()) {
 
             $entityId = (int) $row['product_id'];
-            if (isset($result[$entityId])) {
+            if (!isset($result[$entityId])) {
                 $result[$entityId] = [];
             }
 
