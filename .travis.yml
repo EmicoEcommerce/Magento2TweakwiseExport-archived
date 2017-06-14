@@ -7,6 +7,7 @@ env:
     - MAGE2_ADMIN_USERNAME=admin
     - MAGE2_ADMIN_PASSWORD=admin123
     - MAGE2_ADMIN_DBNAME=magento_2
+    - MAGE2_ADMIN_DBPASS=
   matrix:
     - MAGE2_VERSION=2.1
     - MAGE2_VERSION=2.0
@@ -40,7 +41,7 @@ before_script:
   - composer update
   - composer require emico/tweakwise-export
   - cp -R /home/travis/build/EmicoEcommerce/Magento2TweakwiseExport/* /tmp/build/vendor/emico/tweakwise-export
-  - php bin/magento setup:install --admin-email "$MAGE2_ADMIN_EMAIL" --admin-firstname "$MAGE2_ADMIN_FIRST_NAME" --admin-lastname "$MAGE2_ADMIN_LAST_NAME" --admin-password "$MAGE2_ADMIN_PASSWORD" --admin-user "$MAGE2_ADMIN_USERNAME" --backend-frontname admin --base-url "$MAGE2_FAKE_URL" --db-host 127.0.0.1 --db-name "$MAGE2_ADMIN_DBNAME" --db-user root --session-save files --use-rewrites 1 --use-secure 0 -vvv
+  - php bin/magento setup:install --admin-email "$MAGE2_ADMIN_EMAIL" --admin-firstname "$MAGE2_ADMIN_FIRST_NAME" --admin-lastname "$MAGE2_ADMIN_LAST_NAME" --admin-password "$MAGE2_ADMIN_PASSWORD" --admin-user "$MAGE2_ADMIN_USERNAME" --backend-frontname admin --base-url "$MAGE2_FAKE_URL" --db-host 127.0.0.1 --db-name "$MAGE2_ADMIN_DBNAME" --db-user root --db-password "$MAGE2_ADMIN_DBPASS" --session-save files --use-rewrites 1 --use-secure 0 -vvv
   - php bin/magento setup:upgrade
   - php bin/magento setup:di:compile
   - php bin/magento cache:clean
