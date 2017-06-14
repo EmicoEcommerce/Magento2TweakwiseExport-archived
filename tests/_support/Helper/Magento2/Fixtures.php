@@ -12,6 +12,7 @@ use Codeception\Module;
 use Codeception\TestInterface;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\CatalogSampleData\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\Framework\Exception\NoSuchEntityException;
 
 class Fixtures extends Module
@@ -76,5 +77,33 @@ class Fixtures extends Module
                 $repository->delete($product);
             }
         }
+    }
+
+    /**
+     * @param string $sku
+     * @param string $attribute
+     * @param mixed $value
+     */
+    public function writeProductAttribute($sku, $attribute, $value)
+    {
+        $bootstrap = $this->getBootstrap();
+        // Only with a raw insert like this we where able to insert an empty value in the special_price table for issue #6
+        /** @var ProductRepository $repository */
+        $repository = $bootstrap->getObject(ProductRepository::class);
+        /** @var ProductResource $resource */
+        $resource = $bootstrap->getObject(ProductResource::class);
+
+        $attribute = $resource->getAttribute($attribute);
+
+        $table = $attribute->getBackend()->getTable();
+        $product = $repository->get($sku);
+        $entityIdField = $attribute->getBackend()->getEntityIdField();
+
+        $data = [
+            $entityIdField => $product->getId(),
+            'attribute_id' => $attribute->getId(),
+            'value' => $value,
+        ];
+        $resource->getConnection()->insertOnDuplicate($table, $data, ['value']);
     }
 }

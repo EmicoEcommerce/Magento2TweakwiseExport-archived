@@ -10,8 +10,7 @@ namespace Emico\TweakwiseExport\Model\Write\Writer;
 
 use Emico\TweakwiseExport\Model\Write\Writer;
 use FunctionalTester;
-use Magento\Catalog\Model\ProductRepository;
-use Magento\Catalog\Model\ResourceModel\Product;
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Framework\App\Area;
 use SimpleXMLElement;
 
@@ -43,7 +42,8 @@ class WriterCest
                     self::SKU_DISABLED,
                 ]
             );
-            $this->updateEmptyAttributeValue($i);
+            $i->writeProductAttribute(self::SKU_EMPTY_ATTRIBUTE, 'special_price', null);
+            $i->writeProductAttribute(self::SKU_DISABLED, 'status', Status::STATUS_DISABLED);
 
             // Run Export
             /** @var Writer $writer */
@@ -54,31 +54,6 @@ class WriterCest
 
             $this->exportXml = simplexml_load_string(stream_get_contents($resource));
         }
-    }
-
-    /**
-     * @param FunctionalTester $i
-     */
-    protected function updateEmptyAttributeValue(FunctionalTester $i)
-    {
-        // Only with a raw insert like this we where able to insert an empty value in the special_price table for issue #6
-        /** @var ProductRepository $repository */
-        $repository = $i->getObject(ProductRepository::class);
-        /** @var Product $resource */
-        $resource = $i->getObject(Product::class);
-
-        $attribute = $resource->getAttribute('special_price');
-
-        $table = $attribute->getBackend()->getTable();
-        $product = $repository->get(self::SKU_EMPTY_ATTRIBUTE);
-        $entityIdField = $attribute->getBackend()->getEntityIdField();
-
-        $data = [
-            $entityIdField => $product->getId(),
-            'attribute_id' => $attribute->getId(),
-            'value' => null,
-        ];
-        $resource->getConnection()->insertOnDuplicate($table, $data, ['value']);
     }
 
     /**

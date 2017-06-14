@@ -1,5 +1,5 @@
-category,name,description,sku,price,qty,attribute_set,visibility,special_price,status
+category,name,description,sku,price,qty,attribute_set,visibility,status
 "Gear
-Fitness Equipment","Empty Special Price Test","Fake description",etw-empty-attr,14,100,Gear,4,"",1
+Fitness Equipment","Empty Special Price Test","Fake description",etw-empty-attr,14,100,Gear,4,1
 "Gear
-Fitness Equipment","Disabled test","Fake description",etw-disabled,14,100,Gear,4,"",2
+Fitness Equipment","Disabled test","Fake description",etw-disabled,14,100,Gear,4,2

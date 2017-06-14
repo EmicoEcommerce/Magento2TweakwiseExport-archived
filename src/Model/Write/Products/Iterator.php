@@ -209,7 +209,7 @@ class Iterator extends EavIterator
      */
     protected function skipEntityChild(array $entity, array $stockMap)
     {
-        if (!$entity['status']) {
+        if ($entity['status'] != Status::STATUS_ENABLED) {
             return true;
         }
 
