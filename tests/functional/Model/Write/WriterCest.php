@@ -19,6 +19,7 @@ class WriterCest
     /**
      * Product SKU's
      */
+    const SKU_VALID = 'etw-valid';
     const SKU_EMPTY_ATTRIBUTE = 'etw-empty-attr';
     const SKU_DISABLED = 'etw-disabled';
 
@@ -26,6 +27,11 @@ class WriterCest
      * @var SimpleXMLElement
      */
     protected $exportXml;
+
+    /**
+     * @var array[]
+     */
+    protected $exportItems = null;
 
     /**
      * @param FunctionalTester $i
@@ -38,6 +44,7 @@ class WriterCest
             $i->loadProductFixtures(
                 ['Emico_TweakwiseExport::../tests/fixtures/writer.csv'],
                 [
+                    self::SKU_VALID,
                     self::SKU_EMPTY_ATTRIBUTE,
                     self::SKU_DISABLED,
                 ]
@@ -57,20 +64,67 @@ class WriterCest
     }
 
     /**
+     * @param string $sku
+     * @return null|array
+     */
+    protected function getProductItem($sku)
+    {
+        if ($this->exportItems === null) {
+            $this->exportItems = [];
+            foreach ($this->exportXml->xpath('//item') as $element) {
+                $data = [
+                    'xml' => $element,
+                    'id' => (string) $element->id,
+                    'attributes' => [],
+                    'categories' => [],
+                ];
+
+                foreach ($element->attributes->children() as $attributeElement) {
+                    $name = (string) $attributeElement->name;
+                    $value = (string) $attributeElement->value;
+                    $data['attributes'][$name] = $value;
+                }
+
+                foreach ($element->categories->children() as $categoryElement) {
+                    $data['categories'][] = (string) $categoryElement;
+                }
+
+                $key = isset($data['attributes']['sku']) ? $data['attributes']['sku'] : $data['id'];
+                $this->exportItems[$key] = $data;
+            }
+        }
+
+        return isset($this->exportItems[$sku]) ? $this->exportItems[$sku] : null;
+    }
+
+    /**
+     * @param string $sku
+     * @param string $attribute
+     * @return null|string
+     */
+    protected function getProductAttribute($sku, $attribute)
+    {
+        $item = $this->getProductItem($sku);
+        if (!$item) {
+            return null;
+        }
+
+        if (!isset($item['attributes'][$attribute])) {
+            return null;
+        }
+
+        return $item['attributes'][$attribute];
+    }
+
+    /**
      * @param FunctionalTester $i
      */
     public function testEmptyAttribute(FunctionalTester $i)
     {
-        foreach ($this->exportXml->xpath('//item/attributes/attribute') as $attributeElement) {
-            $name = (string) $attributeElement->name;
-            if ($name != 'special_price') {
-                continue;
-            }
-
-            $value = (string) $attributeElement->value;
-            $value = trim($value);
-            $i->assertNotEmpty($value);
-        }
+        $value = $this->getProductAttribute(self::SKU_EMPTY_ATTRIBUTE, 'special_price');
+        $i->assertNull($value);
+        $value = $this->getProductAttribute(self::SKU_VALID, 'special_price');
+        $i->assertNotNull($value);
     }
 
     /**
@@ -78,14 +132,9 @@ class WriterCest
      */
     public function testNotExportingDisabledProduct(FunctionalTester $i)
     {
-        foreach ($this->exportXml->xpath('//item/attributes/attribute') as $attributeElement) {
-            $name = (string) $attributeElement->name;
-            if ($name != 'sku') {
-                continue;
-            }
-
-            $sku = (string) $attributeElement->value;
-            $i->assertNotEquals(self::SKU_DISABLED, $sku);
-        }
+        $value = $this->getProductItem(self::SKU_DISABLED);
+        $i->assertNull($value);
+        $value = $this->getProductItem(self::SKU_VALID);
+        $i->assertNotNull($value);
     }
 }

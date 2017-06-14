@@ -8,7 +8,7 @@ env:
     - MAGE2_ADMIN_PASSWORD=admin123
     - MAGE2_DB_NAME=magento_2
     - MAGE2_DB_USER=travis
-    - MAGE2_DB_HOST=localhost
+    - MAGE2_DB_HOST=127.0.0.1
     - MAGE2_DB_PASSWORD=
   matrix:
     - MAGE2_VERSION=2.1
