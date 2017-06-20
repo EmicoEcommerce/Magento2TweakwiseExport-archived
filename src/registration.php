@@ -8,7 +8,8 @@
 
 use Magento\Framework\Component\ComponentRegistrar;
 
-if (class_exists(ComponentRegistrar::class, false)) {
+// Used class as string due to the magento compiler issue #9
+if (class_exists('Magento\Framework\Component\ComponentRegistrar\ComponentRegistrar', false)) {
     ComponentRegistrar::register(
         ComponentRegistrar::MODULE,
         'Emico_TweakwiseExport',
