@@ -184,7 +184,7 @@ class EavIterator implements IteratorAggregate
             $select = $this->getConnection()
                 ->select()
                 ->union($this->getAttributeSelects())
-                ->order('entity_id')
+                ->order('path')
                 ->order('store_id');
 
             Profiler::start('query');
