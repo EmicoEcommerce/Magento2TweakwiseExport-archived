@@ -26,5 +26,5 @@ class UnitTester extends \Codeception\Actor
     /**
      * Include generated module code
      */
-    use _generated\FunctionalTesterActions;
+    use _generated\UnitTesterActions;
 }

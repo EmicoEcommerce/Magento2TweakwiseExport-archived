@@ -45,6 +45,7 @@ before_script:
   - ./tests/setup/database.sh
   - ./tests/setup/magento.sh
   - cd /tmp/build
+  - ./vendor/emico/tweakwise-export/vendor/bin/codecept build -c vendor/emico/tweakwise-export/codeception.yml
 
 script:
   - ./vendor/emico/tweakwise-export/vendor/bin/codecept run -c vendor/emico/tweakwise-export/codeception.yml $TEST_SUITE
