@@ -10,12 +10,11 @@ env:
     - MAGE2_DB_USER=travis
     - MAGE2_DB_HOST=127.0.0.1
     - MAGE2_DB_PASSWORD=
-  mage_version:
-      - MAGE2_VERSION=2.1
-      - MAGE2_VERSION=2.0
-    env:
-      - TEST_SUITE=unit
-      - TEST_SUITE=acceptance
+  matrix:
+    - MAGE2_VERSION=2.1
+    - MAGE2_VERSION=2.0
+    - TEST_SUITE=unit
+    - TEST_SUITE=acceptance
 
 matrix:
   allow_failures:
