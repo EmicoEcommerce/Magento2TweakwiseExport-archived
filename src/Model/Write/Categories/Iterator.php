@@ -21,6 +21,7 @@ class Iterator extends EavIterator
      */
     protected $eavSelectOrder = [
         'path',
+        'entity_id',
         'store_id',
     ];
 
