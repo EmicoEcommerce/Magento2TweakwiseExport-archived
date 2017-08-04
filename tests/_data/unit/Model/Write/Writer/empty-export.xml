@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tweakwise>
+    <shop><![CDATA[Default Store]]></shop>
+    <timestamp><![CDATA[2017-01-01T00:00:00.000000+00:00]]></timestamp>
+    <categories>
+        <category>
+            <categoryid>1</categoryid>
+            <rank>0</rank>
+            <name><![CDATA[Root]]></name>
+        </category>
+    </categories>
+    <items/>
+</tweakwise>

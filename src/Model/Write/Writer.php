@@ -8,6 +8,7 @@
 
 namespace Emico\TweakwiseExport\Model\Write;
 
+use DateTime;
 use Emico\TweakwiseExport\Exception\WriteException;
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\Profiler;
@@ -43,6 +44,11 @@ class Writer
     protected $writers;
 
     /**
+     * @var DateTime
+     */
+    protected $now;
+
+    /**
      * Writer constructor.
      *
      * @param StoreManager $storeManager
@@ -54,6 +60,27 @@ class Writer
         $this->storeManager = $storeManager;
         $this->appState = $appState;
         $this->writers = $writers;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getNow()
+    {
+        if (!$this->now) {
+            $this->now = new DateTime();
+        }
+        return $this->now;
+    }
+
+    /**
+     * @param DateTime $now
+     * @return $this
+     */
+    public function setNow(DateTime $now)
+    {
+        $this->now = $now;
+        return $this;
     }
 
     /**
@@ -163,7 +190,7 @@ class Writer
         $xml->startDocument('1.0', 'UTF-8');
         $xml->startElement('tweakwise'); // Start root
         $xml->writeElement('shop', $this->storeManager->getDefaultStoreView()->getName());
-        $xml->writeElement('timestamp', date('Y-m-d\TH:i:s.uP'));
+        $xml->writeElement('timestamp', $this->getNow()->format('Y-m-d\TH:i:s.uP'));
         $this->flush();
         return $this;
     }

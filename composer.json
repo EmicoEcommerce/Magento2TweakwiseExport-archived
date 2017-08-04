@@ -10,7 +10,9 @@
     "require-dev": {
         "malukenho/docheader": "~0.1",
         "phpro/grumphp": "^0.11.1",
-        "codeception/codeception": "^2.3"
+        "codeception/codeception": "^2.3",
+        "codeception/mockery-module": "^0.2.2",
+        "league/flysystem": "^1.0"
     },
     "type": "magento2-module",
     "scripts": {

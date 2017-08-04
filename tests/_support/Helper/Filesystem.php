@@ -9,8 +9,22 @@
 namespace Helper;
 
 use Codeception\Module;
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\Filesystem as Flysystem;
 
-class Functional extends Module
+/**
+ * Class Filesystem
+ *
+ * @package Helper
+ */
+class Filesystem extends Module
 {
-
+    /**
+     * @return Flysystem
+     */
+    public function data()
+    {
+        $adapter = new Local(__DIR__ . '/../../_data');
+        return new Flysystem($adapter);
+    }
 }

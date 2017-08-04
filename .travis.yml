@@ -11,8 +11,11 @@ env:
     - MAGE2_DB_HOST=127.0.0.1
     - MAGE2_DB_PASSWORD=
   matrix:
-    - MAGE2_VERSION=2.1
-    - MAGE2_VERSION=2.0
+    mage_version:
+      - MAGE2_VERSION=2.1
+      - MAGE2_VERSION=2.0
+    env:
+      - TEST_SUITE=unit
 
 language: php
 
@@ -20,6 +23,7 @@ dist: trusty
 
 php:
   - 7.0
+  - 7.1
 
 addons:
   hosts:
@@ -34,24 +38,7 @@ cache:
     - $HOME/.composer/cache
 
 before_script:
-  # Configure composer auth
-  - if [ -n "$GITHUB_TOKEN" ]; then composer config github-oauth.github.com ${GITHUB_TOKEN}; fi;
-  - if [ -n "$MAGENTO_TOKEN_PRIVATE" ]; then composer config http-basic.repo.magento.com ${MAGENTO_TOKEN_PUBLIC} ${MAGENTO_TOKEN_PRIVATE}; fi;
-  # Ensure database exists
-  - mysql -e "CREATE DATABASE IF NOT EXISTS ${MAGE2_DB_NAME};"
-  - mysql -e "GRANT ALL PRIVILEGES ON *.* TO ${MAGE2_DB_USER}@${MAGE2_DB_HOST};"
-  # Install Magento with dependencies
-  - git clone --depth=10 -b $MAGE2_VERSION https://github.com/magento/magento2 /tmp/build
-  - cd /tmp/build
-  - composer require emico/tweakwise-export
-  - composer install
-  - cp -R /home/travis/build/EmicoEcommerce/Magento2TweakwiseExport/* /tmp/build/vendor/emico/tweakwise-export
-  - php bin/magento setup:install --admin-email "$MAGE2_ADMIN_EMAIL" --admin-firstname "$MAGE2_ADMIN_FIRST_NAME" --admin-lastname "$MAGE2_ADMIN_LAST_NAME" --admin-password "$MAGE2_ADMIN_PASSWORD" --admin-user "$MAGE2_ADMIN_USERNAME" --backend-frontname admin --base-url "$MAGE2_FAKE_URL" --db-host "$MAGE2_DB_HOST" --db-name "$MAGE2_DB_NAME" --db-user "$MAGE2_DB_USER" --db-password "$MAGE2_DB_PASSWORD" --session-save files --use-rewrites 1 --use-secure 0 -vvv
-  - php bin/magento setup:upgrade
-  - php bin/magento setup:di:compile
-  - php bin/magento cache:clean
-  - cd /tmp/build/vendor/emico/tweakwise-export
-  - composer install
+  - ./tests/setup/composer.sh
 
 script:
-  - vendor/bin/codecept run
+  - ./vendor/emico/tweakwise-export/vendor/bin/codecept run -c vendor/emico/tweakwise-export/codeception.yml $TEST_SUITE

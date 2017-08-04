@@ -91,6 +91,7 @@ class Categories implements WriterInterface
         return $this;
     }
 
+    protected $data = [];
     /**
      * @param Writer $writer
      * @param XmlWriter $xml
@@ -106,6 +107,7 @@ class Categories implements WriterInterface
         $this->iterator->setStoreId($storeId);
 
         foreach ($this->iterator as $data) {
+            $this->data[] = $data;
             // Skip magento root since we injected our fake root
             if ($data['entity_id'] == 1) {
                 continue;
