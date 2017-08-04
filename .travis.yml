@@ -11,10 +11,10 @@ env:
     - MAGE2_DB_HOST=127.0.0.1
     - MAGE2_DB_PASSWORD=
   matrix:
-    - MAGE2_VERSION=2.1
-    - MAGE2_VERSION=2.0
-    - TEST_SUITE=unit
-    - TEST_SUITE=acceptance
+    - MAGE2_VERSION=2.1 TEST_SUITE=unit
+    - MAGE2_VERSION=2.1 TEST_SUITE=acceptance
+    - MAGE2_VERSION=2.0 TEST_SUITE=unit
+    - MAGE2_VERSION=2.0 TEST_SUITE=acceptance
 
 matrix:
   allow_failures:
