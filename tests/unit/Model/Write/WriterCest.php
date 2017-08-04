@@ -15,9 +15,9 @@ use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Logger;
 use Emico\TweakwiseExport\Model\Write\Categories;
-use Emico\TweakwiseExport\Model\Write\EavIterator;
+use Emico\TweakwiseExport\Model\Write\Categories\Iterator as CategoryIterator;
 use Emico\TweakwiseExport\Model\Write\Products;
-use Emico\TweakwiseExport\Model\Write\Products\Iterator;
+use Emico\TweakwiseExport\Model\Write\Products\Iterator as ProductIterator;
 use Emico\TweakwiseExport\Model\Write\Writer;
 use Exception;
 use FunctionalTester;
@@ -54,11 +54,11 @@ class WriterCest
     }
 
     /**
-     * @param EavIterator $categoryIterator
-     * @param Iterator $productIterator
+     * @param CategoryIterator $categoryIterator
+     * @param ProductIterator $productIterator
      * @return Writer
      */
-    protected function getWriter(EavIterator $categoryIterator, Iterator $productIterator)
+    protected function getWriter(CategoryIterator $categoryIterator, ProductIterator $productIterator)
     {
         $defaultStore = $this->createStore('Default Store');
 
@@ -94,12 +94,12 @@ class WriterCest
     }
 
     /**
-     * @param EavIterator $categoryIterator
-     * @param Iterator $productIterator
+     * @param CategoryIterator $categoryIterator
+     * @param ProductIterator $productIterator
      * @return string
      * @throws Exception
      */
-    protected function getWriterXml(EavIterator $categoryIterator, Iterator $productIterator)
+    protected function getWriterXml(CategoryIterator $categoryIterator, ProductIterator $productIterator)
     {
         $writer = $this->getWriter($categoryIterator, $productIterator);
 
@@ -119,12 +119,12 @@ class WriterCest
 
     /**
      * @param array $data
-     * @return EavIterator|MockInterface
+     * @return CategoryIterator|MockInterface
      */
     protected function createCategoryIterator(array $data)
     {
-        /** @var EavIterator|MockInterface $categoryIterator */
-        $categoryIterator = Mockery::mock(EavIterator::class);
+        /** @var CategoryIterator|MockInterface $categoryIterator */
+        $categoryIterator = Mockery::mock(CategoryIterator::class);
         $categoryIterator->shouldReceive('setStoreId')->atLeast(0)->andReturnSelf();
         $categoryIterator->shouldReceive('getIterator')->andReturn(new ArrayIterator($data));
 
@@ -133,12 +133,12 @@ class WriterCest
 
     /**
      * @param array $data
-     * @return Iterator|MockInterface
+     * @return ProductIterator|MockInterface
      */
     protected function createProductIterator(array $data)
     {
-        /** @var Iterator|MockInterface $productIterator */
-        $productIterator = Mockery::mock(Iterator::class);
+        /** @var ProductIterator|MockInterface $productIterator */
+        $productIterator = Mockery::mock(ProductIterator::class);
         $productIterator->shouldReceive('setStoreId')->atLeast(0)->andReturnSelf();
         $productIterator->shouldReceive('getIterator')->andReturn(new ArrayIterator($data));
 
