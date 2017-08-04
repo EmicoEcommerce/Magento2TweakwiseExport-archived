@@ -18,20 +18,6 @@ use Magento\Framework\Exception\NoSuchEntityException;
 class Fixtures extends Module
 {
     /**
-     * @var array
-     */
-    protected $insertedProducts = [];
-
-    /**
-     * @param TestInterface $test
-     */
-    public function _after(TestInterface $test)
-    {
-        $this->ensureDeleteProduct($this->insertedProducts);
-        $this->insertedProducts = [];
-    }
-
-    /**
      * @return Bootstrap
      */
     protected function getBootstrap()
@@ -47,13 +33,13 @@ class Fixtures extends Module
      */
     public function loadProductFixtures(array $fixtures, array $insertedSkus)
     {
-        $this->ensureDeleteProduct($insertedSkus);
-        $this->getBootstrap()->emulateAreaCode('setup', function() use ($fixtures) {
+        $this->getBootstrap()->emulateAreaCode('setup', function() use ($fixtures, $insertedSkus) {
+            $this->ensureDeleteProduct($insertedSkus);
+
             /** @var Product $productSampleData */
             $productSampleData = $this->getBootstrap()->getObject(Product::class);
             $productSampleData->install($fixtures, []);
         });
-        $this->insertedProducts = array_merge($this->insertedProducts, $insertedSkus);
     }
 
     /**

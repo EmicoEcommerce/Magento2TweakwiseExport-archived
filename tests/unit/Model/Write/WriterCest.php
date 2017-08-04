@@ -10,7 +10,6 @@ namespace Emico\TweakwiseExport\Model\Write\Writer;
 
 use ArrayIterator;
 use DateTime;
-use DOMDocument;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Logger;
@@ -20,7 +19,7 @@ use Emico\TweakwiseExport\Model\Write\Products;
 use Emico\TweakwiseExport\Model\Write\Products\Iterator as ProductIterator;
 use Emico\TweakwiseExport\Model\Write\Writer;
 use Exception;
-use FunctionalTester;
+use UnitTester;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\App\State as AppState;
 use Magento\Store\Model\Store;
@@ -146,42 +145,29 @@ class WriterCest
     }
 
     /**
-     * @param string $xml
-     * @return string
-     */
-    protected function normalizeXml($xml)
-    {
-        $doc = new DOMDocument(1.0);
-        $doc->preserveWhiteSpace = false;
-        $doc->formatOutput = true;
-        $doc->loadXML($xml);
-        return $doc->saveHTML();
-    }
-
-    /**
-     * @param FunctionalTester $i
+     * @param UnitTester $i
      * @param array $categoryData
      * @param array $productData
      * @param string $file
      */
-    protected function assertXmlResult(FunctionalTester $i, array $categoryData, array $productData, $file)
+    protected function assertXmlResult(UnitTester $i, array $categoryData, array $productData, $file)
     {
         $categoryIterator = $this->createCategoryIterator($categoryData);
         $productIterator = $this->createProductIterator($productData);
 
         $actual = $this->getWriterXml($categoryIterator, $productIterator);
-        $actual = $this->normalizeXml($actual);
+        $actual = $i->normalizeXml($actual);
 
         $expected = $i->data()->read('unit/Model/Write/Writer/' . $file);
-        $expected = $this->normalizeXml($expected);
+        $expected = $i->normalizeXml($expected);
 
         $i->assertEquals($expected, $actual);
     }
 
     /**
-     * @param FunctionalTester $i
+     * @param UnitTester $i
      */
-    public function testEmptyExport(FunctionalTester $i)
+    public function testEmptyExport(UnitTester $i)
     {
         $this->assertXmlResult($i, [], [], 'empty-export.xml');
     }

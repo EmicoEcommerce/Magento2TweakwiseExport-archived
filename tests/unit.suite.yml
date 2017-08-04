@@ -1,10 +1,11 @@
 # Codeception Test Suite Configuration
 
-actor: FunctionalTester
+actor: UnitTester
 modules:
     enabled:
         - Asserts
         - Mockery
         - Helper\Filesystem
+        - Helper\Xml
         - Helper\Unit
         - Helper\Magento2\Bootstrap

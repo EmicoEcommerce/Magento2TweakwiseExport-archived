@@ -88,7 +88,7 @@ class Bootstrap extends Module
     /**
      * Include application bootstrap
      */
-    protected function initBootstrap()
+    public function initBootstrap()
     {
         $path = getcwd();
         do {
@@ -110,7 +110,7 @@ class Bootstrap extends Module
     /**
      * Init Magento application
      */
-    protected function initApplication()
+    public function initApplication()
     {
         if (!$this->moduleReRegistered) {
             // Register module again because now we have a class required.
@@ -125,7 +125,7 @@ class Bootstrap extends Module
     /**
      * Init secure areay registry key
      */
-    protected function initSecureArea()
+    public function initSecureArea()
     {
         /** @var Registry $registry */
         $registry = $this->getObject(Registry::class);
