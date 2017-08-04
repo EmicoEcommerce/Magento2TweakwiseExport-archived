@@ -213,7 +213,7 @@ class Iterator extends EavIterator
             return true;
         }
 
-        if (!$this->config->isOutOfStockChildren()) {
+        if ($this->config->isOutOfStockChildren()) {
             return false;
         }
 
@@ -438,39 +438,10 @@ class Iterator extends EavIterator
             $entityStock = isset($stock[$entityId]) ? $stock[$entityId] : [];
             $attributes = isset($extraAttributes[$entityId]) ? $extraAttributes[$entityId] : [];
 
-            // Combine price data
-            if (isset($prices[$entityId])) {
-                $entity['old_price'] = $prices[$entityId]['old_price'];
-                $entity['min_price'] = $prices[$entityId]['min_price'];
-                $entity['max_price'] = $prices[$entityId]['max_price'];
-                $entityPrice = $prices[$entityId]['price'];
-            } else {
-                $entityPrice = 0;
-            }
-
-            // Combine extra attributes
-            foreach ($entity as $attribute => $value) {
-                if (in_array($attribute, ['name', 'entity_id'])) {
-                    continue;
-                }
-
-                $attributes[$attribute . $value] = ['attribute' => $attribute, 'value' => $value];
-            }
-            $attributes = $this->filterEntityAttributes($attributes);
-
-            // Combine stock
-            switch ($this->config->getStockCalculation()) {
-                case StockCalculation::OPTION_MAX:
-                    $entityStock = max($entityStock);
-                    break;
-                case StockCalculation::OPTION_MIN:
-                    $entityStock = min($entityStock);
-                    break;
-                case StockCalculation::OPTION_SUM:
-                default:
-                    $entityStock = array_sum($entityStock);
-                    break;
-            }
+            // Combine data
+            $entityPrice = $this->combinePriceData($prices, $entityId, $entity);
+            $attributes = $this->combineExtraAttributes($entity, $attributes);
+            $entityStock = $this->combineStock($entityStock);
 
             // yield return single entity response from batch
             yield [
@@ -491,11 +462,11 @@ class Iterator extends EavIterator
     protected function getBundleChildIds(array $parentIds)
     {
         $connection = $this->getConnection();
-        
+
         $select = $connection->select()
             ->from($this->getTableName('catalog_product_bundle_selection'), ['product_id', 'parent_product_id'])
             ->where('parent_product_id IN (?)', $parentIds);
-        
+
         $query = $select->query();
         $result = array_combine($parentIds, array_fill(0, count($parentIds), []));
         while ($row = $query->fetch()) {
@@ -668,5 +639,59 @@ class Iterator extends EavIterator
         }
 
         return $result;
+    }
+
+    /**
+     * @param $prices
+     * @param $entityId
+     * @param $entity
+     * @return array
+     */
+    protected function combinePriceData(array $prices, $entityId, array &$entity)
+    {
+        if (isset($prices[$entityId])) {
+            $entity['old_price'] = $prices[$entityId]['old_price'];
+            $entity['min_price'] = $prices[$entityId]['min_price'];
+            $entity['max_price'] = $prices[$entityId]['max_price'];
+            $entityPrice = $prices[$entityId]['price'];
+        } else {
+            $entityPrice = 0;
+        }
+        return [$entity, $entityPrice];
+    }
+
+    /**
+     * @param $entityStock
+     * @return float|int|mixed
+     */
+    protected function combineStock($entityStock)
+    {
+        switch ($this->config->getStockCalculation()) {
+            case StockCalculation::OPTION_MAX:
+                return max($entityStock);
+            case StockCalculation::OPTION_MIN:
+                return min($entityStock);
+            case StockCalculation::OPTION_SUM:
+            default:
+                return array_sum($entityStock);
+        }
+    }
+
+    /**
+     * @param $entity
+     * @param $attributes
+     * @return array
+     */
+    protected function combineExtraAttributes($entity, $attributes): array
+    {
+        foreach ($entity as $attribute => $value) {
+            if (in_array($attribute, ['name', 'entity_id'])) {
+                continue;
+            }
+
+            $attributes[$attribute . $value] = ['attribute' => $attribute, 'value' => $value];
+        }
+        $attributes = $this->filterEntityAttributes($attributes);
+        return $attributes;
     }
 }
