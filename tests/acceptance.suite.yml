@@ -1,0 +1,6 @@
+actor: AcceptanceTester
+modules:
+    enabled:
+        - Asserts
+        - Helper\Filesystem
+        - Helper\Acceptance

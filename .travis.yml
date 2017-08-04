@@ -16,6 +16,7 @@ env:
       - MAGE2_VERSION=2.0
     env:
       - TEST_SUITE=unit
+      - TEST_SUITE=acceptance
 
 language: php
 
