@@ -11,6 +11,7 @@ namespace Emico\TweakwiseExport\Model\Write;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Logger;
+use Emico\TweakwiseExport\Model\Write\Categories\Iterator;
 use Magento\Framework\Profiler;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManager;
@@ -18,7 +19,7 @@ use Magento\Store\Model\StoreManager;
 class Categories implements WriterInterface
 {
     /**
-     * @var EavIterator
+     * @var Iterator
      */
     protected $iterator;
 
@@ -45,13 +46,13 @@ class Categories implements WriterInterface
     /**
      * Categories constructor.
      *
-     * @param EavIterator $iterator
+     * @param Iterator $iterator
      * @param StoreManager $storeManager
      * @param Config $config
      * @param Helper $helper
      * @param Logger $log
      */
-    public function __construct(EavIterator $iterator, StoreManager $storeManager, Config $config, Helper $helper, Logger $log)
+    public function __construct(Iterator $iterator, StoreManager $storeManager, Config $config, Helper $helper, Logger $log)
     {
         $this->iterator = $iterator;
         $this->storeManager = $storeManager;
@@ -91,7 +92,6 @@ class Categories implements WriterInterface
         return $this;
     }
 
-    protected $data = [];
     /**
      * @param Writer $writer
      * @param XmlWriter $xml
@@ -107,7 +107,6 @@ class Categories implements WriterInterface
         $this->iterator->setStoreId($storeId);
 
         foreach ($this->iterator as $data) {
-            $this->data[] = $data;
             // Skip magento root since we injected our fake root
             if ($data['entity_id'] == 1) {
                 continue;

@@ -41,10 +41,9 @@
         </arguments>
     </type>
 
-    <virtualType name="Emico\TweakwiseExport\Model\Write\Categories\Iterator" type="Emico\TweakwiseExport\Model\Write\EavIterator">
+    <type name="Emico\TweakwiseExport\Model\Write\Categories\Iterator">
         <arguments>
             <argument name="eavConfig" xsi:type="object">Magento\Eav\Model\Config</argument>
-            <argument name="entityCode" xsi:type="string">catalog_category</argument>
             <argument name="attributes" xsi:type="array">
                 <item name="parent_id" xsi:type="string">parent_id</item>
                 <item name="name" xsi:type="string">name</item>
@@ -53,12 +52,6 @@
                 <item name="position" xsi:type="string">position</item>
                 <item name="is_active" xsi:type="string">is_active</item>
             </argument>
-        </arguments>
-    </virtualType>
-
-    <type name="Emico\TweakwiseExport\Model\Write\Categories">
-        <arguments>
-            <argument name="iterator" xsi:type="object">Emico\TweakwiseExport\Model\Write\Categories\Iterator</argument>
         </arguments>
     </type>
 </config>

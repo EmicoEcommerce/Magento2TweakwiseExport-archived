@@ -22,6 +22,7 @@ use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Magento\Framework\Profiler;
 use Magento\Setup\Module\I18n\Dictionary\Generator;
 use Zend_Db_Expr;
+use Zend_Db_Select;
 
 class EavIterator implements IteratorAggregate
 {
@@ -64,6 +65,14 @@ class EavIterator implements IteratorAggregate
      * @var DbContext
      */
     protected $dbContext;
+
+    /**
+     * @var array
+     */
+    protected $eavSelectOrder = [
+        'entity_id',
+        'store_id',
+    ];
 
     /**
      * EavIterator constructor.
@@ -174,6 +183,22 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
+     * @return Zend_Db_Select
+     */
+    protected function createSelect()
+    {
+        $select = $this->getConnection()
+            ->select()
+            ->union($this->getAttributeSelects());
+
+        foreach ($this->eavSelectOrder as $field) {
+            $select->order($field);
+        }
+
+        return $select;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getIterator()
@@ -181,10 +206,7 @@ class EavIterator implements IteratorAggregate
         try {
             Profiler::start('eav-iterator::' . $this->entityCode);
 
-            $select = $this->getConnection()
-                ->select()
-                ->union($this->getAttributeSelects())
-                ->order('path');
+            $select = $this->createSelect();
 
             Profiler::start('query');
             try {
@@ -326,6 +348,20 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
+     * @param string $group
+     * @param AbstractAttribute[] $attributes
+     * @return Select
+     */
+    protected function createEavAttributeGroupSelect($group, array $attributes)
+    {
+        if ($this->productMetadata->getEdition() == CommunityProductMetadata::EDITION_NAME) {
+            return $this->getAttributeSelectCommunity($group, $attributes);
+        } else {
+            return $this->getAttributeSelectEnterprise($group, $attributes);
+        }
+    }
+
+    /**
      * @return Select[]
      */
     protected function getAttributeSelects()
@@ -338,10 +374,8 @@ class EavIterator implements IteratorAggregate
                 foreach ($this->getStaticAttributeSelect($attributes) as $select) {
                     $selects[] = $select;
                 }
-            } elseif ($this->productMetadata->getEdition() == CommunityProductMetadata::EDITION_NAME) {
-                $selects[] = $this->getAttributeSelectCommunity($group, $attributes);
             } else {
-                $selects[] = $this->getAttributeSelectEnterprise($group, $attributes);
+                $selects[] = $this->createEavAttributeGroupSelect($group, $attributes);
             }
         }
 

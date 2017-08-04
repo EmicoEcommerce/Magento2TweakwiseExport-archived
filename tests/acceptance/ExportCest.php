@@ -16,6 +16,6 @@ class ExportCest
         $process->setTimeout(120);
         $process->run();
 
-        $i->assertEquals(0, $process, 'Export did not run successfully: ' . $process->getErrorOutput());
+        $i->assertEquals(0, $process->getExitCode(), 'Export did not run successfully: ' . $process->getErrorOutput());
     }
 }
