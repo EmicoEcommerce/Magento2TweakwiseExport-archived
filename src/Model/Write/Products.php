@@ -138,7 +138,7 @@ class Products implements WriterInterface
         // Write product base data
         $tweakwiseId = $this->helper->getTweakwiseId($storeId, $data['entity_id']);
         $xml->writeElement('id', $tweakwiseId);
-        $xml->writeElement('price', $data['price']);
+        $xml->writeElement('price', $data['price'][1]);
         $xml->writeElement('name', $data['name']);
         $xml->writeElement('stock', $data['stock']);
 
