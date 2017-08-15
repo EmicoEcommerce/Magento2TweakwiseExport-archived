@@ -19,15 +19,36 @@ class ExportCest
     protected $exportItems = null;
 
     /**
+     * @var Process
+     */
+    protected $exportProcess;
+
+    /**
      * @return SimpleXMLElement
      */
     protected function getFeed()
     {
         if (!$this->feed) {
+            $this->getExportProcess();
             $this->feed = simplexml_load_file('var/feeds/tweakwise.xml');
         }
 
         return $this->feed;
+    }
+
+    /**
+     * @return Process
+     */
+    protected function getExportProcess()
+    {
+        if (!$this->exportProcess) {
+            $process = new Process('php ./bin/magento tweakwise:export');
+            $process->setTimeout(120);
+            $process->run();
+
+            $this->exportProcess = $process;
+        }
+        return $this->exportProcess;
     }
 
     /**
@@ -88,10 +109,7 @@ class ExportCest
      */
     public function runExport(AcceptanceTester $i)
     {
-        $process = new Process('./bin/magento tweakwise:export');
-        $process->setTimeout(120);
-        $process->run();
-
+        $process = $this->getExportProcess();
         $i->assertEquals(0, $process->getExitCode(), 'Export did not run successfully: ' . $process->getErrorOutput());
     }
 

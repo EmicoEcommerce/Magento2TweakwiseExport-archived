@@ -5,3 +5,5 @@ cd /tmp/build
 composer require --no-interaction --ignore-platform-reqs emico/tweakwise-export
 cp -R ${TRAVIS_BUILD_DIR}/* /tmp/build/vendor/emico/tweakwise-export
 php bin/magento setup:upgrade --no-interaction
+
+magerun2 config:set tweakwise/export/enabled 1
