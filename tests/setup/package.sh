@@ -2,6 +2,6 @@
 
 # Install package
 cd /tmp/build
-composer require emico/tweakwise-export
-cp -R /home/travis/build/EmicoEcommerce/Magento2TweakwiseExport/* /tmp/build/vendor/emico/tweakwise-export
-php bin/magento setup:upgrade
+composer require --no-interaction --ignore-platform-reqs emico/tweakwise-export
+cp -R ${TRAVIS_BUILD_DIR}/* /tmp/build/vendor/emico/tweakwise-export
+php bin/magento setup:upgrade --no-interaction
