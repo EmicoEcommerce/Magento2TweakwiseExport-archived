@@ -439,7 +439,7 @@ class Iterator extends EavIterator
             $attributes = isset($extraAttributes[$entityId]) ? $extraAttributes[$entityId] : [];
 
             // Combine data
-            $entityPrice = $this->combinePriceData($prices, $entityId, $entity);
+            list($entity, $entityPrice) = $this->combinePriceData($prices, $entityId, $entity);
             $attributes = $this->combineExtraAttributes($entity, $attributes);
             $entityStock = $this->combineStock($entityStock);
 
