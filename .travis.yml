@@ -41,11 +41,10 @@ cache:
     - $HOME/.composer/cache
 
 before_script:
-  - ./tests/setup/composer.sh
-  - ./tests/setup/database.sh
-  - ./tests/setup/magento.sh
-  - ./tests/setup/package.sh
-  - cd /tmp/build
+  - ${TRAVIS_BUILD_DIR}/tests/setup/composer.sh
+  - ${TRAVIS_BUILD_DIR}/tests/setup/database.sh
+  - ${TRAVIS_BUILD_DIR}/tests/setup/magento.sh
+  - ${TRAVIS_BUILD_DIR}/tests/setup/package.sh
 
 script:
   - php bin/magento setup:di:compile
