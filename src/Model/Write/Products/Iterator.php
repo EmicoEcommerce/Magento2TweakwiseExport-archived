@@ -205,9 +205,10 @@ class Iterator extends EavIterator
     /**
      * @param array $entity
      * @param array $stockMap
+     * @param int $parentId
      * @return bool
      */
-    protected function skipEntityChild(array $entity, array $stockMap)
+    protected function skipEntityChild(array $entity, array $stockMap, $parentId)
     {
         if ($entity['status'] != Status::STATUS_ENABLED) {
             return true;
@@ -217,12 +218,17 @@ class Iterator extends EavIterator
             return false;
         }
 
-        $entityId = (int) $entity['entity_id'];
-        if (!isset($stockMap[$entityId])) {
+        if (!isset($stockMap[$parentId])) {
             return true;
         }
 
-        return $stockMap[$entityId] <= 0.0001;
+        $parentStockMap = $stockMap[$parentId];
+        $entityId = (int) $entity['entity_id'];
+        if (!isset($parentStockMap[$entityId])) {
+            return true;
+        }
+
+        return $parentStockMap[$entityId] <= 0.0001;
     }
 
     /**
@@ -370,7 +376,7 @@ class Iterator extends EavIterator
         foreach ($iterator as $entity) {
             $parentId = $map[$entity['entity_id']];
 
-            if ($this->skipEntityChild($entity, $stockMap[$parentId])) {
+            if ($this->skipEntityChild($entity, $stockMap, $parentId)) {
                 continue;
             }
 
