@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
 # Install Magento with dependencies
+echo "Create magento project"
 cd /tmp
 composer create-project --no-interaction --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition:${MAGE2_VERSION} build
 cd build
 
 ${TRAVIS_BUILD_DIR}/tests/setup/composer-configure.sh
 
+echo "Install magento"
 php bin/magento setup:install --no-interaction \
     --admin-email "$MAGE2_ADMIN_EMAIL" \
     --admin-firstname "$MAGE2_ADMIN_FIRST_NAME" \
@@ -24,4 +26,9 @@ php bin/magento setup:install --no-interaction \
     --use-secure 0 \
     -vvv
 
+echo "Fix composer reference"
+rm -Rf composer.lock
+composer remove composer/composer doctrine/instantiator
+
+echo "Deploy magento sample data"
 php bin/magento sampledata:deploy --no-interaction
