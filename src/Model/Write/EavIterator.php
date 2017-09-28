@@ -8,12 +8,11 @@
 
 namespace Emico\TweakwiseExport\Model\Write;
 
+use Emico\TweakwiseExport\Model\Helper;
 use IteratorAggregate;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Eav\Model\Entity\Type;
-use Magento\Framework\App\ProductMetadata as CommunityProductMetadata;
-use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Select;
@@ -57,9 +56,9 @@ class EavIterator implements IteratorAggregate
     protected $entityIds;
 
     /**
-     * @var ProductMetadataInterface
+     * @var Helper
      */
-    protected $productMetadata;
+    protected $helper;
 
     /**
      * @var DbContext
@@ -77,17 +76,17 @@ class EavIterator implements IteratorAggregate
     /**
      * EavIterator constructor.
      *
-     * @param ProductMetadataInterface $productMetadata
+     * @param Helper $helper
      * @param EavConfig $eavConfig
      * @param DbContext $dbContext
      * @param string $entityCode
      * @param string[] $attributes
      */
-    public function __construct(ProductMetadataInterface $productMetadata, EavConfig $eavConfig, DbContext $dbContext, $entityCode, array $attributes)
+    public function __construct(Helper $helper, EavConfig $eavConfig, DbContext $dbContext, $entityCode, array $attributes)
     {
         $this->eavConfig = $eavConfig;
         $this->entityCode = $entityCode;
-        $this->productMetadata = $productMetadata;
+        $this->helper = $helper;
         $this->dbContext = $dbContext;
         $this->attributes = [];
         foreach ($attributes as $attribute) {
@@ -311,7 +310,7 @@ class EavIterator implements IteratorAggregate
             ->from(['attribute_table' => $table], [])
             ->join(['main_table' => $this->getEntityType()->getEntityTable()], 'attribute_table.row_id = main_table.row_id', [])
             ->columns([
-                'entity_id' => 'main_table.entity_id',
+                'entity_id' => 'main_table.row_id',
                 'store_id' => 'attribute_table.store_id',
                 'attribute_id' => 'attribute_table.attribute_id',
                 'value' => 'attribute_table.value'
@@ -354,11 +353,11 @@ class EavIterator implements IteratorAggregate
      */
     protected function createEavAttributeGroupSelect($group, array $attributes)
     {
-        if ($this->productMetadata->getEdition() == CommunityProductMetadata::EDITION_NAME) {
-            return $this->getAttributeSelectCommunity($group, $attributes);
-        } else {
+        if ($this->helper->isEnterprise()) {
             return $this->getAttributeSelectEnterprise($group, $attributes);
         }
+
+        return $this->getAttributeSelectCommunity($group, $attributes);
     }
 
     /**

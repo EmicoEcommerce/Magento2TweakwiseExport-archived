@@ -8,10 +8,10 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Categories;
 
+use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\EavIterator;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
-use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 
 class Iterator extends EavIterator
@@ -28,14 +28,14 @@ class Iterator extends EavIterator
     /**
      * Iterator constructor.
      *
-     * @param ProductMetadataInterface $productMetadata
+     * @param Helper $helper
      * @param EavConfig $eavConfig
      * @param DbContext $dbContext
      * @param array|string[] $attributes
      */
-    public function __construct(ProductMetadataInterface $productMetadata, EavConfig $eavConfig, DbContext $dbContext, $attributes)
+    public function __construct(Helper $helper, EavConfig $eavConfig, DbContext $dbContext, $attributes)
     {
-        parent::__construct($productMetadata, $eavConfig, $dbContext, 'catalog_category', $attributes);
+        parent::__construct($helper, $eavConfig, $dbContext, 'catalog_category', $attributes);
     }
 
     /**
@@ -63,6 +63,7 @@ class Iterator extends EavIterator
         $staticAttribute = reset($this->getAttributeGroups()['_static']);
         /** @var AbstractAttribute $eavAttribute */
         $eavAttribute = reset($attributes);
+
         $select->join(
             $staticAttribute->getBackendTable(),
             $staticAttribute->getBackendTable() . '.entity_id = ' . $eavAttribute->getBackendTable() . '.entity_id',

@@ -24,7 +24,6 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductColl
 use Magento\Catalog\Model\Indexer\Category\Product\AbstractAction as CategoryProductAbstractAction;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ConfigurableType;
 use Magento\Eav\Model\Config as EavConfig;
-use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Magento\Framework\Profiler;
@@ -57,11 +56,6 @@ class Iterator extends EavIterator
     protected $visibility;
 
     /**
-     * @var Helper
-     */
-    protected $helper;
-
-    /**
      * Product type factory
      *
      * @var ProductType
@@ -76,7 +70,7 @@ class Iterator extends EavIterator
     /**
      * Iterator constructor.
      *
-     * @param ProductMetadataInterface $productMetadata
+     * @param Helper $helper
      * @param EavConfig $eavConfig
      * @param ProductCollectionFactory $productCollectionFactory
      * @param StoreManager $storeManager
@@ -87,22 +81,20 @@ class Iterator extends EavIterator
      * @param Config $config
      */
     public function __construct(
-        ProductMetadataInterface $productMetadata,
+        Helper $helper,
         EavConfig $eavConfig,
         ProductCollectionFactory $productCollectionFactory,
         StoreManager $storeManager,
         Visibility $visibility,
-        Helper $helper,
         ProductType $productType,
         DbContext $dbContext,
         Config $config
     ) {
-        parent::__construct($productMetadata, $eavConfig, $dbContext, Product::ENTITY, []);
+        parent::__construct($helper, $eavConfig, $dbContext, Product::ENTITY, []);
 
         $this->productCollectionFactory = $productCollectionFactory;
         $this->storeManager = $storeManager;
         $this->visibility = $visibility;
-        $this->helper = $helper;
         $this->productType = $productType;
         $this->config = $config;
 
@@ -336,20 +328,6 @@ class Iterator extends EavIterator
     }
 
     /**
-     * @param array $childrenIds
-     * @return EavIterator
-     */
-    protected function createChildIterator(array $childrenIds)
-    {
-        $iterator = new EavIterator($this->eavConfig, $this->entityCode, []);
-        $iterator->setStoreId($this->storeId);
-        $iterator->setEntityIds($childrenIds);
-
-        $this->initializeAttributes($iterator);
-        return $iterator;
-    }
-
-    /**
      * @param array $parentChildMap
      * @param array $stockMap
      * @return array[]
@@ -367,7 +345,7 @@ class Iterator extends EavIterator
             }
         }
 
-        $iterator = new EavIterator($this->productMetadata, $this->eavConfig, $this->dbContext, $this->entityCode, []);
+        $iterator = new EavIterator($this->helper, $this->eavConfig, $this->dbContext, $this->entityCode, []);
         $iterator->setEntityIds(array_keys($map));
         $this->initializeAttributes($iterator);
 

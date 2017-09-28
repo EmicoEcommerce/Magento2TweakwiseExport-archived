@@ -9,9 +9,26 @@
 namespace Emico\TweakwiseExport\Model;
 
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Magento\Framework\App\ProductMetadata as CommunityProductMetadata;
+use Magento\Framework\App\ProductMetadataInterface;
 
 class Helper
 {
+    /**
+     * @var ProductMetadataInterface
+     */
+    protected $productMetadata;
+
+    /**
+     * Helper constructor.
+     *
+     * @param ProductMetadataInterface $productMetadata
+     */
+    public function __construct(ProductMetadataInterface $productMetadata)
+    {
+        $this->productMetadata = $productMetadata;
+    }
+
     /**
      * @param int $storeId
      * @param int $entityId
@@ -55,5 +72,13 @@ class Helper
         }
 
         return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEnterprise()
+    {
+        return $this->productMetadata->getEdition() !== CommunityProductMetadata::EDITION_NAME;
     }
 }
