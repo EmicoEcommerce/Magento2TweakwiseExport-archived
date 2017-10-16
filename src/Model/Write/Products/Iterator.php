@@ -352,6 +352,9 @@ class Iterator extends EavIterator
         $parentIds = array_keys($parentChildMap);
         $result = array_combine($parentIds, array_fill(0, count($parentIds), []));
         foreach ($iterator as $entity) {
+            if (!isset($map[$entity['entity_id']])) {
+                continue;
+            }
             $parentId = $map[$entity['entity_id']];
 
             if ($this->skipEntityChild($entity, $stockMap, $parentId)) {
@@ -528,6 +531,9 @@ class Iterator extends EavIterator
             $type = $types->factory($fakeProduct);
 
             if (!$type->isComposite($fakeProduct)) {
+                foreach ($group as $entityId => $entity) {
+                    $childrenIds[$entityId] = $type->getChildrenIds($entityId, false);
+                }
                 continue;
             }
 
