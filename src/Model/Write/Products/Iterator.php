@@ -22,6 +22,7 @@ use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Catalog\Model\Indexer\Category\Product\AbstractAction as CategoryProductAbstractAction;
+use Magento\CatalogInventory\Model\Configuration as StockConfig;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ConfigurableType;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\DataObject;
@@ -68,6 +69,11 @@ class Iterator extends EavIterator
     protected $config;
 
     /**
+     * @var StockConfig
+     */
+    protected $stockConfig;
+
+    /**
      * Iterator constructor.
      *
      * @param Helper $helper
@@ -88,7 +94,8 @@ class Iterator extends EavIterator
         Visibility $visibility,
         ProductType $productType,
         DbContext $dbContext,
-        Config $config
+        Config $config,
+        StockConfig $stockConfig
     ) {
         parent::__construct($helper, $eavConfig, $dbContext, Product::ENTITY, []);
 
@@ -97,6 +104,7 @@ class Iterator extends EavIterator
         $this->visibility = $visibility;
         $this->productType = $productType;
         $this->config = $config;
+        $this->stockConfig = $stockConfig;
 
         $this->initializeAttributes($this);
     }
@@ -153,7 +161,7 @@ class Iterator extends EavIterator
 
             $batch[$entity['entity_id']] = $entity;
 
-            if (count($batch) == self::BATCH_SIZE) {
+            if (count($batch) === self::BATCH_SIZE) {
                 // After PHP7+ we can use yield from
                 foreach ($this->processBatch($batch) as $processedEntity) {
                     yield $processedEntity;
@@ -221,6 +229,24 @@ class Iterator extends EavIterator
         }
 
         return $parentStockMap[$entityId] <= 0.0001;
+    }
+
+    /**
+     * @param int $stock
+     * @return bool
+     */
+    protected function skipEntityByStock($stock)
+    {
+        if ($this->stockConfig->isShowOutOfStock($this->storeId)) {
+            return false;
+        }
+
+        $stockThresholdQty = $this->stockConfig->getStockThresholdQty();
+        if ($stockThresholdQty) {
+            return $stock <= $stockThresholdQty;
+        }
+
+        return $stock <= 0;
     }
 
     /**
@@ -429,6 +455,9 @@ class Iterator extends EavIterator
             list($entity, $entityPrice) = $this->combinePriceData($prices, $entityId, $entity);
             $attributes = $this->combineExtraAttributes($entity, $attributes);
             $entityStock = $this->combineStock($entityStock);
+            if ($this->skipEntityByStock($entityStock)) {
+                continue;
+            }
 
             // yield return single entity response from batch
             yield [
