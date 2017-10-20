@@ -44,7 +44,7 @@
                     </depends>
                 </field>
                 <field id="api_import_url" translate="label,comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Tweakwise Import API Key</label>
+                    <label>Tweakwise Import API Url</label>
                     <comment>API protection parameter see Tweakwise import task tab API. Starts with the API url like: https://navigator-api.tweakwise.com/task/trigger/</comment>
                     <validate>validate-url</validate>
                     <depends>
