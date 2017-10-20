@@ -11,6 +11,7 @@ namespace Emico\TweakwiseExport\Controller\Feed;
 use Emico\TweakwiseExport\App\Response\FeedContent;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Export as ExportModel;
+use Emico\TweakwiseExport\Model\Logger;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Response\Http as HttpResponse;
@@ -21,12 +22,17 @@ class Export extends Action
     /**
      * @var Config
      */
-    protected $config;
+    private $config;
 
     /**
      * @var Export
      */
-    protected $export;
+    private $export;
+
+    /**
+     * @var Logger
+     */
+    private $log;
 
     /**
      * Export constructor.
@@ -34,12 +40,14 @@ class Export extends Action
      * @param Context $context
      * @param Config $config
      * @param ExportModel $export
+     * @param Logger $log
      */
-    public function __construct(Context $context, Config $config, ExportModel $export)
+    public function __construct(Context $context, Config $config, ExportModel $export, Logger $log)
     {
         parent::__construct($context);
         $this->config = $config;
         $this->export = $export;
+        $this->log = $log;
     }
 
     /**
@@ -59,6 +67,6 @@ class Export extends Action
         }
 
         $response->setHeader('Content-Type', 'text/xml');
-        $response->setContent(new FeedContent($this->export));
+        $response->setContent(new FeedContent($this->export, $this->log));
     }
 }
