@@ -9,6 +9,8 @@
 namespace Emico\TweakwiseExport\App\Response;
 
 use Emico\TweakwiseExport\Model\Export;
+use Emico\TweakwiseExport\Model\Logger;
+use Exception;
 
 /**
  * Class FeedContent
@@ -21,16 +23,23 @@ class FeedContent {
     /**
      * @var Export
      */
-    protected $export;
+    private $export;
+
+    /**
+     * @var Logger
+     */
+    private $log;
 
     /**
      * SomeFeedResponse constructor.
      *
      * @param Export $export
+     * @param Logger $log
      */
-    public function __construct(Export $export)
+    public function __construct(Export $export, Logger $log)
     {
         $this->export = $export;
+        $this->log = $log;
     }
 
     /**
@@ -40,9 +49,13 @@ class FeedContent {
      */
     public function __toString()
     {
-        $resource = fopen('php://output', 'w');
+        $resource = fopen('php://output', 'wb');
         try {
-            $this->export->getFeed($resource);
+            try {
+                $this->export->getFeed($resource);
+            } catch (Exception $e) {
+                $this->log->error(sprintf('Failed to get feed due to %s', $e->getMessage()));
+            }
         } finally {
             fclose($resource);
         }

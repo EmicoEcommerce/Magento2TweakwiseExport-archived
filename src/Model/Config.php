@@ -77,17 +77,9 @@ class Config
     /**
      * @return string
      */
-    public function getApiServerUrl()
+    public function getApiImportUrl()
     {
-        return (string) $this->config->getValue('tweakwise/export/api_server_url');
-    }
-
-    /**
-     * @return string
-     */
-    public function getApiImportKey()
-    {
-        return (string) $this->config->getValue('tweakwise/export/api_import_key');
+        return (string) $this->config->getValue('tweakwise/export/api_import_url');
     }
 
     /**

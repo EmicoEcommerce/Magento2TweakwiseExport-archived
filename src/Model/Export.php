@@ -13,6 +13,7 @@ use Emico\TweakwiseExport\Exception\LockException;
 use Emico\TweakwiseExport\Model\Validate\Validator;
 use Emico\TweakwiseExport\Model\Write\Writer;
 use Magento\Framework\Profiler;
+use Zend\Http\Client as HttpClient;
 
 /**
  * Class Export
@@ -77,7 +78,7 @@ class Export
                 $lockFile = $this->config->getDefaultFeedPath() . '.lock';
             }
 
-            $lockHandle = @fopen($lockFile, 'w');
+            $lockHandle = @fopen($lockFile, 'wb');
             if (!$lockHandle) {
                 $this->log->throwException(new LockException(sprintf('Could not lock feed export on lockfile "%s"', $lockFile)));
             }
@@ -131,7 +132,7 @@ class Export
 
         $feedFile = $this->config->getDefaultFeedPath();
         if (file_exists($feedFile)) {
-            $sourceHandle = @fopen($feedFile, 'r');
+            $sourceHandle = @fopen($feedFile, 'rb');
             if (!$sourceHandle) {
                 $this->log->throwException(new FeedException(sprintf('Could not open feed path "%s" for reading', $feedFile)));
             }
@@ -158,7 +159,7 @@ class Export
     {
         $this->executeLocked(function () use ($feedFile, $validate) {
             $tmpFeedFile = $feedFile . '.tmp';
-            $sourceHandle = @fopen($tmpFeedFile, 'w');
+            $sourceHandle = @fopen($tmpFeedFile, 'wb');
             if (!$sourceHandle) {
                 $this->log->throwException(new FeedException(sprintf('Could not open feed path "%s" for writing', $feedFile)));
             }
@@ -177,7 +178,29 @@ class Export
 
             rename($tmpFeedFile, $feedFile);
             $this->log->debug('Feed renamed ' . $tmpFeedFile);
+
+            $this->triggerTweakwiseImport();
         });
         return $this;
+    }
+
+    /**
+     * Trigger TW import call if configured
+     */
+    private function triggerTweakwiseImport()
+    {
+        $apiImportUrl = $this->config->getApiImportUrl();
+        if (empty($apiImportUrl)) {
+            $this->log->debug('TW import not triggered, no api import url defined.');
+            return;
+        }
+
+        try {
+            $client = new HttpClient($apiImportUrl);
+            $client->send();
+            $this->log->debug('TW import triggered');
+        } catch (HttpClient\Exception\ExceptionInterface $e) {
+            $this->log->error(sprintf('Trigger TW import failed due to %s', $e->getMessage()));
+        }
     }
 }
