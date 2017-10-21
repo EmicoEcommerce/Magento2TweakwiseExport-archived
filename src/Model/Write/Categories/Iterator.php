@@ -58,8 +58,23 @@ class Iterator extends EavIterator
     protected function createEavAttributeGroupSelect($group, array $attributes)
     {
         $select = parent::createEavAttributeGroupSelect($group, $attributes);
-        $select->columns('main_table.path');
 
+        if ($this->helper->isEnterprise()) {
+            $select->columns('main_table.path');
+        } else {
+            /** @var AbstractAttribute $staticAttribute */
+            $staticAttribute = reset($this->getAttributeGroups()['_static']);
+
+            /** @var AbstractAttribute $eavAttribute */
+            $eavAttribute = reset($attributes);
+
+            $select->join(
+                $staticAttribute->getBackendTable(),
+                $staticAttribute->getBackendTable() . '.entity_id = ' . $eavAttribute->getBackendTable() . '.entity_id',
+                ['path']
+            );
+        }
+        
         return $select;
     }
 }
