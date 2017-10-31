@@ -232,6 +232,24 @@ class Iterator extends EavIterator
     }
 
     /**
+     * @return int
+     */
+    protected function getStockThresholdQty()
+    {
+        // Check required for Magento <= 2.1.9
+        if (!method_exists($this->stockConfig, 'getStockThresholdQty')) {
+            return 0;
+        }
+
+        $qty = $this->stockConfig->getStockThresholdQty();
+        if ($qty === null) {
+            return 0;
+        }
+
+        return (int) $qty;
+    }
+
+    /**
      * @param int $stock
      * @return bool
      */
@@ -241,12 +259,8 @@ class Iterator extends EavIterator
             return false;
         }
 
-        $stockThresholdQty = $this->stockConfig->getStockThresholdQty();
-        if ($stockThresholdQty) {
-            return $stock <= $stockThresholdQty;
-        }
-
-        return $stock <= 0;
+        $stockThresholdQty = $this->getStockThresholdQty();
+        return $stock <= $stockThresholdQty;
     }
 
     /**
