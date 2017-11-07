@@ -715,7 +715,7 @@ class Iterator extends EavIterator
      * @param $attributes
      * @return array
      */
-    protected function combineExtraAttributes($entity, $attributes): array
+    protected function combineExtraAttributes($entity, $attributes)
     {
         foreach ($entity as $attribute => $value) {
             if (in_array($attribute, ['name', 'entity_id'])) {
