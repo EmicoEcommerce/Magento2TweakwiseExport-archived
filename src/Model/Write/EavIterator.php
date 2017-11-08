@@ -310,7 +310,7 @@ class EavIterator implements IteratorAggregate
             ->from(['attribute_table' => $table], [])
             ->join(['main_table' => $this->getEntityType()->getEntityTable()], 'attribute_table.row_id = main_table.row_id', [])
             ->columns([
-                'entity_id' => 'main_table.row_id',
+                'entity_id' => 'main_table.entity_id',
                 'store_id' => 'attribute_table.store_id',
                 'attribute_id' => 'attribute_table.attribute_id',
                 'value' => 'attribute_table.value'
