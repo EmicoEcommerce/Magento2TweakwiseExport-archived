@@ -6,6 +6,7 @@ Environment
 --
 * PHP Version: (5.6|7.0|7.1)
 * Magento Version:
+* Magento Enterprise: (yes|no)
 * Tweakwise Export Version:
 * Magento Deploy Mode: (production|development)
 * Third party modules:
