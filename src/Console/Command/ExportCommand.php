@@ -10,7 +10,6 @@ namespace Emico\TweakwiseExport\Console\Command;
 
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Export;
-use Emico\TweakwiseExport\Model\Validate\Validator;
 use Emico\TweakwiseExport\Profiler\Driver\ConsoleDriver;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
@@ -34,11 +33,6 @@ class ExportCommand extends Command
     protected $export;
 
     /**
-     * @var Validator
-     */
-    protected $validator;
-
-    /**
      * @var State
      */
     protected $state;
@@ -48,14 +42,12 @@ class ExportCommand extends Command
      *
      * @param Config $config
      * @param Export $export
-     * @param Validator $validator
      * @param State $state
      */
-    public function __construct(Config $config, Export $export, Validator $validator, State $state)
+    public function __construct(Config $config, Export $export, State $state)
     {
         $this->config = $config;
         $this->export = $export;
-        $this->validator = $validator;
         $this->state = $state;
         parent::__construct();
     }
@@ -67,7 +59,12 @@ class ExportCommand extends Command
     {
         $this->setName('tweakwise:export')
             ->addArgument('file', InputArgument::OPTIONAL, 'Export to specific file', $this->config->getDefaultFeedFile())
-            ->addOption('validate', 'c', InputOption::VALUE_NONE, 'Validate feed and rollback if fails.')
+            ->addOption(
+                'validate',
+                'c',
+                InputOption::VALUE_REQUIRED, 'Validate feed and rollback if fails [y/n].',
+                $this->config->isValidate() ? 'y' : 'n'
+            )
             ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Debugging enables profiler.')
             ->setDescription('Export tweakwise feed');
     }
@@ -84,7 +81,12 @@ class ExportCommand extends Command
         }
 
         $feedFile = (string) $input->getArgument('file');
-        $validate = (bool) $input->getOption('validate');
+        $validate = (string) $input->getOption('validate');
+        if ($validate !== 'y' && $validate !== 'n') {
+            $output->writeln('Validate option can only contain y or n');
+            return;
+        }
+        $validate = $validate === 'y';
 
         $startTime = microtime(true);
         $this->export->generateToFile($feedFile, $validate);
