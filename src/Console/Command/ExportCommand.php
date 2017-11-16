@@ -11,6 +11,7 @@ namespace Emico\TweakwiseExport\Console\Command;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Export;
 use Emico\TweakwiseExport\Profiler\Driver\ConsoleDriver;
+use Exception;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
 use Magento\Framework\Profiler;
@@ -71,27 +72,30 @@ class ExportCommand extends Command
 
     /**
      * {@inheritdoc}
+     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->state->setAreaCode(Area::AREA_CRONTAB);
-        if ($input->getOption('debug')) {
-            Profiler::enable();
-            Profiler::add(new ConsoleDriver($output));
-        }
+        $this->state->emulateAreaCode(Area::AREA_CRONTAB, function() use ($input, $output) {
+            if ($input->getOption('debug')) {
+                Profiler::enable();
+                Profiler::add(new ConsoleDriver($output));
+            }
 
-        $feedFile = (string) $input->getArgument('file');
-        $validate = (string) $input->getOption('validate');
-        if ($validate !== 'y' && $validate !== 'n') {
-            $output->writeln('Validate option can only contain y or n');
-            return;
-        }
-        $validate = $validate === 'y';
+            $feedFile = (string) $input->getArgument('file');
+            $validate = (string) $input->getOption('validate');
+            if ($validate !== 'y' && $validate !== 'n') {
+                $output->writeln('Validate option can only contain y or n');
+                return;
+            }
+            $validate = $validate === 'y';
 
-        $startTime = microtime(true);
-        $this->export->generateToFile($feedFile, $validate);
-        $generateTime = round(microtime(true) - $startTime, 2);
-        $memoryUsage = round(memory_get_peak_usage(true) / 1024 / 1024, 2);
-        $output->writeln(sprintf('Feed written to %s in %ss using %sMb memory', $feedFile, $generateTime, $memoryUsage));
+            $startTime = microtime(true);
+            $this->export->generateToFile($feedFile, $validate);
+            $generateTime = round(microtime(true) - $startTime, 2);
+            $memoryUsage = round(memory_get_peak_usage(true) / 1024 / 1024, 2);
+            $output->writeln(sprintf('Feed written to %s in %ss using %sMb memory', $feedFile, $generateTime, $memoryUsage));
+        });
+
     }
 }
