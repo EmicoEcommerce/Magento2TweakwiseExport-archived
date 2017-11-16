@@ -135,12 +135,12 @@ class Helper
     {
         $startDate = $this->getFeedExportStartDate();
         if (!$this->config->isRealTime() && $startDate) {
-            return sprintf(__('Running, started on %s.'), $this->localDate->formatDate($startDate, IntlDateFormatter::LONG));
+            return sprintf(__('Running, started on %s.'), $this->localDate->formatDate($startDate, IntlDateFormatter::MEDIUM, true));
         }
 
         $finishedDate = $this->getLastFeedExportDate();
         if ($finishedDate) {
-            return sprintf(__('Finished on %s.'), $this->localDate->formatDate($finishedDate, IntlDateFormatter::LONG));
+            return sprintf(__('Finished on %s.'), $this->localDate->formatDate($finishedDate, IntlDateFormatter::MEDIUM, true));
         }
 
         return __('Export never triggered.');

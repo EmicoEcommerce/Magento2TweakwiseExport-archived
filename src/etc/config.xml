@@ -12,6 +12,7 @@
         <tweakwise>
             <export>
                 <enabled>0</enabled>
+                <schedule>0 3 * * *</schedule>
                 <key />
                 <validate>0</validate>
                 <real_time>0</real_time>
