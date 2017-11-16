@@ -8,25 +8,34 @@
 
 namespace Emico\TweakwiseExport\Model;
 
+use DateTime;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Framework\App\ProductMetadata as CommunityProductMetadata;
 use Magento\Framework\App\ProductMetadataInterface;
+use SplFileInfo;
 
 class Helper
 {
     /**
      * @var ProductMetadataInterface
      */
-    protected $productMetadata;
+    private $productMetadata;
+
+    /**
+     * @var Config
+     */
+    private $config;
 
     /**
      * Helper constructor.
      *
      * @param ProductMetadataInterface $productMetadata
+     * @param Config $config
      */
-    public function __construct(ProductMetadataInterface $productMetadata)
+    public function __construct(ProductMetadataInterface $productMetadata, Config $config)
     {
         $this->productMetadata = $productMetadata;
+        $this->config = $config;
     }
 
     /**
@@ -80,5 +89,35 @@ class Helper
     public function isEnterprise()
     {
         return $this->productMetadata->getEdition() !== CommunityProductMetadata::EDITION_NAME;
+    }
+
+    /**
+     * Get start date of current feed export. Only working with export to file.
+     *
+     * @return DateTime|null
+     */
+    public function getFeedExportStartDate()
+    {
+        $file = new SplFileInfo($this->config->getFeedTmpFile());
+        if (!$file->isFile()) {
+            return null;
+        }
+
+        return new DateTime('@' . $file->getMTime());
+    }
+
+    /**
+     * Get date of last finished feed export
+     *
+     * @return DateTime|null
+     */
+    public function getLastFeedExportDate()
+    {
+        $file = new SplFileInfo($this->config->getDefaultFeedFile());
+        if (!$file->isFile()) {
+            return null;
+        }
+
+        return new DateTime('@' . $file->getMTime());
     }
 }

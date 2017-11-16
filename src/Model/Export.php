@@ -113,6 +113,7 @@ class Export
     {
         $this->executeLocked(function () use ($targetHandle) {
             $this->writer->write($targetHandle);
+            $this->touchFeedGenerateDate();
         });
         return $this;
     }
@@ -190,6 +191,7 @@ class Export
                 }
             }
 
+            $this->touchFeedGenerateDate();
             $this->triggerTweakwiseImport();
         });
         return $this;
@@ -213,5 +215,13 @@ class Export
         } catch (HttpClient\Exception\ExceptionInterface $e) {
             $this->log->error(sprintf('Trigger TW import failed due to %s', $e->getMessage()));
         }
+    }
+
+    /**
+     * Update last modified time from feed file
+     */
+    private function touchFeedGenerateDate()
+    {
+        touch($this->config->getDefaultFeedFile());
     }
 }
