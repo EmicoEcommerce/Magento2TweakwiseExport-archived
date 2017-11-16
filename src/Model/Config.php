@@ -135,7 +135,7 @@ class Config
     /**
      * @return string
      */
-    public function getDefaultFeedPath()
+    public function getDefaultFeedFile()
     {
         $dir = $this->directoryList->getPath('var') . DIRECTORY_SEPARATOR . 'feeds';
         if (!is_dir($dir)) {

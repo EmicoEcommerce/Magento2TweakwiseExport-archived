@@ -75,7 +75,7 @@ class Export
     {
         Profiler::start('tweakwise::export');
         if (!$lockFile) {
-            $lockFile = $this->config->getDefaultFeedPath() . '.lock';
+            $lockFile = $this->config->getDefaultFeedFile() . '.lock';
         }
 
         try {
@@ -134,7 +134,7 @@ class Export
             return $this;
         }
 
-        $feedFile = $this->config->getDefaultFeedPath();
+        $feedFile = $this->config->getDefaultFeedFile();
         if (file_exists($feedFile)) {
             $sourceHandle = @fopen($feedFile, 'rb');
             if (!$sourceHandle) {

@@ -66,7 +66,7 @@ class ExportCommand extends Command
     protected function configure()
     {
         $this->setName('tweakwise:export')
-            ->addArgument('file', InputArgument::OPTIONAL, 'Export to specific file', $this->config->getDefaultFeedPath())
+            ->addArgument('file', InputArgument::OPTIONAL, 'Export to specific file', $this->config->getDefaultFeedFile())
             ->addOption('validate', 'c', InputOption::VALUE_NONE, 'Validate feed and rollback if fails.')
             ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Debugging enables profiler.')
             ->setDescription('Export tweakwise feed');
