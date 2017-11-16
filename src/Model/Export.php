@@ -12,6 +12,7 @@ use Emico\TweakwiseExport\Exception\FeedException;
 use Emico\TweakwiseExport\Exception\LockException;
 use Emico\TweakwiseExport\Model\Validate\Validator;
 use Emico\TweakwiseExport\Model\Write\Writer;
+use Exception;
 use Magento\Framework\Profiler;
 use Zend\Http\Client as HttpClient;
 
@@ -73,11 +74,11 @@ class Export
     protected function executeLocked(callable $action, $lockFile = null)
     {
         Profiler::start('tweakwise::export');
-        try {
-            if (!$lockFile) {
-                $lockFile = $this->config->getDefaultFeedPath() . '.lock';
-            }
+        if (!$lockFile) {
+            $lockFile = $this->config->getDefaultFeedPath() . '.lock';
+        }
 
+        try {
             $lockHandle = @fopen($lockFile, 'wb');
             if (!$lockHandle) {
                 $this->log->throwException(new LockException(sprintf('Could not lock feed export on lockfile "%s"', $lockFile)));
@@ -94,6 +95,9 @@ class Export
                 $this->log->throwException(new LockException(sprintf('Unable to obtain lock on %s', $lockFile)));
             }
         } finally {
+            if (file_exists($lockFile)) {
+                unlink($lockFile);
+            }
             Profiler::stop('tweakwise::export');
         }
 
@@ -160,24 +164,34 @@ class Export
         $this->executeLocked(function () use ($feedFile, $validate) {
             $tmpFeedFile = $feedFile . '.tmp';
             $sourceHandle = @fopen($tmpFeedFile, 'wb');
+
             if (!$sourceHandle) {
                 $this->log->throwException(new FeedException(sprintf('Could not open feed path "%s" for writing', $feedFile)));
             }
 
             try {
-                $this->writer->write($sourceHandle);
-                $this->log->debug('Feed exported to ' . $tmpFeedFile);
+                try {
+                    $this->writer->write($sourceHandle);
+                    $this->log->debug('Feed exported to ' . $tmpFeedFile);
+                } finally {
+                    fclose($sourceHandle);
+                }
+
+                if ($validate) {
+                    $this->validator->validate($tmpFeedFile);
+                    $this->log->debug('Feed validated ' . $tmpFeedFile);
+                }
+
+                if (!rename($tmpFeedFile, $feedFile)) {
+                    $this->log->debug('Feed rename failed ' . $tmpFeedFile);
+                } else {
+                    $this->log->debug('Feed renamed ' . $tmpFeedFile);
+                }
             } finally {
-                fclose($sourceHandle);
+                if (file_exists($tmpFeedFile)) {
+                    unlink($tmpFeedFile);
+                }
             }
-
-            if ($validate) {
-                $this->validator->validate($tmpFeedFile);
-                $this->log->debug('Feed validated ' . $tmpFeedFile);
-            }
-
-            rename($tmpFeedFile, $feedFile);
-            $this->log->debug('Feed renamed ' . $tmpFeedFile);
 
             $this->triggerTweakwiseImport();
         });
