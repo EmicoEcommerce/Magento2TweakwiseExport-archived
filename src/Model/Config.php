@@ -144,4 +144,30 @@ class Config
 
         return $dir . DIRECTORY_SEPARATOR . self::FEED_FILE_NAME;
     }
+
+    /**
+     * @param string|null $file
+     * @return string
+     */
+    public function getFeedLockFile($file = null)
+    {
+        if (!$file) {
+            $file = $this->getDefaultFeedFile();
+        }
+
+        return $file . '.lock';
+    }
+
+    /**
+     * @param string|null $file
+     * @return string
+     */
+    public function getFeedTmpFile($file = null)
+    {
+        if (!$file) {
+            $file = $this->getDefaultFeedFile();
+        }
+
+        return $file . '.tmp';
+    }
 }

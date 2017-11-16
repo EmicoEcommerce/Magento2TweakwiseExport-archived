@@ -68,15 +68,12 @@ class Export
 
     /**
      * @param callable $action
-     * @param string|null $lockFile Defaults to default feed path
      * @return $this
      */
-    protected function executeLocked(callable $action, $lockFile = null)
+    protected function executeLocked(callable $action)
     {
         Profiler::start('tweakwise::export');
-        if (!$lockFile) {
-            $lockFile = $this->config->getDefaultFeedFile() . '.lock';
-        }
+        $lockFile = $this->config->getFeedLockFile();
 
         try {
             $lockHandle = @fopen($lockFile, 'wb');
@@ -162,7 +159,7 @@ class Export
     public function generateToFile($feedFile, $validate)
     {
         $this->executeLocked(function () use ($feedFile, $validate) {
-            $tmpFeedFile = $feedFile . '.tmp';
+            $tmpFeedFile = $this->config->getFeedTmpFile($feedFile);
             $sourceHandle = @fopen($tmpFeedFile, 'wb');
 
             if (!$sourceHandle) {
