@@ -22,6 +22,7 @@
                 <product_selection>4</product_selection>
                 <out_of_stock_children>1</out_of_stock_children>
                 <exclude_child_attributes>url_key,small_image,small_image_label,thumbnail_label,status,tax_class_id</exclude_child_attributes>
+                <price_field>final_price,price,min_price</price_field>
             </export>
         </tweakwise>
     </default>

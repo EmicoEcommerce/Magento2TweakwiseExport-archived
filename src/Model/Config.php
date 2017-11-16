@@ -115,6 +115,15 @@ class Config
     }
 
     /**
+     * @return string[]
+     */
+    public function getPriceFields()
+    {
+        $data = (array) explode(',', $this->config->getValue('tweakwise/export/price_field'));
+        return array_filter($data);
+    }
+
+    /**
      * @param string|null $attribute
      * @return bool|string[]
      */

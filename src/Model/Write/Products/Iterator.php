@@ -280,7 +280,8 @@ class Iterator extends EavIterator
             ->reset(Zend_Db_Select::COLUMNS)
             ->columns([
                 'entity_id',
-                'price' => new Zend_Db_Expr('IF(price_index.final_price IS NOT NULL AND price_index.final_price != 0, price_index.final_price, price_index.min_price)'),
+                'price' => 'price_index.price',
+                'final_price' => 'price_index.final_price',
                 'old_price' => 'price_index.price',
                 'min_price' => 'price_index.min_price',
                 'max_price' => 'price_index.max_price',
@@ -675,9 +676,9 @@ class Iterator extends EavIterator
     }
 
     /**
-     * @param $prices
-     * @param $entityId
-     * @param $entity
+     * @param array[] $prices
+     * @param int $entityId
+     * @param array $entity
      * @return array
      */
     protected function combinePriceData(array $prices, $entityId, array &$entity)
@@ -686,7 +687,7 @@ class Iterator extends EavIterator
             $entity['old_price'] = $prices[$entityId]['old_price'];
             $entity['min_price'] = $prices[$entityId]['min_price'];
             $entity['max_price'] = $prices[$entityId]['max_price'];
-            $entityPrice = $prices[$entityId]['price'];
+            $entityPrice = $this->getPriceValue($entityId, $prices[$entityId]);
         } else {
             $entityPrice = 0;
         }
@@ -726,5 +727,23 @@ class Iterator extends EavIterator
         }
         $attributes = $this->filterEntityAttributes($attributes);
         return $attributes;
+    }
+
+    /**
+     * @param int $entityId
+     * @param array $priceData
+     * @return float
+     */
+    protected function getPriceValue($entityId, array $priceData)
+    {
+        $priceFields = $this->config->getPriceFields($this->storeId);
+        foreach ($priceFields as $field) {
+            $value = (float) $priceData[$field];
+            if ($value > 0.00001) {
+                return $value;
+            }
+        }
+
+        return 0;
     }
 }
