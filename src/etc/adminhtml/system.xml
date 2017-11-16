@@ -19,7 +19,16 @@
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="feed_key" translate="label,comment" type="text" sortOrder="11" showInDefault="1" showInWebsite="0" showInStore="0">
+
+                <field id="export_state" translate="label,comment" type="label" sortOrder="11" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>State</label>
+                    <frontend_model>Emico\TweakwiseExport\Block\Config\Form\Field\ExportState</frontend_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="feed_key" translate="label,comment" type="text" sortOrder="13" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Key</label>
                     <comment>Export url will be: www.example.com/tweakwise/feed/export/key/XXXX</comment>
                     <depends>

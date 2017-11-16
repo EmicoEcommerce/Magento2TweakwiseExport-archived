@@ -9,9 +9,11 @@
 namespace Emico\TweakwiseExport\Model;
 
 use DateTime;
+use IntlDateFormatter;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Framework\App\ProductMetadata as CommunityProductMetadata;
 use Magento\Framework\App\ProductMetadataInterface;
+use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use SplFileInfo;
 
 class Helper
@@ -25,6 +27,10 @@ class Helper
      * @var Config
      */
     private $config;
+    /**
+     * @var TimezoneInterface
+     */
+    private $localDate;
 
     /**
      * Helper constructor.
@@ -32,10 +38,11 @@ class Helper
      * @param ProductMetadataInterface $productMetadata
      * @param Config $config
      */
-    public function __construct(ProductMetadataInterface $productMetadata, Config $config)
+    public function __construct(ProductMetadataInterface $productMetadata, Config $config, TimezoneInterface $localDate)
     {
         $this->productMetadata = $productMetadata;
         $this->config = $config;
+        $this->localDate = $localDate;
     }
 
     /**
@@ -119,5 +126,23 @@ class Helper
         }
 
         return new DateTime('@' . $file->getMTime());
+    }
+
+    /**
+     * @return \Magento\Framework\Phrase|string
+     */
+    public function getExportStateText()
+    {
+        $startDate = $this->getFeedExportStartDate();
+        if (!$this->config->isRealTime() && $startDate) {
+            return sprintf(__('Running, started on %s.'), $this->localDate->formatDate($startDate, IntlDateFormatter::LONG));
+        }
+
+        $finishedDate = $this->getLastFeedExportDate();
+        if ($finishedDate) {
+            return sprintf(__('Finished on %s.'), $this->localDate->formatDate($finishedDate, IntlDateFormatter::LONG));
+        }
+
+        return __('Export never triggered.');
     }
 }
