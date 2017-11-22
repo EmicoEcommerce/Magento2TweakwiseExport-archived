@@ -163,7 +163,7 @@ abstract class ExportTest extends TestCase
      * @param int $qty
      * @return Product
      */
-    protected function createSavedProduct(array $categoryIds = [2], int $qty = 100): Product
+    protected function createSavedProduct(int $qty = 100, array $categoryIds = [2]): Product
     {
         $product = $this->createProduct();
         $this->productRepository->save($product);
