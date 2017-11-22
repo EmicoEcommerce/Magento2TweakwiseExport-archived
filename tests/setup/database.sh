@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 # Ensure database exists
 mysql -e "CREATE DATABASE IF NOT EXISTS ${MAGE2_DB_NAME};"

@@ -1,11 +1,5 @@
 env:
   global:
-    - MAGE2_FAKE_URL=http://magento-2-ce.dev
-    - MAGE2_ADMIN_EMAIL=inf@emico.nl
-    - MAGE2_ADMIN_FIRST_NAME=Emico
-    - MAGE2_ADMIN_LAST_NAME=Emico
-    - MAGE2_ADMIN_USERNAME=admin
-    - MAGE2_ADMIN_PASSWORD=admin123
     - MAGE2_DB_NAME=magento_2
     - MAGE2_DB_USER=travis
     - MAGE2_DB_HOST=127.0.0.1
@@ -18,14 +12,10 @@ env:
     - secure: "WiNLOXtLlpmwtbKq9vNSilxBVI1pUiwpm/cv7bNAJ+nbKxsdqSSdcDTPBehTH/6xPiya06rEHNAar5s30ebA3ic19SvWMpRBo7qVkfNQ8cli3/tSS4LqS1WpA1RDf/wUdeKCLYxi5iXY1pMDLnpY7GBvQzmCrXcJ6ANBXovtkNuPXq1PUq8hUmGfuCDh2Qr0er99jclQoZ4alwe6yjENorKqIJy5qzMAH7v5gqKqifrrZzm7YU7O2rNFqm3SsizfBAowgO2c4z2F6M15ucLrJDOuWIRovNSWzBA/xUbCrKSFHI4bG0x57K+vlBx+46uuVwgjzmQEncx4jQTix6PmeBIGybrGvTlgFT+OUEBEk6iWSkQRWEcE76o9zyxvNvp7S4LbO0LaF7Sa9fjJd0LBCiZ6gcET0sMXmJsRd7Dl5c8MwCJWpLZbgdr/FnDDNSBslQc9bwx7OpPzF6ibTZ08ICvXwG1G4hm6ZPmIjIiRvJKR1lyT6C6Bavln9xvtnKDKdudEWEg7nBLbRtfKTVIbBQb56lCQkhs4MKDW+ZAHnAu9D53XgE2J64HKeoPY20T4t/QjanQn9DK/UQREFNVtYk0YOH4NBtx42keYbdKHSo72EhKyOSeuQff7YcGq3qAHW6Nxx0JyV1ewwuoY5jGeJus4/IAjUwdgMOzP22rxwIw="
 
   matrix:
-    - MAGE2_VERSION=2.1 TEST_SUITE=unit
-    - MAGE2_VERSION=2.1 TEST_SUITE=acceptance
-    - MAGE2_VERSION=2.0 TEST_SUITE=unit
-    - MAGE2_VERSION=2.0 TEST_SUITE=acceptance
-
-matrix:
-  allow_failures:
-    - php: 7.1
+    - MAGE2_VERSION=2.1
+    - MAGE2_VERSION=2.1
+    - MAGE2_VERSION=2.0
+    - MAGE2_VERSION=2.0
 
 language: php
 
@@ -34,10 +24,6 @@ dist: trusty
 php:
   - 7.0
   - 7.1
-
-addons:
-  hosts:
-    - magento-2-ce.dev
 
 services:
   - mysql
@@ -50,7 +36,6 @@ cache:
 before_script:
   - ${TRAVIS_BUILD_DIR}/tests/setup/composer-configure.sh --global
   - ${TRAVIS_BUILD_DIR}/tests/setup/composer-install.sh
-  - ${TRAVIS_BUILD_DIR}/tests/setup/magerun2.sh
   - ${TRAVIS_BUILD_DIR}/tests/setup/database.sh
   - ${TRAVIS_BUILD_DIR}/tests/setup/magento.sh
   - ${TRAVIS_BUILD_DIR}/tests/setup/package.sh
@@ -58,4 +43,4 @@ before_script:
 script:
   - cd /tmp/build
   - php bin/magento setup:di:compile
-  - ./vendor/emico/tweakwise-export/vendor/bin/codecept run -c vendor/emico/tweakwise-export/codeception.yml $TEST_SUITE
+  - cd /tmp/build/dev/tests/integration && ../../../vendor/bin/phpunit ../../../vendor/emico/tweakwise-export/src/Test

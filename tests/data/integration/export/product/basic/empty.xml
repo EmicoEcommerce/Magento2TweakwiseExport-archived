@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tweakwise>
-    <shop><![CDATA[Default Store]]></shop>
+    <shop><![CDATA[Default Store View]]></shop>
     <timestamp><![CDATA[2017-01-01T00:00:00.000000+00:00]]></timestamp>
     <categories>
         <category>
             <categoryid>1</categoryid>
             <rank>0</rank>
             <name><![CDATA[Root]]></name>
+        </category>
+        <category>
+            <categoryid>100012</categoryid>
+            <rank>1</rank>
+            <name><![CDATA[Default Store View - Default Category]]></name>
+            <parents>
+                <categoryid>1</categoryid>
+            </parents>
         </category>
     </categories>
     <items/>
