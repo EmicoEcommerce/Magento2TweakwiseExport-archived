@@ -9,6 +9,7 @@
 namespace Emico\TweakwiseExport\Model;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Store\Model\Store;
 
@@ -22,28 +23,35 @@ class Config
     /**
      * @var ScopeConfigInterface
      */
-    protected $config;
+    private $config;
 
     /**
      * @var DirectoryList
      */
-    protected $directoryList;
+    private $directoryList;
 
     /**
      * @var array
      */
-    protected $skipAttributes;
+    private $skipAttributes;
+
+    /**
+     * @var DeploymentConfig
+     */
+    private $deployConfig;
 
     /**
      * Export constructor.
      *
      * @param ScopeConfigInterface $config
      * @param DirectoryList $directoryList
+     * @param DeploymentConfig $deployConfig
      */
-    public function __construct(ScopeConfigInterface $config, DirectoryList $directoryList)
+    public function __construct(ScopeConfigInterface $config, DirectoryList $directoryList, DeploymentConfig $deployConfig)
     {
         $this->config = $config;
         $this->directoryList = $directoryList;
+        $this->deployConfig = $deployConfig;
     }
 
     /**
@@ -71,6 +79,10 @@ class Config
      */
     public function isValidate()
     {
+        if (!$this->deployConfig->isAvailable()) {
+            return false;
+        }
+
         return (bool) $this->config->getValue('tweakwise/export/validate');
     }
 
