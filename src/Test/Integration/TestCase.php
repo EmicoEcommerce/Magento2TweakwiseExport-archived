@@ -13,7 +13,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\Framework\App\Config\MutableScopeConfigInterface;
 
-abstract class TestCase extends \PHPUnit\Framework\TestCase
+abstract class TestCase extends \Emico\TweakwiseExport\Test\TestCase
 {
     /**
      * Set admin area
