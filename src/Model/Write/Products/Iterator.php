@@ -13,6 +13,7 @@ use Emico\TweakwiseExport\Model\Config\Source\StockCalculation;
 use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\EavIterator;
 use Generator;
+use InvalidArgumentException;
 use Magento\Bundle\Model\Product\Type as BundleType;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
@@ -26,13 +27,14 @@ use Magento\CatalogInventory\Model\Configuration as StockConfig;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ConfigurableType;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Magento\Framework\Profiler;
 use Magento\GroupedProduct\Model\Product\Type\Grouped as GroupType;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link;
 use Magento\Store\Model\StoreManager;
-use Zend_Db_Expr;
 use Zend_Db_Select;
+use Zend_Db_Statement_Exception;
 
 class Iterator extends EavIterator
 {
@@ -81,10 +83,10 @@ class Iterator extends EavIterator
      * @param ProductCollectionFactory $productCollectionFactory
      * @param StoreManager $storeManager
      * @param Visibility $visibility
-     * @param Helper $helper
      * @param ProductType $productType
      * @param DbContext $dbContext
      * @param Config $config
+     * @param StockConfig $stockConfig
      */
     public function __construct(
         Helper $helper,
@@ -113,7 +115,7 @@ class Iterator extends EavIterator
      * @param array $params
      * @return ProductCollection
      */
-    protected function createProductCollection(array $params = [])
+    protected function createProductCollection(array $params = []): ProductCollection
     {
         return $this->productCollectionFactory->create($params);
     }
@@ -123,8 +125,9 @@ class Iterator extends EavIterator
      *
      * @param EavIterator $iterator
      * @return $this
+     * @throws LocalizedException
      */
-    protected function initializeAttributes(EavIterator $iterator)
+    protected function initializeAttributes(EavIterator $iterator): self
     {
         // Add default attributes
         $iterator->selectAttribute('name');
@@ -180,7 +183,7 @@ class Iterator extends EavIterator
      * @param string $modelEntity
      * @return string
      */
-    protected function getTableName($modelEntity)
+    protected function getTableName($modelEntity): string
     {
         return $this->getResources()->getTableName($modelEntity);
     }
@@ -189,13 +192,13 @@ class Iterator extends EavIterator
      * @param array $entity
      * @return bool
      */
-    protected function skipEntity(array $entity)
+    protected function skipEntity(array $entity): bool
     {
-        if ($entity['status'] != Status::STATUS_ENABLED) {
+        if ($entity['status'] !== Status::STATUS_ENABLED) {
             return true;
         }
 
-        if (!in_array($entity['visibility'], $this->visibility->getVisibleInSiteIds())) {
+        if (!\in_array($entity['visibility'], $this->visibility->getVisibleInSiteIds(), true)) {
             return true;
         }
 
@@ -208,9 +211,9 @@ class Iterator extends EavIterator
      * @param int $parentId
      * @return bool
      */
-    protected function skipEntityChild(array $entity, array $stockMap, $parentId)
+    protected function skipEntityChild(array $entity, array $stockMap, $parentId): bool
     {
-        if ($entity['status'] != Status::STATUS_ENABLED) {
+        if ($entity['status'] !== Status::STATUS_ENABLED) {
             return true;
         }
 
@@ -234,7 +237,7 @@ class Iterator extends EavIterator
     /**
      * @return int
      */
-    protected function getStockThresholdQty()
+    protected function getStockThresholdQty(): int
     {
         // Check required for Magento <= 2.1.9
         if (!method_exists($this->stockConfig, 'getStockThresholdQty')) {
@@ -253,7 +256,7 @@ class Iterator extends EavIterator
      * @param int $stock
      * @return bool
      */
-    protected function skipEntityByStock($stock)
+    protected function skipEntityByStock($stock): bool
     {
         if (!$this->stockConfig->getManageStock($this->storeId)) {
             return false;
@@ -270,10 +273,11 @@ class Iterator extends EavIterator
     /**
      * @param array $entityIds
      * @return float[][]
+     * @throws Zend_Db_Statement_Exception
      */
-    protected function getEntityPriceBatch(array $entityIds)
+    protected function getEntityPriceBatch(array $entityIds): array
     {
-        if (count($entityIds) == 0) {
+        if (count($entityIds) === 0) {
             return [];
         }
 
@@ -303,10 +307,11 @@ class Iterator extends EavIterator
     /**
      * @param array $entityIds
      * @return int[][]
+     * @throws Zend_Db_Statement_Exception
      */
-    protected function getEntityCategoriesBatch(array $entityIds)
+    protected function getEntityCategoriesBatch(array $entityIds): array
     {
-        if (count($entityIds) == 0) {
+        if (count($entityIds) === 0) {
             return [];
         }
 
@@ -333,18 +338,19 @@ class Iterator extends EavIterator
     /**
      * @param array $parentChildMap
      * @return int[]
+     * @throws Zend_Db_Statement_Exception
      */
-    protected function getEntityStockBatch(array $parentChildMap)
+    protected function getEntityStockBatch(array $parentChildMap): array
     {
-        if (count($parentChildMap) == 0) {
+        if (count($parentChildMap) === 0) {
             return [];
         }
 
-        $allEntityIds = array_merge(array_keys($parentChildMap), call_user_func_array('array_merge', $parentChildMap));
+        $allEntityIds = array_merge(array_keys($parentChildMap), array_merge(...$parentChildMap));
         $query = $this->getConnection()
             ->select()
             ->from($this->getTableName('cataloginventory_stock_item'), ['product_id', 'qty'])
-            ->where('product_id IN(' . join(',', $allEntityIds) . ')')
+            ->where('product_id IN(' . implode(',', $allEntityIds) . ')')
             ->query();
 
         $map = [];
@@ -376,10 +382,11 @@ class Iterator extends EavIterator
      * @param array $parentChildMap
      * @param array $stockMap
      * @return array[]
+     * @throws LocalizedException
      */
-    protected function getEntityExtraAttributesBatch(array $parentChildMap, array $stockMap)
+    protected function getEntityExtraAttributesBatch(array $parentChildMap, array $stockMap): array
     {
-        if (count($parentChildMap) == 0) {
+        if (count($parentChildMap) === 0) {
             return [];
         }
 
@@ -407,7 +414,7 @@ class Iterator extends EavIterator
             }
 
             foreach ($entity as $attribute => $value) {
-                if ($attribute == 'entity_id') {
+                if ($attribute === 'entity_id') {
                     continue;
                 }
 
@@ -425,6 +432,8 @@ class Iterator extends EavIterator
     /**
      * @param array $entities
      * @return Generator
+     * @throws InvalidArgumentException
+     * @throws Zend_Db_Statement_Exception
      */
     protected function processBatch(array $entities)
     {
@@ -466,9 +475,9 @@ class Iterator extends EavIterator
 
         foreach ($entities as $entityId => $entity) {
             $name = $entity['name'];
-            $entityCategories = isset($categories[$entityId]) ? $categories[$entityId] : [];
-            $entityStock = isset($stock[$entityId]) ? $stock[$entityId] : [];
-            $attributes = isset($extraAttributes[$entityId]) ? $extraAttributes[$entityId] : [];
+            $entityCategories = $categories[$entityId] ?? [];
+            $entityStock = $stock[$entityId] ?? [];
+            $attributes = $extraAttributes[$entityId] ?? [];
 
             // Combine data
             list($entity, $entityPrice) = $this->combinePriceData($prices, $entityId, $entity);
@@ -494,7 +503,7 @@ class Iterator extends EavIterator
      * @param int[] $parentIds
      * @return array[]
      */
-    protected function getBundleChildIds(array $parentIds)
+    protected function getBundleChildIds(array $parentIds): array
     {
         $connection = $this->getConnection();
 
@@ -516,7 +525,7 @@ class Iterator extends EavIterator
      * @param int $typeId
      * @return array[]
      */
-    protected function getLinkChildIds(array $parentIds, $typeId)
+    protected function getLinkChildIds(array $parentIds, $typeId): array
     {
         $connection = $this->getConnection();
 
@@ -538,7 +547,7 @@ class Iterator extends EavIterator
      * @param int[] $parentIds
      * @return array[]
      */
-    protected function getConfigurableChildIds(array $parentIds)
+    protected function getConfigurableChildIds(array $parentIds): array
     {
         $connection = $this->getConnection();
 
@@ -559,7 +568,7 @@ class Iterator extends EavIterator
      * @param array $entities
      * @return array
      */
-    protected function getEntityParentChildMap(array $entities)
+    protected function getEntityParentChildMap(array $entities): array
     {
         $groups = [];
         foreach ($entities as $entity) {
@@ -587,11 +596,14 @@ class Iterator extends EavIterator
 
             $parentIds = array_keys($group);
             if ($type instanceof BundleType) {
-                $childrenIds = $childrenIds + $this->getBundleChildIds($parentIds);
+                /** @noinspection SlowArrayOperationsInLoopInspection */
+                $childrenIds = array_merge($childrenIds, $this->getBundleChildIds($parentIds));
             } elseif ($type instanceof GroupType) {
-                $childrenIds = $childrenIds + $this->getLinkChildIds($parentIds, Link::LINK_TYPE_GROUPED);
+                /** @noinspection SlowArrayOperationsInLoopInspection */
+                $childrenIds = array_merge($childrenIds, $this->getLinkChildIds($parentIds, Link::LINK_TYPE_GROUPED));
             } elseif ($type instanceof ConfigurableType) {
-                $childrenIds = $childrenIds + $this->getConfigurableChildIds($parentIds);
+                /** @noinspection SlowArrayOperationsInLoopInspection */
+                $childrenIds = array_merge($childrenIds, $this->getConfigurableChildIds($parentIds));
             } else {
                 foreach ($parentIds as $parentId) {
                     $childrenIds[$parentId] = $type->getChildrenIds($parentId, false);
@@ -606,7 +618,7 @@ class Iterator extends EavIterator
      * @param string $attribute
      * @return bool
      */
-    protected function skipChildAttribute($attribute)
+    protected function skipChildAttribute($attribute): bool
     {
         return $this->config->getSkipAttribute($attribute);
     }
@@ -625,12 +637,12 @@ class Iterator extends EavIterator
         $attribute = $this->attributesByCode[$attributeCode];
 
         // Text values are ok like this
-        if (in_array($attribute->getBackendModel(), ['static', 'varchar', 'text', 'datetime'])) {
+        if (\in_array($attribute->getBackendModel(), ['static', 'varchar', 'text', 'datetime'], true)) {
             return $value;
         }
 
         // Decimal values can be cast
-        if ($attribute->getBackendModel() == 'decimal') {
+        if ($attribute->getBackendModel() === 'decimal') {
             // Cleanup empty values
             $value = trim($value);
             if (empty($value)) {
@@ -641,9 +653,9 @@ class Iterator extends EavIterator
         }
 
         // Convert int backend
-        if ($attribute->getBackendModel() == 'int') {
+        if ($attribute->getBackendModel() === 'int') {
             // If select or multi select skip
-            if ($attribute->getFrontendInput() == 'select' || $attribute->getFrontendInput() == 'multiselect') {
+            if ($attribute->getFrontendInput() === 'select' || $attribute->getFrontendInput() === 'multiselect') {
                 return $value;
             }
 
@@ -664,7 +676,7 @@ class Iterator extends EavIterator
      * @param array $entity
      * @return array
      */
-    protected function filterEntityAttributes(array $entity)
+    protected function filterEntityAttributes(array $entity): array
     {
         $result = [];
         foreach ($entity as $attribute) {
@@ -685,7 +697,7 @@ class Iterator extends EavIterator
      * @param array $entity
      * @return array
      */
-    protected function combinePriceData(array $prices, $entityId, array &$entity)
+    protected function combinePriceData(array $prices, $entityId, array &$entity): array
     {
         if (isset($prices[$entityId])) {
             $entity['old_price'] = $prices[$entityId]['old_price'];
@@ -720,10 +732,10 @@ class Iterator extends EavIterator
      * @param $attributes
      * @return array
      */
-    protected function combineExtraAttributes($entity, $attributes)
+    protected function combineExtraAttributes($entity, $attributes): array
     {
         foreach ($entity as $attribute => $value) {
-            if (in_array($attribute, ['name', 'entity_id'])) {
+            if (\in_array($attribute, ['name', 'entity_id'], true)) {
                 continue;
             }
 
@@ -738,9 +750,9 @@ class Iterator extends EavIterator
      * @param array $priceData
      * @return float
      */
-    protected function getPriceValue($entityId, array $priceData)
+    protected function getPriceValue($entityId, array $priceData): float
     {
-        $priceFields = $this->config->getPriceFields($this->storeId);
+        $priceFields = $this->config->getPriceFields();
         foreach ($priceFields as $field) {
             $value = (float) $priceData[$field];
             if ($value > 0.00001) {
