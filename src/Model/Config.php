@@ -16,6 +16,20 @@ use Magento\Store\Model\Store;
 class Config
 {
     /**
+     * Config path constants
+     */
+    const PATH_ENABLED = 'tweakwise/export/enabled';
+    const PATH_REAL_TIME = 'tweakwise/export/real_time';
+    const PATH_VALIDATE = 'tweakwise/export/validate';
+    const PATH_API_IMPORT_URL = 'tweakwise/export/api_import_url';
+    const PATH_STOCK_CALCULATION = 'tweakwise/export/stock_calculation';
+    const PATH_PROUCT_SELECTION = 'tweakwise/export/product_selection';
+    const PATH_OUT_OF_STOCK_CHILDREN = 'tweakwise/export/out_of_stock_children';
+    const PATH_FEED_KEY = 'tweakwise/export/feed_key';
+    const PATH_PRICE_FIELD = 'tweakwise/export/price_field';
+    const PATH_EXCLUDE_CHILD_ATTRIBUTES = 'tweakwise/export/exclude_child_attributes';
+
+    /**
      * default feed filename
      */
     const FEED_FILE_NAME = 'tweakwise.xml';
@@ -61,9 +75,9 @@ class Config
     public function isEnabled(Store $store = null)
     {
         if ($store) {
-            return $store->getConfig('tweakwise/export/enabled');
+            return $store->getConfig(self::PATH_ENABLED);
         }
-        return (bool) $this->config->getValue('tweakwise/export/enabled');
+        return (bool) $this->config->getValue(self::PATH_ENABLED);
     }
 
     /**
@@ -71,7 +85,7 @@ class Config
      */
     public function isRealTime()
     {
-        return (bool) $this->config->getValue('tweakwise/export/real_time');
+        return (bool) $this->config->getValue(self::PATH_REAL_TIME);
     }
 
     /**
@@ -83,7 +97,7 @@ class Config
             return false;
         }
 
-        return (bool) $this->config->getValue('tweakwise/export/validate');
+        return (bool) $this->config->getValue(self::PATH_VALIDATE);
     }
 
     /**
@@ -91,7 +105,7 @@ class Config
      */
     public function getApiImportUrl()
     {
-        return (string) $this->config->getValue('tweakwise/export/api_import_url');
+        return (string) $this->config->getValue(self::PATH_API_IMPORT_URL);
     }
 
     /**
@@ -99,7 +113,7 @@ class Config
      */
     public function getStockCalculation()
     {
-        return (string) $this->config->getValue('tweakwise/export/stock_calculation');
+        return (string) $this->config->getValue(self::PATH_STOCK_CALCULATION);
     }
 
     /**
@@ -107,7 +121,7 @@ class Config
      */
     public function getProductSelection()
     {
-        return (int) $this->config->getValue('tweakwise/export/product_selection');
+        return (int) $this->config->getValue(self::PATH_PROUCT_SELECTION);
     }
 
     /**
@@ -115,7 +129,7 @@ class Config
      */
     public function isOutOfStockChildren()
     {
-        return (bool) $this->config->getValue('tweakwise/export/out_of_stock_children');
+        return (bool) $this->config->getValue(self::PATH_OUT_OF_STOCK_CHILDREN);
     }
 
     /**
@@ -123,7 +137,7 @@ class Config
      */
     public function getKey()
     {
-        return (string) $this->config->getValue('tweakwise/export/feed_key');
+        return (string) $this->config->getValue(self::PATH_FEED_KEY);
     }
 
     /**
@@ -131,7 +145,7 @@ class Config
      */
     public function getPriceFields()
     {
-        $data = (array) explode(',', $this->config->getValue('tweakwise/export/price_field'));
+        $data = (array) explode(',', $this->config->getValue(self::PATH_PRICE_FIELD));
         return array_filter($data);
     }
 
@@ -142,7 +156,7 @@ class Config
     public function getSkipAttribute($attribute = null)
     {
         if (!$this->skipAttributes) {
-            $skipAttributes = explode(',', $this->config->getValue('tweakwise/export/exclude_child_attributes'));
+            $skipAttributes = explode(',', $this->config->getValue(self::PATH_EXCLUDE_CHILD_ATTRIBUTES));
             $this->skipAttributes = array_flip($skipAttributes);
         }
 
