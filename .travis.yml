@@ -1,5 +1,11 @@
 env:
   global:
+    - MAGE2_FAKE_URL=http://magento-2-ce.dev
+    - MAGE2_ADMIN_EMAIL=inf@emico.nl
+    - MAGE2_ADMIN_FIRST_NAME=Emico
+    - MAGE2_ADMIN_LAST_NAME=Emico
+    - MAGE2_ADMIN_USERNAME=admin
+    - MAGE2_ADMIN_PASSWORD=admin123
     - MAGE2_DB_NAME=magento_2
     - MAGE2_DB_USER=travis
     - MAGE2_DB_HOST=127.0.0.1
