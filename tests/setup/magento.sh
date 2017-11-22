@@ -4,13 +4,13 @@ set -e
 # Install Magento with dependencies
 echo "Create magento project"
 cd /tmp
-composer create-project --no-interaction --ignore-platform-reqs --repository-url=https://repo.magento.com/ magento/project-community-edition:${MAGE2_VERSION} build
+composer create-project --no-interaction --ignore-platform-reqs --repository-url=https://repo.magento.com/ ${MAGE2_VERSION} build
 cd build
 
 cp -vf ${TRAVIS_BUILD_DIR}/tests/setup/install-config-mysql.php dev/tests/integration/etc/
 
 echo "Install magento"
-php bin/magento setup:config:set --no-interaction \
+php bin/magento setup:install --no-interaction \
     --admin-email "$MAGE2_ADMIN_EMAIL" \
     --admin-firstname "$MAGE2_ADMIN_FIRST_NAME" \
     --admin-lastname "$MAGE2_ADMIN_LAST_NAME" \

@@ -18,10 +18,12 @@ env:
     - secure: "WiNLOXtLlpmwtbKq9vNSilxBVI1pUiwpm/cv7bNAJ+nbKxsdqSSdcDTPBehTH/6xPiya06rEHNAar5s30ebA3ic19SvWMpRBo7qVkfNQ8cli3/tSS4LqS1WpA1RDf/wUdeKCLYxi5iXY1pMDLnpY7GBvQzmCrXcJ6ANBXovtkNuPXq1PUq8hUmGfuCDh2Qr0er99jclQoZ4alwe6yjENorKqIJy5qzMAH7v5gqKqifrrZzm7YU7O2rNFqm3SsizfBAowgO2c4z2F6M15ucLrJDOuWIRovNSWzBA/xUbCrKSFHI4bG0x57K+vlBx+46uuVwgjzmQEncx4jQTix6PmeBIGybrGvTlgFT+OUEBEk6iWSkQRWEcE76o9zyxvNvp7S4LbO0LaF7Sa9fjJd0LBCiZ6gcET0sMXmJsRd7Dl5c8MwCJWpLZbgdr/FnDDNSBslQc9bwx7OpPzF6ibTZ08ICvXwG1G4hm6ZPmIjIiRvJKR1lyT6C6Bavln9xvtnKDKdudEWEg7nBLbRtfKTVIbBQb56lCQkhs4MKDW+ZAHnAu9D53XgE2J64HKeoPY20T4t/QjanQn9DK/UQREFNVtYk0YOH4NBtx42keYbdKHSo72EhKyOSeuQff7YcGq3qAHW6Nxx0JyV1ewwuoY5jGeJus4/IAjUwdgMOzP22rxwIw="
 
   matrix:
-    - MAGE2_VERSION=2.1
-    - MAGE2_VERSION=2.1
-    - MAGE2_VERSION=2.0
-    - MAGE2_VERSION=2.0
+    - MAGE2_VERSION=magento/project-community-edition:2.1.9
+    - MAGE2_VERSION=magento/project-community-edition:2.1.8
+    - MAGE2_VERSION=magento/project-community-edition:2.1.7
+    - MAGE2_VERSION=magento/project-community-edition:2.1.3
+    - MAGE2_VERSION=magento/project-community-edition:2.1.2
+    - MAGE2_VERSION=magento/project-community-edition:2.1.0
 
 language: php
 
