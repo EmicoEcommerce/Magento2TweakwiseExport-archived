@@ -255,6 +255,10 @@ class Iterator extends EavIterator
      */
     protected function skipEntityByStock($stock)
     {
+        if (!$this->stockConfig->getManageStock($this->storeId)) {
+            return false;
+        }
+
         if ($this->stockConfig->isShowOutOfStock($this->storeId)) {
             return false;
         }
