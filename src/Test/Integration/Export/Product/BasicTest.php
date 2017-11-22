@@ -12,13 +12,41 @@ use Emico\TweakwiseExport\Test\Integration\ExportTest;
 
 class BasicTest extends ExportTest
 {
+    /**
+     * Test if empty export does not throw error
+     */
     public function testEmptyExport()
     {
         $this->assertFeedResult('integration/export/product/basic/empty.xml');
     }
 
-    public function oneProductTest()
+    /**
+     * Test export with one product and check on product data
+     */
+    public function testOneProduct()
     {
-        $this->assertFeedResult('integration/export/product/basic/one-product.xml');
+        $product = $this->createSavedProduct();
+        $feed = $this->exportFeed();
+
+        $this->assertProductData(
+            $feed,
+            $product->getSku(),
+            $product->getName(),
+            $product->getPrice(),
+            [
+                'sku' => $product->getSku(),
+                'type_id' => 'simple',
+                'status' => 'Enabled',
+                'visibility' => '4',
+                'tax_class_id' => 'Taxable Goods',
+                'price' => $product->getPrice(),
+                'old_price' => $product->getPrice(),
+                'min_price' => $product->getPrice(),
+                'max_price' => $product->getPrice(),
+            ],
+            [
+                100012
+            ]
+        );
     }
 }

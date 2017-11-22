@@ -8,12 +8,21 @@
 
 namespace Emico\TweakwiseExport\Test\Integration;
 
+use Magento\Framework\App\Area;
 use Magento\Store\Model\ScopeInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\Framework\App\Config\MutableScopeConfigInterface;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
+    /**
+     * Set admin area
+     */
+    protected function setUp()
+    {
+        Bootstrap::getInstance()->loadArea(Area::AREA_ADMINHTML);
+    }
+
     /**
      * @param string $type
      * @param array $arguments
@@ -22,6 +31,16 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     protected function getObject(string $type, array $arguments = [])
     {
         return Bootstrap::getObjectManager()->get($type, $arguments);
+    }
+
+    /**
+     * @param string $type
+     * @param array $arguments
+     * @return mixed
+     */
+    protected function createObject(string $type, array $arguments = [])
+    {
+        return Bootstrap::getObjectManager()->create($type, $arguments);
     }
 
     /**
