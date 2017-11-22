@@ -8,11 +8,8 @@
 
 use Magento\Framework\Component\ComponentRegistrar;
 
-// Used class as string due to the magento compiler issue #9
-if (class_exists('Magento\Framework\Component\ComponentRegistrar', false)) {
-    ComponentRegistrar::register(
-        ComponentRegistrar::MODULE,
-        'Emico_TweakwiseExport',
-        __DIR__
-    );
-}
+ComponentRegistrar::register(
+    ComponentRegistrar::MODULE,
+    'Emico_TweakwiseExport',
+    __DIR__
+);
