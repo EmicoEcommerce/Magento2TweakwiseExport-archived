@@ -24,6 +24,9 @@ env:
     - MAGE2_VERSION=magento/project-community-edition:2.1.3
     - MAGE2_VERSION=magento/project-community-edition:2.1.2
     - MAGE2_VERSION=magento/project-community-edition:2.1.0
+    - MAGE2_VERSION=magento/project-enterprise-edition:2.1.8
+    - MAGE2_VERSION=magento/project-enterprise-edition:2.1.3
+    - MAGE2_VERSION=magento/project-enterprise-edition:2.1.0
 
 language: php
 
