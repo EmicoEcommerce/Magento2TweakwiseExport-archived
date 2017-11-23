@@ -12,64 +12,26 @@ use DateTime;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Export;
 use Emico\TweakwiseExport\Model\Write\Writer;
-use Faker\Factory;
-use Faker\Generator;
-use Magento\Catalog\Api\CategoryRepositoryInterface;
-use Magento\Catalog\Model\CategoryFactory;
-use Magento\Catalog\Model\Entity\Attribute;
-use Magento\Catalog\Model\Product;
-use Magento\Catalog\Api\CategoryLinkManagementInterface;
-use Magento\Catalog\Model\ProductFactory;
-use Magento\Catalog\Model\ProductRepository;
-use Magento\Catalog\Setup\CategorySetup;
-use Magento\CatalogInventory\Api\StockRegistryInterface;
-use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
-use Magento\Eav\Model\Config as EavConfig;
-use Magento\Framework\Api\SearchCriteria;
-use RuntimeException;
+use Emico\TweakwiseExport\TestHelper\Data\CategoryProvider;
+use Emico\TweakwiseExport\TestHelper\Data\ProductProvider;
 use SimpleXMLElement;
 
 abstract class ExportTest extends TestCase
 {
-    /**
-     * @var Generator
-     */
-    protected $faker;
-
-    /**
-     * @var ProductRepository
-     */
-    protected $productRepository;
-
-    /**
-     * @var ProductFactory
-     */
-    protected $productFactory;
-
-    /**
-     * @var CategoryRepositoryInterface
-     */
-    protected $categoryRepository;
-
-    /**
-     * @var CategoryFactory
-     */
-    protected $categoryFactory;
-
-    /**
-     * @var CategoryLinkManagementInterface
-     */
-    protected $categoryLinkManagement;
-
     /**
      * @var Writer
      */
     protected $writer;
 
     /**
-     * @var StockRegistryInterface
+     * @var ProductProvider
      */
-    protected $stockRegistry;
+    protected $productData;
+
+    /**
+     * @var \Emico\TweakwiseExport\TestHelper\Data\CategoryProvider
+     */
+    protected $categoryData;
 
     /**
      * Make sure export is enabled and set some much used objects
@@ -80,13 +42,8 @@ abstract class ExportTest extends TestCase
 
         $this->setConfig(Config::PATH_ENABLED, true);
 
-        $this->faker = Factory::create();
-        $this->productRepository = $this->getObject(ProductRepository::class);
-        $this->productFactory = $this->getObject(ProductFactory::class);
-        $this->categoryRepository = $this->getObject(CategoryRepositoryInterface::class);
-        $this->categoryFactory = $this->getObject(CategoryFactory::class);
-        $this->categoryLinkManagement = $this->getObject(CategoryLinkManagementInterface::class);
-        $this->stockRegistry = $this->getObject(StockRegistryInterface::class);
+        $this->productData = $this->getObject(ProductProvider::class);
+        $this->categoryData = $this->getObject(CategoryProvider::class);
 
         $this->writer = $this->getObject(Writer::class);
         $this->writer->setNow(DateTime::createFromFormat('Y-d-m H:i:s', '2017-01-01 00:00:00'));
@@ -109,12 +66,8 @@ abstract class ExportTest extends TestCase
      */
     protected function clearTestData()
     {
-        /** @var SearchCriteria $productCriteria */
-        $productCriteria = $this->createObject(SearchCriteria::class);
-        $products = $this->productRepository->getList($productCriteria)->getItems();
-        foreach ($products as $product) {
-            $this->productRepository->delete($product);
-        }
+        $this->productData->clearData();
+        $this->categoryData->clearData();
     }
 
     /**
@@ -143,60 +96,6 @@ abstract class ExportTest extends TestCase
         } finally {
             fclose($resource);
         }
-    }
-
-    /**
-     * @param string $set
-     * @return int
-     */
-    protected function getAttributeSetId(string $set = 'Default'): int
-    {
-        /** @var $installer CategorySetup */
-        $installer = $this->getObject(CategorySetup::class);
-        return (int) $installer->getAttributeSetId(Product::ENTITY, $set);
-    }
-
-    /**
-     * @param array $data
-     * @return Product
-     */
-    protected function createProduct(array $data = []): Product
-    {
-        /** @var Product $product */
-        $product = $this->productFactory->create();
-        $product->setSku('test-' . $this->faker->uuid);
-        $product->setName($this->faker->name);
-        $product->setTypeId(Product\Type::TYPE_SIMPLE);
-        $product->setVisibility(Product\Visibility::VISIBILITY_BOTH);
-        $product->setPrice($this->faker->randomNumber(2));
-        $product->setAttributeSetId($this->getAttributeSetId());
-        $product->setStatus(Product\Attribute\Source\Status::STATUS_ENABLED);
-        $product->addData($data);
-
-        $categoryIds = $data['category_ids'] ?? [2];
-        $this->productRepository->save($product);
-        $this->categoryLinkManagement->assignProductToCategories($product->getSku(), $categoryIds);
-
-        $stockItem = $this->stockRegistry->getStockItemBySku($product->getSku());
-        $stockItem->setQty($data['qty'] ?? [100]);
-        $this->stockRegistry->updateStockItemBySku($product->getSku(), $stockItem);
-
-        return $product;
-    }
-
-    /**
-     * @param string $code
-     * @return Attribute
-     */
-    protected function getProductAttribute(string $code): Attribute
-    {
-        /** @var EavConfig $config */
-        $config = $this->getObject(EavConfig::class);
-        $attribute = $config->getAttribute(Product::ENTITY, $code);
-        if (!$attribute instanceof Attribute) {
-            throw new RuntimeException('Invalid attribute type returned by eav config');
-        }
-        return $attribute;
     }
 
     /**
@@ -289,16 +188,5 @@ abstract class ExportTest extends TestCase
         if ($categories !== null) {
             $this->assertArraySubset($categories, $productData['categories']);
         }
-    }
-
-    /**
-     * @param Product $product
-     * @param callable $callback
-     */
-    protected function updateStockItem(Product $product, callable $callback)
-    {
-        $stockItem = $this->stockRegistry->getStockItemBySku($product->getSku());
-        $callback($stockItem);
-        $this->stockRegistry->updateStockItemBySku($product->getSku(), $stockItem);
     }
 }

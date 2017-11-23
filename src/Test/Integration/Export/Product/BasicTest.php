@@ -25,7 +25,7 @@ class BasicTest extends ExportTest
      */
     public function testOneProduct()
     {
-        $product = $this->createProduct();
+        $product = $this->productData->createProduct();
         $feed = $this->exportFeed();
 
         $this->assertProductData(
