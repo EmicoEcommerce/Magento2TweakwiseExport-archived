@@ -24,6 +24,7 @@ class StockTest extends ExportTest
         $productOutStock = $this->productData->create(['qty' => 0]);
 
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
+        $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, false);
 
         $feed = $this->exportFeed();
 
@@ -36,10 +37,28 @@ class StockTest extends ExportTest
      *
      * @magentoDbIsolation enabled
      */
+    public function testEnableStockManagementShowOutOfStockProducts()
+    {
+        $productOutStock = $this->productData->create(['qty' => 0]);
+
+        $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
+        $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, true);
+
+        $feed = $this->exportFeed();
+
+        $this->assertProductData($feed, $productOutStock->getSku());
+    }
+
+    /**
+     * Test export with one product and check on product data
+     *
+     * @magentoDbIsolation enabled
+     */
     public function testDisableStockManagement()
     {
         $product = $this->productData->create(['qty' => 0]);
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, false);
+        $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, false);
 
         $feed = $this->exportFeed();
         $this->assertProductData($feed, $product->getSku());
@@ -57,6 +76,7 @@ class StockTest extends ExportTest
         $productOutStock = $this->productData->create(['qty' => 4]);
 
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
+        $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, false);
         $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 5);
 
         $feed = $this->exportFeed();
@@ -74,6 +94,7 @@ class StockTest extends ExportTest
     public function testInStockWithQtyThresholdOnProduct()
     {
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
+        $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, false);
         $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 10);
 
         $productInStock = $this->productData->create(['qty' => 6]);
