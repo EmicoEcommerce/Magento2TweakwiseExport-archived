@@ -141,9 +141,12 @@ abstract class ExportTest extends TestCase
     }
 
     /**
+     * @param array $productData
+     * @param int $qty
+     * @param array $categoryIds
      * @return Product
      */
-    protected function createProduct(): Product
+    protected function createProduct(array $productData = [], int $qty = 100, array $categoryIds = [2]): Product
     {
         /** @var Product $product */
         $product = $this->productFactory->create();
@@ -154,18 +157,8 @@ abstract class ExportTest extends TestCase
         $product->setPrice($this->faker->randomNumber(2));
         $product->setAttributeSetId(4); // Default attribute set for products
         $product->setStatus(Product\Attribute\Source\Status::STATUS_ENABLED);
+        $product->addData($productData);
 
-        return $product;
-    }
-
-    /**
-     * @param array $categoryIds
-     * @param int $qty
-     * @return Product
-     */
-    protected function createSavedProduct(int $qty = 100, array $categoryIds = [2]): Product
-    {
-        $product = $this->createProduct();
         $this->productRepository->save($product);
         $this->categoryLinkManagement->assignProductToCategories($product->getSku(), $categoryIds);
 
@@ -286,5 +279,16 @@ abstract class ExportTest extends TestCase
         if ($categories !== null) {
             $this->assertArraySubset($categories, $productData['categories']);
         }
+    }
+
+    /**
+     * @param Product $product
+     * @param callable $callback
+     */
+    protected function updateStockItem(Product $product, callable $callback)
+    {
+        $stockItem = $this->stockRegistry->getStockItemBySku($product->getSku());
+        $callback($stockItem);
+        $this->stockRegistry->updateStockItemBySku($product->getSku(), $stockItem);
     }
 }

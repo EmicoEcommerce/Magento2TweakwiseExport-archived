@@ -9,30 +9,18 @@
 namespace Emico\TweakwiseExport\Test\Integration\Export\Product;
 
 use Emico\TweakwiseExport\Test\Integration\ExportTest;
-use Magento\Catalog\Model\Product;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use \Magento\CatalogInventory\Model\Configuration as StockConfiguration;
 
 class StockTest extends ExportTest
 {
     /**
-     * @param Product $product
-     * @param callable $callback
-     */
-    protected function updateStockItem(Product $product, callable $callback)
-    {
-        $stockItem = $this->stockRegistry->getStockItemBySku($product->getSku());
-        $callback($stockItem);
-        $this->stockRegistry->updateStockItemBySku($product->getSku(), $stockItem);
-    }
-
-    /**
      * Test export with one product and check on product data
      */
     public function testEnableStockManagement()
     {
-        $productInStock = $this->createSavedProduct();
-        $productOutStock = $this->createSavedProduct(0);
+        $productInStock = $this->createProduct();
+        $productOutStock = $this->createProduct([], 0);
 
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
 
@@ -47,7 +35,7 @@ class StockTest extends ExportTest
      */
     public function testDisableStockManagement()
     {
-        $product = $this->createSavedProduct(0);
+        $product = $this->createProduct([], 0);
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, false);
 
         $feed = $this->exportFeed();
@@ -60,8 +48,8 @@ class StockTest extends ExportTest
      */
     public function testInStockWithQtyThreshold()
     {
-        $productInStock = $this->createSavedProduct(6);
-        $productOutStock = $this->createSavedProduct(4);
+        $productInStock = $this->createProduct([], 6);
+        $productOutStock = $this->createProduct([], 4);
 
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
         $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 5);
@@ -81,12 +69,12 @@ class StockTest extends ExportTest
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
         $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 10);
 
-        $productInStock = $this->createSavedProduct(6);
+        $productInStock = $this->createProduct([], 6);
         $this->updateStockItem($productInStock, function(StockItemInterface $stockItem) {
             $stockItem->setUseConfigMinQty(false);
             $stockItem->setMinQty(5);
         });
-        $productOutStock = $this->createSavedProduct(4);
+        $productOutStock = $this->createProduct([], 4);
         $this->updateStockItem($productOutStock, function(StockItemInterface $stockItem) {
             $stockItem->setUseConfigMinQty(false);
             $stockItem->setMinQty(5);
