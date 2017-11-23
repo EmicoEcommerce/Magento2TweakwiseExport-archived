@@ -194,11 +194,11 @@ class Iterator extends EavIterator
      */
     protected function skipEntity(array $entity): bool
     {
-        if ($entity['status'] !== Status::STATUS_ENABLED) {
+        if ((int) $entity['status'] !== Status::STATUS_ENABLED) {
             return true;
         }
 
-        if (!\in_array($entity['visibility'], $this->visibility->getVisibleInSiteIds(), true)) {
+        if (!\in_array((int) $entity['visibility'], $this->visibility->getVisibleInSiteIds(), true)) {
             return true;
         }
 
@@ -213,7 +213,7 @@ class Iterator extends EavIterator
      */
     protected function skipEntityChild(array $entity, array $stockMap, $parentId): bool
     {
-        if ($entity['status'] !== Status::STATUS_ENABLED) {
+        if ((int) $entity['status'] !== Status::STATUS_ENABLED) {
             return true;
         }
 
