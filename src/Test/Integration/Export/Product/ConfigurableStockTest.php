@@ -8,6 +8,7 @@
 
 namespace Emico\TweakwiseExport\Test\Integration\Export\Product;
 
+use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Test\Integration\ExportTest;
 use Emico\TweakwiseExport\TestHelper\Data\Product\ConfigurableProvider;
 use Magento\CatalogInventory\Model\Configuration as StockConfiguration;
@@ -29,13 +30,36 @@ class ConfigurableStockTest extends ExportTest
     }
 
     /**
-     * Test export with one product and check on product data
+     * Test to see if show out of stock children is handled when set to true
+     *
+     * @magentoDbIsolation enabled
+     */
+    public function testAttributesVisibleWhenOutStock()
+    {
+        $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
+        $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, false);
+        $this->setConfig(Config::PATH_OUT_OF_STOCK_CHILDREN, true);
+
+        $product = $this->configurableProvider->create([
+            ['color' => 'black', 'qty' => 0],
+            ['color' => 'blue', 'qty' => 10],
+            ['color' => 'white', 'qty' => 2],
+        ]);
+
+        $feed = $this->exportFeed();
+        $this->assertProductData($feed, $product->getSku(), null, null, ['color' => ['black', 'blue', 'white']]);
+    }
+
+    /**
+     * Test to see if show out of stock children is handled when set to false
      *
      * @magentoDbIsolation enabled
      */
     public function testAttributesNotVisibleWhenOutStock()
     {
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
+        $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, false);
+        $this->setConfig(Config::PATH_OUT_OF_STOCK_CHILDREN, false);
 
         $product = $this->configurableProvider->create([
             ['color' => 'black', 'qty' => 0],

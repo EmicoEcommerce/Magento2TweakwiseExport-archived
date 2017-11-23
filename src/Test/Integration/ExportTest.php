@@ -131,6 +131,13 @@ abstract class ExportTest extends TestCase
         if ($attributes !== null) {
             foreach ($attributes as $key => $value) {
                 $this->assertArrayHasKey($key, $productData['attributes']);
+                if (\is_array($value)) {
+                    asort($value);
+                }
+
+                if (\is_array($productData['attributes'][$key])) {
+                    asort($productData['attributes'][$key]);
+                }
                 $this->assertEquals($value, $productData['attributes'][$key]);
             }
         }
