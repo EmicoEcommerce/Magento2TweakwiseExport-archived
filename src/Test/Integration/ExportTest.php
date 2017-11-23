@@ -14,6 +14,7 @@ use Emico\TweakwiseExport\Model\Export;
 use Emico\TweakwiseExport\Model\Write\Writer;
 use Emico\TweakwiseExport\TestHelper\Data\CategoryProvider;
 use Emico\TweakwiseExport\TestHelper\Data\ProductProvider;
+use Emico\TweakwiseExport\TestHelper\FeedData;
 use SimpleXMLElement;
 
 abstract class ExportTest extends TestCase
@@ -29,9 +30,14 @@ abstract class ExportTest extends TestCase
     protected $productData;
 
     /**
-     * @var \Emico\TweakwiseExport\TestHelper\Data\CategoryProvider
+     * @var CategoryProvider
      */
     protected $categoryData;
+
+    /**
+     * @var FeedData
+     */
+    protected $feedData;
 
     /**
      * Make sure export is enabled and set some much used objects
@@ -44,6 +50,7 @@ abstract class ExportTest extends TestCase
 
         $this->productData = $this->getObject(ProductProvider::class);
         $this->categoryData = $this->getObject(CategoryProvider::class);
+        $this->feedData = $this->getObject(FeedData::class);
 
         $this->writer = $this->getObject(Writer::class);
         $this->writer->setNow(DateTime::createFromFormat('Y-d-m H:i:s', '2017-01-01 00:00:00'));
@@ -78,50 +85,6 @@ abstract class ExportTest extends TestCase
     }
 
     /**
-     * @param SimpleXMLElement $feed
-     * @param string $sku
-     * @return array|null
-     */
-    protected function getProductItem(SimpleXMLElement $feed, string $sku)
-    {
-        foreach ($feed->xpath('//item') as $element) {
-            $data = [
-                'xml' => $element,
-                'id' => (string) $element->id,
-                'name' => (string) $element->name,
-                'price' => (float) $element->price,
-                'attributes' => [],
-                'categories' => [],
-            ];
-
-            foreach ($element->attributes->children() as $attributeElement) {
-                $name = (string) $attributeElement->name;
-                $value = (string) $attributeElement->value;
-                if (isset($data['attributes'][$name])) {
-                    // Ensure data is array
-                    if (!\is_array($data['attributes'][$name])) {
-                        $data['attributes'][$name] = [$data['attributes'][$name]];
-                    }
-
-                    $data['attributes'][$name][] = $value;
-                }
-                $data['attributes'][$name] = $value;
-            }
-
-            foreach ($element->categories->children() as $categoryElement) {
-                $data['categories'][] = (string) $categoryElement;
-            }
-
-            $key = $data['attributes']['sku'] ?? $data['id'];
-            if ($key === $sku) {
-                return $data;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * @param string $file
      * @param SimpleXMLElement $result
      */
@@ -152,7 +115,7 @@ abstract class ExportTest extends TestCase
         array $categories = null
     )
     {
-        $productData = $this->getProductItem($feed, $sku);
+        $productData = $this->feedData->getProductData($feed, $sku);
         $this->assertNotNull($productData);
 
         if ($price !== null) {

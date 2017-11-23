@@ -28,7 +28,7 @@ class StockTest extends ExportTest
         $feed = $this->exportFeed();
 
         $this->assertProductData($feed, $productInStock->getSku());
-        $this->assertNull($this->getProductItem($feed, $productOutStock->getSku()));
+        $this->assertNull($this->feedData->getProductData($feed, $productOutStock->getSku()));
     }
 
     /**
@@ -62,7 +62,7 @@ class StockTest extends ExportTest
         $feed = $this->exportFeed();
 
         $this->assertProductData($feed, $productInStock->getSku());
-        $this->assertNull($this->getProductItem($feed, $productOutStock->getSku()));
+        $this->assertNull($this->feedData->getProductData($feed, $productOutStock->getSku()));
     }
 
     /**
@@ -88,6 +88,6 @@ class StockTest extends ExportTest
         $feed = $this->exportFeed();
 
         $this->assertProductData($feed, $productInStock->getSku());
-        $this->assertNull($this->getProductItem($feed, $productOutStock->getSku()));
+        $this->assertNull($this->feedData->getProductData($feed, $productOutStock->getSku()));
     }
 }
