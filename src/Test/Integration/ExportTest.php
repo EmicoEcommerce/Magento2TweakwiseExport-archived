@@ -16,12 +16,17 @@ use Faker\Factory;
 use Faker\Generator;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Model\CategoryFactory;
+use Magento\Catalog\Model\Entity\Attribute;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Api\CategoryLinkManagementInterface;
 use Magento\Catalog\Model\ProductFactory;
 use Magento\Catalog\Model\ProductRepository;
+use Magento\Catalog\Setup\CategorySetup;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\Api\SearchCriteria;
+use RuntimeException;
 use SimpleXMLElement;
 
 abstract class ExportTest extends TestCase
@@ -141,12 +146,21 @@ abstract class ExportTest extends TestCase
     }
 
     /**
-     * @param array $productData
-     * @param int $qty
-     * @param array $categoryIds
+     * @param string $set
+     * @return int
+     */
+    protected function getAttributeSetId(string $set = 'Default'): int
+    {
+        /** @var $installer CategorySetup */
+        $installer = $this->getObject(CategorySetup::class);
+        return (int) $installer->getAttributeSetId(Product::ENTITY, $set);
+    }
+
+    /**
+     * @param array $data
      * @return Product
      */
-    protected function createProduct(array $productData = [], int $qty = 100, array $categoryIds = [2]): Product
+    protected function createProduct(array $data = []): Product
     {
         /** @var Product $product */
         $product = $this->productFactory->create();
@@ -155,18 +169,34 @@ abstract class ExportTest extends TestCase
         $product->setTypeId(Product\Type::TYPE_SIMPLE);
         $product->setVisibility(Product\Visibility::VISIBILITY_BOTH);
         $product->setPrice($this->faker->randomNumber(2));
-        $product->setAttributeSetId(4); // Default attribute set for products
+        $product->setAttributeSetId($this->getAttributeSetId());
         $product->setStatus(Product\Attribute\Source\Status::STATUS_ENABLED);
-        $product->addData($productData);
+        $product->addData($data);
 
+        $categoryIds = $data['category_ids'] ?? [2];
         $this->productRepository->save($product);
         $this->categoryLinkManagement->assignProductToCategories($product->getSku(), $categoryIds);
 
         $stockItem = $this->stockRegistry->getStockItemBySku($product->getSku());
-        $stockItem->setQty($qty);
+        $stockItem->setQty($data['qty'] ?? [100]);
         $this->stockRegistry->updateStockItemBySku($product->getSku(), $stockItem);
 
         return $product;
+    }
+
+    /**
+     * @param string $code
+     * @return Attribute
+     */
+    protected function getProductAttribute(string $code): Attribute
+    {
+        /** @var EavConfig $config */
+        $config = $this->getObject(EavConfig::class);
+        $attribute = $config->getAttribute(Product::ENTITY, $code);
+        if (!$attribute instanceof Attribute) {
+            throw new RuntimeException('Invalid attribute type returned by eav config');
+        }
+        return $attribute;
     }
 
     /**
@@ -203,26 +233,6 @@ abstract class ExportTest extends TestCase
         }
 
         return null;
-    }
-
-    /**
-     * @param SimpleXMLElement $feed
-     * @param string $sku
-     * @param string $attribute
-     * @return null|string
-     */
-    protected function getProductAttribute(SimpleXMLElement $feed, string $sku, string $attribute)
-    {
-        $item = $this->getProductItem($feed, $sku);
-        if (!$item) {
-            return null;
-        }
-
-        if (!isset($item['attributes'][$attribute])) {
-            return null;
-        }
-
-        return $item['attributes'][$attribute];
     }
 
     /**
