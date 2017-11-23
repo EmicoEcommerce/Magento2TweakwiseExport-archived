@@ -71,11 +71,15 @@ class ConfigurableProvider
         array $configurableAttributes = ['color']
     ): ProductInterface
     {
-        if (!isset($productData['type'])) {
-            $productData['type'] = Configurable::TYPE_CODE;
+        if (!isset($productData['type_id'])) {
+            $productData['type_id'] = Configurable::TYPE_CODE;
         }
 
         $product = $this->productProvider->create($productData);
+        foreach ($configurableAttributes as $attribute) {
+            $this->attributeProvider->ensureSet($attribute, $product->getAttributeSetId());
+        }
+
         $simpleProducts = $this->createSimpleProducts($simpleData, $configurableAttributes);
         $configurableOptions = $this->createConfigurableOptions($configurableAttributes);
 
@@ -88,8 +92,7 @@ class ConfigurableProvider
         $extensionAttributes->setConfigurableProductLinks(array_keys($simpleProducts));
         $product->setExtensionAttributes($extensionAttributes);
 
-        $this->productRepository->save($product);
-        return $product;
+        return $this->productRepository->save($product);
     }
 
     /**
@@ -129,8 +132,8 @@ class ConfigurableProvider
             $data[$attributeCode] = $this->attributeProvider->getOptionId($attributeCode, $data[$attributeCode]);
         }
 
-        if (!isset($simple['visibility'])) {
-            $simple['visibility'] = Product\Visibility::VISIBILITY_NOT_VISIBLE;
+        if (!isset($data['visibility'])) {
+            $data['visibility'] = Product\Visibility::VISIBILITY_NOT_VISIBLE;
         }
 
         return $this->productProvider->create($data);
@@ -154,15 +157,15 @@ class ConfigurableProvider
             foreach ($options as $option) {
                 $attributeValues[] = [
                     'label' => $option->getLabel(),
-                    'attribute_id' => $attribute->getId(),
+                    'attribute_id' => $attribute->getAttributeId(),
                     'value_index' => $option->getValue(),
                 ];
             }
 
             $configurableAttributesData[] = [
-                'attribute_id' => $attribute->getId(),
+                'attribute_id' => $attribute->getAttributeId(),
                 'code' => $attribute->getAttributeCode(),
-                'label' => $attribute->getStoreLabel(),
+                'label' => $attribute->getDefaultFrontendLabel(),
                 'position' => '0',
                 'values' => $attributeValues,
             ];

@@ -18,8 +18,8 @@ class StockTest extends ExportTest
      */
     public function testEnableStockManagement()
     {
-        $productInStock = $this->productData->createProduct();
-        $productOutStock = $this->productData->createProduct(['qty' => 0]);
+        $productInStock = $this->productData->create();
+        $productOutStock = $this->productData->create(['qty' => 0]);
 
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
 
@@ -34,7 +34,7 @@ class StockTest extends ExportTest
      */
     public function testDisableStockManagement()
     {
-        $product = $this->productData->createProduct(['qty' => 0]);
+        $product = $this->productData->create(['qty' => 0]);
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, false);
 
         $feed = $this->exportFeed();
@@ -47,8 +47,8 @@ class StockTest extends ExportTest
      */
     public function testInStockWithQtyThreshold()
     {
-        $productInStock = $this->productData->createProduct(['qty' => 6]);
-        $productOutStock = $this->productData->createProduct(['qty' => 4]);
+        $productInStock = $this->productData->create(['qty' => 6]);
+        $productOutStock = $this->productData->create(['qty' => 4]);
 
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
         $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 5);
@@ -68,10 +68,10 @@ class StockTest extends ExportTest
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
         $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 10);
 
-        $productInStock = $this->productData->createProduct(['qty' => 6]);
+        $productInStock = $this->productData->create(['qty' => 6]);
         $this->productData->updateStockItem($productInStock, ['use_config_min_qty' => false, 'min_qty' => 5]);
 
-        $productOutStock = $this->productData->createProduct(['qty' => 4]);
+        $productOutStock = $this->productData->create(['qty' => 4]);
         $this->productData->updateStockItem($productOutStock, ['use_config_min_qty' => false, 'min_qty' => 5]);
 
         $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);

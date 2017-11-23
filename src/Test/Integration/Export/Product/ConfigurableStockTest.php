@@ -24,6 +24,7 @@ class ConfigurableStockTest extends ExportTest
      */
     protected function setUp()
     {
+        parent::setUp();
         $this->configurableProvider = $this->getObject(ConfigurableProvider::class);
     }
 
@@ -37,9 +38,10 @@ class ConfigurableStockTest extends ExportTest
         $product = $this->configurableProvider->create([
             ['color' => 'black', 'qty' => 0],
             ['color' => 'blue', 'qty' => 10],
+            ['color' => 'white', 'qty' => 2],
         ]);
 
         $feed = $this->exportFeed();
-        $this->assertProductData($feed, $product->getSku());
+        $this->assertProductData($feed, $product->getSku(), null, null, ['color' => ['blue', 'white']]);
     }
 }

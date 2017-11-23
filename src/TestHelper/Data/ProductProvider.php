@@ -8,6 +8,7 @@
 
 namespace Emico\TweakwiseExport\TestHelper\Data;
 
+use Emico\TweakwiseExport\TestHelper\Data\Product\AttributeProvider;
 use Faker\Factory;
 use Faker\Generator;
 use Magento\Catalog\Api\CategoryLinkManagementInterface;
@@ -72,6 +73,10 @@ class ProductProvider
      * @var CategoryProvider
      */
     private $categoryProvider;
+    /**
+     * @var AttributeProvider
+     */
+    private $attributeProvider;
 
     /**
      * CategoryDataProvider constructor.
@@ -84,7 +89,7 @@ class ProductProvider
      * @param CategoryLinkManagementInterface $categoryLinkManagement
      * @param ObjectHydrator $objectHydrator
      * @param CategoryProvider $categoryProvider
-     * @internal param CategoryProvider $categoryProvider
+     * @param AttributeProvider $attributeProvider
      */
     public function __construct(
         ProductRepositoryInterface $productRepository,
@@ -94,7 +99,8 @@ class ProductProvider
         CategorySetup $categorySetup,
         CategoryLinkManagementInterface $categoryLinkManagement,
         ObjectHydrator $objectHydrator,
-        CategoryProvider $categoryProvider
+        CategoryProvider $categoryProvider,
+        AttributeProvider $attributeProvider
     )
     {
         $this->faker = Factory::create();
@@ -106,6 +112,7 @@ class ProductProvider
         $this->categoryLinkManagement = $categoryLinkManagement;
         $this->objectHydrator = $objectHydrator;
         $this->categoryProvider = $categoryProvider;
+        $this->attributeProvider = $attributeProvider;
     }
 
     /**
@@ -123,21 +130,11 @@ class ProductProvider
     }
 
     /**
-     * @param string $set
-     * @return int
-     */
-    protected function getAttributeSetId(string $set = 'Default'): int
-    {
-        return (int) $this->categorySetup->getAttributeSetId(Product::ENTITY, $set);
-    }
-
-    /**
      * @param array $data
      * @return ProductInterface
      */
     public function create(array $data = []): ProductInterface
     {
-        /** @var ProductInterface $product */
         $product = $this->productFactory->create();
 
         // Set product defaults
@@ -146,14 +143,18 @@ class ProductProvider
         $product->setTypeId(Product\Type::TYPE_SIMPLE);
         $product->setVisibility(Product\Visibility::VISIBILITY_BOTH);
         $product->setPrice($this->faker->randomNumber(2));
-        $product->setAttributeSetId($this->getAttributeSetId());
+        $product->setAttributeSetId($this->attributeProvider->getSetId());
         $product->setStatus(Product\Attribute\Source\Status::STATUS_ENABLED);
 
         // Overwrite with provided data
-        $this->objectHydrator->hydrate($data, $product);
+        if (method_exists($product, 'addData')) {
+            $product->addData($data);
+        } else {
+            $this->objectHydrator->hydrate($data, $product);
+        }
 
         // Save product
-        $this->productRepository->save($product);
+        $product = $this->productRepository->save($product);
 
         // Ensure product qty
         $data['qty'] = $data['qty'] ?? [self::DEFAULT_STOCK_QTY];

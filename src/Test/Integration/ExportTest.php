@@ -118,6 +118,14 @@ abstract class ExportTest extends TestCase
             foreach ($element->attributes->children() as $attributeElement) {
                 $name = (string) $attributeElement->name;
                 $value = (string) $attributeElement->value;
+                if (isset($data['attributes'][$name])) {
+                    // Ensure data is array
+                    if (!\is_array($data['attributes'][$name])) {
+                        $data['attributes'][$name] = [$data['attributes'][$name]];
+                    }
+
+                    $data['attributes'][$name][] = $value;
+                }
                 $data['attributes'][$name] = $value;
             }
 

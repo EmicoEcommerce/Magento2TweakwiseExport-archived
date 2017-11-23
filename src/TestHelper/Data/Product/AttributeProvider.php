@@ -10,12 +10,12 @@ namespace Emico\TweakwiseExport\TestHelper\Data\Product;
 
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Magento\Catalog\Setup\CategorySetup;
 use Magento\Eav\Api\AttributeOptionManagementInterface;
 use Magento\Eav\Api\Data\AttributeInterface;
 use Magento\Eav\Api\Data\AttributeOptionInterfaceFactory;
 use Magento\Eav\Api\Data\AttributeOptionLabelInterfaceFactory;
 use Magento\Eav\Model\Config as EavConfig;
-use RuntimeException;
 
 class AttributeProvider
 {
@@ -40,24 +40,32 @@ class AttributeProvider
     private $optionFactory;
 
     /**
+     * @var CategorySetup
+     */
+    private $categorySetup;
+
+    /**
      * AttributeProvider constructor.
      *
      * @param EavConfig $eavConfig
      * @param AttributeOptionManagementInterface $attributeOptionManagement
      * @param AttributeOptionLabelInterfaceFactory $optionLabelFactory
      * @param AttributeOptionInterfaceFactory $optionFactory
+     * @param CategorySetup $categorySetup
      */
     public function __construct(
         EavConfig $eavConfig,
         AttributeOptionManagementInterface $attributeOptionManagement,
         AttributeOptionLabelInterfaceFactory $optionLabelFactory,
-        AttributeOptionInterfaceFactory $optionFactory
+        AttributeOptionInterfaceFactory $optionFactory,
+        CategorySetup $categorySetup
     )
     {
         $this->eavConfig = $eavConfig;
         $this->attributeOptionManagement = $attributeOptionManagement;
         $this->optionLabelFactory = $optionLabelFactory;
         $this->optionFactory = $optionFactory;
+        $this->categorySetup = $categorySetup;
     }
 
     /**
@@ -69,6 +77,26 @@ class AttributeProvider
     public function get(string $code): AttributeInterface
     {
         return $this->eavConfig->getAttribute(Product::ENTITY, $code);
+    }
+
+    /**
+     * @param string $set
+     * @return int
+     */
+    public function getSetId(string $set = 'Default'): int
+    {
+        return (int) $this->categorySetup->getAttributeSetId(Product::ENTITY, $set);
+    }
+
+    /**
+     * @param string $code
+     * @param string|int $set
+     * @return $this
+     */
+    public function ensureSet(string $code, $set): self
+    {
+        $this->categorySetup->addAttributeToGroup(Product::ENTITY, $set, 'Default', $code);
+        return $this;
     }
 
     /**
