@@ -30,6 +30,8 @@ class ConfigurableStockTest extends ExportTest
 
     /**
      * Test export with one product and check on product data
+     *
+     * @magentoDbIsolation enabled
      */
     public function testAttributesNotVisibleWhenOutStock()
     {

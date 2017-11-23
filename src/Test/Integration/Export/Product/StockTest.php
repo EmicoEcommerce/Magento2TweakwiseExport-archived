@@ -15,6 +15,8 @@ class StockTest extends ExportTest
 {
     /**
      * Test export with one product and check on product data
+     *
+     * @magentoDbIsolation enabled
      */
     public function testEnableStockManagement()
     {
@@ -31,6 +33,8 @@ class StockTest extends ExportTest
 
     /**
      * Test export with one product and check on product data
+     *
+     * @magentoDbIsolation enabled
      */
     public function testDisableStockManagement()
     {
@@ -44,6 +48,8 @@ class StockTest extends ExportTest
     /**
      * - Product with qty > 0 but less then configured qty threshold should not be exported.
      * - Product with qty > qty threshold should be exported.
+     *
+     * @magentoDbIsolation enabled
      */
     public function testInStockWithQtyThreshold()
     {
@@ -62,6 +68,8 @@ class StockTest extends ExportTest
     /**
      * - Product with qty < General qty threshold but qty threshold on product < qty should be exported.
      * - Product with qty > General qty threshold but qty threshold on product > qty should not be exported.
+     *
+     * @magentoDbIsolation enabled
      */
     public function testInStockWithQtyThresholdOnProduct()
     {

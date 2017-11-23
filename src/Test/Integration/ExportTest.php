@@ -47,27 +47,6 @@ abstract class ExportTest extends TestCase
 
         $this->writer = $this->getObject(Writer::class);
         $this->writer->setNow(DateTime::createFromFormat('Y-d-m H:i:s', '2017-01-01 00:00:00'));
-
-        $this->clearTestData();
-    }
-
-    /**
-     * Remove all created test products
-     */
-    protected function tearDown()
-    {
-        parent::tearDown();
-
-        $this->clearTestData();
-    }
-
-    /**
-     * Clear old test data
-     */
-    protected function clearTestData()
-    {
-        $this->productData->clearData();
-        $this->categoryData->clearData();
     }
 
     /**

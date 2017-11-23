@@ -20,17 +20,18 @@ abstract class TestCase extends \Emico\TweakwiseExport\Test\TestCase
      */
     protected function setUp()
     {
+        parent::setUp();
+
         Bootstrap::getInstance()->loadArea(Area::AREA_ADMINHTML);
     }
 
     /**
      * @param string $type
-     * @param array $arguments
      * @return mixed
      */
-    protected function getObject(string $type, array $arguments = [])
+    protected function getObject(string $type)
     {
-        return Bootstrap::getObjectManager()->get($type, $arguments);
+        return Bootstrap::getObjectManager()->get($type);
     }
 
     /**

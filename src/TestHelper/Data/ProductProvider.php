@@ -16,10 +16,8 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\Data\ProductInterfaceFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
-use Magento\Catalog\Setup\CategorySetup;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
-use Magento\Framework\Api\Search\SearchCriteriaFactory;
 use Zend\Hydrator\ClassMethods as ObjectHydrator;
 
 class ProductProvider
@@ -50,16 +48,6 @@ class ProductProvider
     private $stockRegistry;
 
     /**
-     * @var SearchCriteriaFactory
-     */
-    private $searchCriteriaFactory;
-
-    /**
-     * @var CategorySetup
-     */
-    private $categorySetup;
-
-    /**
      * @var CategoryLinkManagementInterface
      */
     private $categoryLinkManagement;
@@ -84,8 +72,6 @@ class ProductProvider
      * @param ProductRepositoryInterface $productRepository
      * @param ProductInterfaceFactory $productFactory
      * @param StockRegistryInterface $stockRegistry
-     * @param SearchCriteriaFactory $searchCriteriaFactory
-     * @param CategorySetup $categorySetup
      * @param CategoryLinkManagementInterface $categoryLinkManagement
      * @param ObjectHydrator $objectHydrator
      * @param CategoryProvider $categoryProvider
@@ -95,8 +81,6 @@ class ProductProvider
         ProductRepositoryInterface $productRepository,
         ProductInterfaceFactory $productFactory,
         StockRegistryInterface $stockRegistry,
-        SearchCriteriaFactory $searchCriteriaFactory,
-        CategorySetup $categorySetup,
         CategoryLinkManagementInterface $categoryLinkManagement,
         ObjectHydrator $objectHydrator,
         CategoryProvider $categoryProvider,
@@ -107,26 +91,10 @@ class ProductProvider
         $this->productRepository = $productRepository;
         $this->productFactory = $productFactory;
         $this->stockRegistry = $stockRegistry;
-        $this->searchCriteriaFactory = $searchCriteriaFactory;
-        $this->categorySetup = $categorySetup;
         $this->categoryLinkManagement = $categoryLinkManagement;
         $this->objectHydrator = $objectHydrator;
         $this->categoryProvider = $categoryProvider;
         $this->attributeProvider = $attributeProvider;
-    }
-
-    /**
-     * @return $this
-     */
-    public function clearData(): self
-    {
-        $criteria = $this->searchCriteriaFactory->create();
-        $products = $this->productRepository->getList($criteria)->getItems();
-        foreach ($products as $product) {
-            $this->productRepository->delete($product);
-        }
-
-        return $this;
     }
 
     /**

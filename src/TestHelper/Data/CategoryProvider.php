@@ -11,15 +11,6 @@ namespace Emico\TweakwiseExport\TestHelper\Data;
 class CategoryProvider
 {
     /**
-     * @return CategoryProvider
-     */
-    public function clearData(): self
-    {
-        // Currently nothing to clean up
-        return $this;
-    }
-
-    /**
      * @return array
      */
     public function getDefaultCategoryIds(): array
