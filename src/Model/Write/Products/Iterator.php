@@ -294,15 +294,15 @@ class Iterator extends EavIterator
      */
     protected function skipEntityByStock(array $stock): bool
     {
-        if (!$this->stockConfig->getManageStock($this->storeId)) {
+        if ($stock['use_config_manage_stock'] && !$this->stockConfig->getManageStock($this->storeId)) {
             return false;
         }
 
-        if ($this->stockConfig->isShowOutOfStock($this->storeId)) {
+        if (!$stock['use_config_manage_stock'] && !$stock['manage_stock']) {
             return false;
         }
 
-        $stockThresholdQty = $this->getStockThresholdQty();
+        $stockThresholdQty = $stock['use_config_min_qty'] ? $this->getStockThresholdQty() : $stock['min_qty'];
         return $stock['qty'] <= $stockThresholdQty;
     }
 
@@ -530,7 +530,8 @@ class Iterator extends EavIterator
             // Combine data
             list($entity, $entityPrice) = $this->combinePriceData($prices, $entityId, $entity);
             $attributes = $this->combineExtraAttributes($entity, $attributes);
-            if ($this->skipEntityByStock($entityStock)) {
+
+            if (!$this->stockConfig->isShowOutOfStock($this->storeId) && $this->skipEntityByStock($entityStock)) {
                 continue;
             }
 

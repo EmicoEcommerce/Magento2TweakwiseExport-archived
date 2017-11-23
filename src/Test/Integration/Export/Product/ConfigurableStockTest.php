@@ -89,7 +89,7 @@ class ConfigurableStockTest extends ExportTest
         ]);
 
         $feed = $this->exportFeed();
-        $this->assertProductData($feed, $product->getSku(), null, null, ['color' => ['blue']]);
+        $this->assertProductData($feed, $product->getSku(), null, null, ['color' => 'blue']);
     }
 
     /**
