@@ -217,7 +217,7 @@ class Iterator extends EavIterator
             return true;
         }
 
-        if ($this->config->isOutOfStockChildren()) {
+        if ($this->config->isOutOfStockChildren($this->storeId)) {
             return false;
         }
 
@@ -617,7 +617,7 @@ class Iterator extends EavIterator
      */
     protected function skipChildAttribute($attribute): bool
     {
-        return $this->config->getSkipAttribute($attribute);
+        return $this->config->getSkipAttribute($attribute, $this->storeId);
     }
 
     /**
@@ -713,7 +713,7 @@ class Iterator extends EavIterator
      */
     protected function combineStock($entityStock)
     {
-        switch ($this->config->getStockCalculation()) {
+        switch ($this->config->getStockCalculation($this->storeId)) {
             case StockCalculation::OPTION_MAX:
                 return max($entityStock);
             case StockCalculation::OPTION_MIN:
@@ -749,7 +749,7 @@ class Iterator extends EavIterator
      */
     protected function getPriceValue($entityId, array $priceData): float
     {
-        $priceFields = $this->config->getPriceFields();
+        $priceFields = $this->config->getPriceFields($this->storeId);
         foreach ($priceFields as $field) {
             $value = (float) $priceData[$field];
             if ($value > 0.00001) {

@@ -11,7 +11,10 @@ namespace Emico\TweakwiseExport\Model;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\App\ScopeInterface as AppScopeInterface;
+use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
+use RuntimeException;
 
 class Config
 {
@@ -23,7 +26,6 @@ class Config
     const PATH_VALIDATE = 'tweakwise/export/validate';
     const PATH_API_IMPORT_URL = 'tweakwise/export/api_import_url';
     const PATH_STOCK_CALCULATION = 'tweakwise/export/stock_calculation';
-    const PATH_PROUCT_SELECTION = 'tweakwise/export/product_selection';
     const PATH_OUT_OF_STOCK_CHILDREN = 'tweakwise/export/out_of_stock_children';
     const PATH_FEED_KEY = 'tweakwise/export/feed_key';
     const PATH_PRICE_FIELD = 'tweakwise/export/price_field';
@@ -69,94 +71,88 @@ class Config
     }
 
     /**
-     * @param Store $store
+     * @param Store|int|string|null $store
      * @return bool
      */
-    public function isEnabled(Store $store = null)
+    public function isEnabled($store = null): bool
     {
-        if ($store) {
-            return $store->getConfig(self::PATH_ENABLED);
-        }
-        return (bool) $this->config->getValue(self::PATH_ENABLED);
+        return (bool) $this->config->isSetFlag(self::PATH_ENABLED, ScopeInterface::SCOPE_STORE, $store);
     }
 
     /**
      * @return bool
      */
-    public function isRealTime()
+    public function isRealTime(): bool
     {
-        return (bool) $this->config->getValue(self::PATH_REAL_TIME);
+        return (bool) $this->config->isSetFlag(self::PATH_REAL_TIME, AppScopeInterface::SCOPE_DEFAULT);
     }
 
     /**
      * @return bool
      */
-    public function isValidate()
+    public function isValidate(): bool
     {
         if (!$this->deployConfig->isAvailable()) {
             return false;
         }
 
-        return (bool) $this->config->getValue(self::PATH_VALIDATE);
+        return (bool) $this->config->isSetFlag(self::PATH_VALIDATE, AppScopeInterface::SCOPE_DEFAULT);
     }
 
     /**
      * @return string
      */
-    public function getApiImportUrl()
+    public function getApiImportUrl(): string
     {
-        return (string) $this->config->getValue(self::PATH_API_IMPORT_URL);
+        return (string) $this->config->getValue(self::PATH_API_IMPORT_URL, AppScopeInterface::SCOPE_DEFAULT);
     }
 
     /**
+     * @param Store|int|string|null $store
      * @return string
      */
-    public function getStockCalculation()
+    public function getStockCalculation($store = null): string
     {
-        return (string) $this->config->getValue(self::PATH_STOCK_CALCULATION);
+        return (string) $this->config->getValue(self::PATH_STOCK_CALCULATION, ScopeInterface::SCOPE_STORE, $store);
     }
 
     /**
-     * @return int
-     */
-    public function getProductSelection()
-    {
-        return (int) $this->config->getValue(self::PATH_PROUCT_SELECTION);
-    }
-
-    /**
+     * @param Store|int|string|null $store
      * @return bool
      */
-    public function isOutOfStockChildren()
+    public function isOutOfStockChildren($store = null): bool
     {
-        return (bool) $this->config->getValue(self::PATH_OUT_OF_STOCK_CHILDREN);
+        return (bool) $this->config->isSetFlag(self::PATH_OUT_OF_STOCK_CHILDREN, ScopeInterface::SCOPE_STORE, $store);
     }
 
     /**
      * @return string
      */
-    public function getKey()
+    public function getKey(): string
     {
-        return (string) $this->config->getValue(self::PATH_FEED_KEY);
+        return (string) $this->config->getValue(self::PATH_FEED_KEY, AppScopeInterface::SCOPE_DEFAULT);
     }
 
     /**
+     * @param Store|int|string|null $store
      * @return string[]
      */
-    public function getPriceFields()
+    public function getPriceFields($store = null): array
     {
-        $data = (array) explode(',', $this->config->getValue(self::PATH_PRICE_FIELD));
+        $data = (array) explode(',', $this->config->getValue(self::PATH_PRICE_FIELD, ScopeInterface::SCOPE_STORE, $store));
         return array_filter($data);
     }
 
     /**
+     * @param Store|int|string|null $store
      * @param string|null $attribute
      * @return bool|string[]
      */
-    public function getSkipAttribute($attribute = null)
+    public function getSkipAttribute($attribute = null, $store = null)
     {
         if (!$this->skipAttributes) {
-            $skipAttributes = explode(',', $this->config->getValue(self::PATH_EXCLUDE_CHILD_ATTRIBUTES));
+            $value = $this->config->getValue(self::PATH_EXCLUDE_CHILD_ATTRIBUTES, ScopeInterface::SCOPE_STORE, $store);
+            $skipAttributes = explode(',', $value);
             $this->skipAttributes = array_flip($skipAttributes);
         }
 
@@ -170,11 +166,11 @@ class Config
     /**
      * @return string
      */
-    public function getDefaultFeedFile()
+    public function getDefaultFeedFile(): string
     {
         $dir = $this->directoryList->getPath('var') . DIRECTORY_SEPARATOR . 'feeds';
-        if (!is_dir($dir)) {
-            mkdir($dir);
+        if (!is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
+            throw new RuntimeException(sprintf('Directory "%s" was not created', $dir));
         }
 
         return $dir . DIRECTORY_SEPARATOR . self::FEED_FILE_NAME;
@@ -184,7 +180,7 @@ class Config
      * @param string|null $file
      * @return string
      */
-    public function getFeedLockFile($file = null)
+    public function getFeedLockFile($file = null): string
     {
         if (!$file) {
             $file = $this->getDefaultFeedFile();
@@ -197,7 +193,7 @@ class Config
      * @param string|null $file
      * @return string
      */
-    public function getFeedTmpFile($file = null)
+    public function getFeedTmpFile($file = null): string
     {
         if (!$file) {
             $file = $this->getDefaultFeedFile();

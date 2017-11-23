@@ -9,7 +9,7 @@
 namespace Emico\TweakwiseExport\Test\Integration;
 
 use Magento\Framework\App\Area;
-use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Store\Model\ScopeInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\Framework\App\Config\MutableScopeConfigInterface;
 
@@ -47,20 +47,14 @@ abstract class TestCase extends \Emico\TweakwiseExport\Test\TestCase
     /**
      * @param string $path
      * @param mixed $value
-     * @param string $scope
-     * @param string|null $scopeCode
+     * @param string|null $storeCode
      * @return $this
      */
-    protected function setConfig(
-        string $path,
-        $value,
-        string $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-        string $scopeCode = null
-    )
+    protected function setConfig(string $path, $value, string $storeCode = null)
     {
         /** @var MutableScopeConfigInterface $config */
         $config = $this->getObject(MutableScopeConfigInterface::class);
-        $config->setValue($path, $value, $scope, $scopeCode);
+        $config->setValue($path, $value, ScopeInterface::SCOPE_STORE, $storeCode);
         return $this;
     }
 }
