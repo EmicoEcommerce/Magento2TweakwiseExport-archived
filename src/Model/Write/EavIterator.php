@@ -206,7 +206,6 @@ class EavIterator implements IteratorAggregate
             Profiler::start('eav-iterator::' . $this->entityCode);
 
             $select = $this->createSelect();
-            $selectSql = $select->assemble() . PHP_EOL . PHP_EOL;
 
             Profiler::start('query');
             try {
