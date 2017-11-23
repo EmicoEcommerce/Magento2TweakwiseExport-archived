@@ -9,12 +9,14 @@
 namespace Emico\TweakwiseExport\Test;
 
 if (class_exists('PHPUnit\Framework\TestCase')) {
-    class_alias('PHPUnit\Framework\TestCase', '\Emico\TweakwiseExport\Test\BaseTestCase');
+    abstract class BaseTestCase extends \PHPUnit\Framework\TestCase
+    { }
 } else {
-    class_alias('\PHPUnit_Framework_TestCase', '\Emico\TweakwiseExport\Test\BaseTestCase');
+    abstract class BaseTestCase extends \PHPUnit\Framework\TestCase
+    { }
 }
 
-abstract class TestCase extends \Emico\TweakwiseExport\Test\BaseTestCase
+abstract class TestCase extends BaseTestCase
 {
 
 }
