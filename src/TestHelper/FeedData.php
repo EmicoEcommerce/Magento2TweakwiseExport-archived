@@ -13,6 +13,25 @@ use SimpleXMLElement;
 class FeedData
 {
     /**
+     * @param string $id
+     * @param array $attributes
+     * @param string $sku
+     * @return bool
+     */
+    protected function elementMatchSku(string $id, array $attributes, string $sku): bool
+    {
+        if (!isset($attributes['sku'])) {
+            return $sku === $id;
+        }
+
+        if (!\is_array($attributes['sku'])) {
+            return $attributes['sku'] === $sku;
+        }
+
+        return \in_array($sku, $attributes['sku'], true);
+    }
+
+    /**
      * @param SimpleXMLElement $feed
      * @param string $sku
      * @return array|null
@@ -20,19 +39,21 @@ class FeedData
     public function getProductData(SimpleXMLElement $feed, string $sku)
     {
         foreach ($feed->xpath('//item') as $element) {
-            $data = [
+            $id = (string) $element->id;
+            $attributes = $this->getItemAttributes($element);
+
+            if (!$this->elementMatchSku($id, $attributes, $sku)) {
+                continue;
+            }
+
+            return [
                 'xml' => $element,
-                'id' => (string) $element->id,
+                'id' => $id,
                 'name' => (string) $element->name,
                 'price' => (float) $element->price,
-                'attributes' => $this->getItemAttributes($element),
+                'attributes' => $attributes,
                 'categories' => $this->getItemCategories($element),
             ];
-
-            $key = $data['attributes']['sku'] ?? $data['id'];
-            if ($key === $sku) {
-                return $data;
-            }
         }
 
         return null;
