@@ -15,13 +15,10 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\Data\ProductInterfaceFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Catalog\Setup\CategorySetup;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
-use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\Api\Search\SearchCriteriaFactory;
-use RuntimeException;
 use Zend\Hydrator\ClassMethods as ObjectHydrator;
 
 class ProductProvider
@@ -57,11 +54,6 @@ class ProductProvider
     private $searchCriteriaFactory;
 
     /**
-     * @var EavConfig
-     */
-    private $eavConfig;
-
-    /**
      * @var CategorySetup
      */
     private $categorySetup;
@@ -75,6 +67,7 @@ class ProductProvider
      * @var ObjectHydrator
      */
     private $objectHydrator;
+
     /**
      * @var CategoryProvider
      */
@@ -87,7 +80,6 @@ class ProductProvider
      * @param ProductInterfaceFactory $productFactory
      * @param StockRegistryInterface $stockRegistry
      * @param SearchCriteriaFactory $searchCriteriaFactory
-     * @param EavConfig $eavConfig
      * @param CategorySetup $categorySetup
      * @param CategoryLinkManagementInterface $categoryLinkManagement
      * @param ObjectHydrator $objectHydrator
@@ -99,7 +91,6 @@ class ProductProvider
         ProductInterfaceFactory $productFactory,
         StockRegistryInterface $stockRegistry,
         SearchCriteriaFactory $searchCriteriaFactory,
-        EavConfig $eavConfig,
         CategorySetup $categorySetup,
         CategoryLinkManagementInterface $categoryLinkManagement,
         ObjectHydrator $objectHydrator,
@@ -111,7 +102,6 @@ class ProductProvider
         $this->productFactory = $productFactory;
         $this->stockRegistry = $stockRegistry;
         $this->searchCriteriaFactory = $searchCriteriaFactory;
-        $this->eavConfig = $eavConfig;
         $this->categorySetup = $categorySetup;
         $this->categoryLinkManagement = $categoryLinkManagement;
         $this->objectHydrator = $objectHydrator;
@@ -145,7 +135,7 @@ class ProductProvider
      * @param array $data
      * @return ProductInterface
      */
-    public function createProduct(array $data = []): ProductInterface
+    public function create(array $data = []): ProductInterface
     {
         /** @var ProductInterface $product */
         $product = $this->productFactory->create();
@@ -187,36 +177,5 @@ class ProductProvider
         $this->objectHydrator->hydrate($data, $stockItem);
         $this->stockRegistry->updateStockItemBySku($product->getSku(), $stockItem);
         return $stockItem;
-    }
-
-    /**
-     * @param string $code
-     * @return Attribute
-     */
-    protected function getProductAttribute(string $code): Attribute
-    {
-        $attribute = $this->eavConfig->getAttribute(Product::ENTITY, $code);
-        if (!$attribute instanceof Attribute) {
-            throw new RuntimeException('Invalid attribute type returned by eav config');
-        }
-        return $attribute;
-    }
-
-    /**
-     * Fetches or creates option id for product attribute
-     *
-     * @param string $code
-     * @param string $label
-     * @return int
-     */
-    protected function getAttributeOptionId(string $code, string $label): int
-    {
-        $attribute = $this->getProductAttribute($code);
-        $options = $attribute->getOptions();
-        foreach ($options as $option) {
-            if ($option->getLabel() === $label) {
-                return (int) $option->getValue();
-            }
-        }
     }
 }
