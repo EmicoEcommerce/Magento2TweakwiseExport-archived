@@ -189,6 +189,58 @@ class Iterator extends EavIterator
     }
 
     /**
+     * @param int $parentId
+     * @param array $children
+     * @param array $stock
+     * @return array($children, $stock)
+     */
+    protected function filterChildren(int $parentId, array $children, array $stock): array
+    {
+        // Products without children
+        if (count($children) === 0) {
+            return [null, $stock[$parentId]];
+        }
+
+        $resultChildren = [];
+        $resultStock = [];
+        foreach ($children as $childId) {
+            if (!$this->config->isOutOfStockChildren($this->storeId)) {
+                if (!isset($stock[$childId])) {
+                    continue;
+                }
+
+                if ($this->skipEntityByStock($stock[$childId])) {
+                    continue;
+                }
+            }
+
+            $resultStock[] = $stock[$childId];
+            $resultChildren[] = $childId;
+        }
+
+        $parentStock = $stock[$parentId];
+        $parentStock['qty'] = $this->combineStock($resultStock);
+        return [$resultChildren, $parentStock,];
+    }
+
+    /**
+     * @param array $parentChildMap
+     * @param array $stockMap
+     * @return array($parentChildMap, $stockMap)
+     */
+    protected function filterChildrenBatch(array $parentChildMap, array $stockMap): array
+    {
+        $resultChildMap = [];
+        $resultStock = [];
+        foreach ($parentChildMap as $parentId => $children) {
+            list($parentChildren, $parentStock) = $this->filterChildren($parentId, $children, $stockMap[$parentId]);
+            $resultChildMap[$parentId] = $parentChildren;
+            $resultStock[$parentId] = $parentStock;
+        }
+        return [$resultChildMap, $resultStock];
+    }
+
+    /**
      * @param array $entity
      * @return bool
      */
@@ -207,31 +259,15 @@ class Iterator extends EavIterator
 
     /**
      * @param array $entity
-     * @param array $stockMap
-     * @param int $parentId
      * @return bool
      */
-    protected function skipEntityChild(array $entity, array $stockMap, $parentId): bool
+    protected function skipEntityChild(array $entity): bool
     {
         if ((int) $entity['status'] !== Status::STATUS_ENABLED) {
             return true;
         }
 
-        if ($this->config->isOutOfStockChildren($this->storeId)) {
-            return false;
-        }
-
-        if (!isset($stockMap[$parentId])) {
-            return true;
-        }
-
-        $parentStockMap = $stockMap[$parentId];
-        $entityId = (int) $entity['entity_id'];
-        if (!isset($parentStockMap[$entityId])) {
-            return true;
-        }
-
-        return $parentStockMap[$entityId] <= 0.0001;
+        return false;
     }
 
     /**
@@ -253,10 +289,10 @@ class Iterator extends EavIterator
     }
 
     /**
-     * @param int $stock
+     * @param array $stock
      * @return bool
      */
-    protected function skipEntityByStock($stock): bool
+    protected function skipEntityByStock(array $stock): bool
     {
         if (!$this->stockConfig->getManageStock($this->storeId)) {
             return false;
@@ -267,7 +303,7 @@ class Iterator extends EavIterator
         }
 
         $stockThresholdQty = $this->getStockThresholdQty();
-        return $stock <= $stockThresholdQty;
+        return $stock['qty'] <= $stockThresholdQty;
     }
 
     /**
@@ -349,26 +385,28 @@ class Iterator extends EavIterator
         $allEntityIds = array_merge(array_keys($parentChildMap), array_merge(...$parentChildMap));
         $query = $this->getConnection()
             ->select()
-            ->from($this->getTableName('cataloginventory_stock_item'), ['product_id', 'qty'])
+            ->from($this->getTableName('cataloginventory_stock_item'))
             ->where('product_id IN(' . implode(',', $allEntityIds) . ')')
             ->query();
 
         $map = [];
         while ($row = $query->fetch()) {
             $productId = (int) $row['product_id'];
-            $map[$productId] = (float) $row['qty'];
+            $map[$productId] = $row;
         }
 
         $result = [];
         foreach ($parentChildMap as $parentId => $childIds) {
             $parentResult = [];
             if (isset($map[$parentId])) {
-                $parentResult[$parentId] = max(0, $map[$parentId]);
+                $parentResult[$parentId] = $map[$parentId];
+                $parentResult[$parentId]['qty'] = max($map[$parentId]['qty'] ?? 0, 0);
             }
 
             foreach ($childIds as $childId) {
                 if (isset($map[$childId])) {
-                    $parentResult[$childId] = max(0, $map[$childId]);
+                    $parentResult[$childId] = $map[$childId];
+                    $parentResult[$childId]['qty'] = max($map[$childId]['qty'] ?? 0, 0);
                 }
             }
 
@@ -380,11 +418,10 @@ class Iterator extends EavIterator
 
     /**
      * @param array $parentChildMap
-     * @param array $stockMap
      * @return array[]
      * @throws LocalizedException
      */
-    protected function getEntityExtraAttributesBatch(array $parentChildMap, array $stockMap): array
+    protected function getEntityExtraAttributesBatch(array $parentChildMap): array
     {
         if (count($parentChildMap) === 0) {
             return [];
@@ -392,6 +429,10 @@ class Iterator extends EavIterator
 
         $map = [];
         foreach ($parentChildMap as $parent => $childIds) {
+            if ($childIds === null) {
+                continue;
+            }
+
             foreach ($childIds as $id) {
                 $map[$id] = $parent;
             }
@@ -407,11 +448,11 @@ class Iterator extends EavIterator
             if (!isset($map[$entity['entity_id']])) {
                 continue;
             }
-            $parentId = $map[$entity['entity_id']];
-
-            if ($this->skipEntityChild($entity, $stockMap, $parentId)) {
+            if ($this->skipEntityChild($entity)) {
                 continue;
             }
+
+            $parentId = $map[$entity['entity_id']];
 
             foreach ($entity as $attribute => $value) {
                 if ($attribute === 'entity_id') {
@@ -466,14 +507,21 @@ class Iterator extends EavIterator
             Profiler::stop('tweakwise::export::products::getEntityStockBatch');
         }
 
+        list($parentChildMap, $stock) = $this->filterChildrenBatch($parentChildMap, $stock);
+
         try {
             Profiler::start('tweakwise::export::products::getEntityExtraAttributesBatch');
-            $extraAttributes = $this->getEntityExtraAttributesBatch($parentChildMap, $stock);
+            $extraAttributes = $this->getEntityExtraAttributesBatch($parentChildMap);
         } finally {
             Profiler::stop('tweakwise::export::products::getEntityExtraAttributesBatch');
         }
 
         foreach ($entities as $entityId => $entity) {
+            // Skip entities without children
+            if (isset($parentChildMap[$entityId]) && \is_array($parentChildMap[$entityId]) && count($parentChildMap[$entityId]) === 0) {
+                continue;
+            }
+
             $name = $entity['name'];
             $entityCategories = $categories[$entityId] ?? [];
             $entityStock = $stock[$entityId] ?? [];
@@ -482,7 +530,6 @@ class Iterator extends EavIterator
             // Combine data
             list($entity, $entityPrice) = $this->combinePriceData($prices, $entityId, $entity);
             $attributes = $this->combineExtraAttributes($entity, $attributes);
-            $entityStock = $this->combineStock($entityStock);
             if ($this->skipEntityByStock($entityStock)) {
                 continue;
             }
@@ -492,7 +539,7 @@ class Iterator extends EavIterator
                 'entity_id' => $entityId,
                 'name' => $name,
                 'price' => $entityPrice,
-                'stock' => $entityStock,
+                'stock' => $entityStock['qty'],
                 'categories' => $entityCategories,
                 'attributes' => $attributes,
             ];
@@ -713,14 +760,17 @@ class Iterator extends EavIterator
      */
     protected function combineStock($entityStock)
     {
+        $stockQty = array_column($entityStock, 'qty');
+        $stockQty = array_map('floatval', $stockQty);
+
         switch ($this->config->getStockCalculation($this->storeId)) {
             case StockCalculation::OPTION_MAX:
-                return max($entityStock);
+                return max($stockQty);
             case StockCalculation::OPTION_MIN:
-                return min($entityStock);
+                return min($stockQty);
             case StockCalculation::OPTION_SUM:
             default:
-                return array_sum($entityStock);
+                return array_sum($stockQty);
         }
     }
 
