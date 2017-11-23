@@ -566,7 +566,7 @@ class Iterator extends EavIterator
 
     /**
      * @param array $entities
-     * @return array
+     * @return array[]
      */
     protected function getEntityParentChildMap(array $entities): array
     {
@@ -596,14 +596,11 @@ class Iterator extends EavIterator
 
             $parentIds = array_keys($group);
             if ($type instanceof BundleType) {
-                /** @noinspection SlowArrayOperationsInLoopInspection */
-                $childrenIds = array_merge($childrenIds, $this->getBundleChildIds($parentIds));
+                $childrenIds += $this->getBundleChildIds($parentIds);
             } elseif ($type instanceof GroupType) {
-                /** @noinspection SlowArrayOperationsInLoopInspection */
-                $childrenIds = array_merge($childrenIds, $this->getLinkChildIds($parentIds, Link::LINK_TYPE_GROUPED));
+                $childrenIds += $this->getLinkChildIds($parentIds, Link::LINK_TYPE_GROUPED);
             } elseif ($type instanceof ConfigurableType) {
-                /** @noinspection SlowArrayOperationsInLoopInspection */
-                $childrenIds = array_merge($childrenIds, $this->getConfigurableChildIds($parentIds));
+                $childrenIds += $this->getConfigurableChildIds($parentIds);
             } else {
                 foreach ($parentIds as $parentId) {
                     $childrenIds[$parentId] = $type->getChildrenIds($parentId, false);

@@ -18,6 +18,9 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
+use Magento\Framework\App\Area;
+use Magento\Store\Model\App\Emulation;
+use Magento\Store\Model\Store;
 use Zend\Hydrator\ClassMethods as ObjectHydrator;
 
 class ProductProvider
@@ -67,6 +70,11 @@ class ProductProvider
     private $attributeProvider;
 
     /**
+     * @var Emulation
+     */
+    private $emulation;
+
+    /**
      * CategoryDataProvider constructor.
      *
      * @param ProductRepositoryInterface $productRepository
@@ -76,6 +84,7 @@ class ProductProvider
      * @param ObjectHydrator $objectHydrator
      * @param CategoryProvider $categoryProvider
      * @param AttributeProvider $attributeProvider
+     * @param Emulation $emulation
      */
     public function __construct(
         ProductRepositoryInterface $productRepository,
@@ -84,7 +93,8 @@ class ProductProvider
         CategoryLinkManagementInterface $categoryLinkManagement,
         ObjectHydrator $objectHydrator,
         CategoryProvider $categoryProvider,
-        AttributeProvider $attributeProvider
+        AttributeProvider $attributeProvider,
+        Emulation $emulation
     )
     {
         $this->faker = Factory::create();
@@ -95,6 +105,7 @@ class ProductProvider
         $this->objectHydrator = $objectHydrator;
         $this->categoryProvider = $categoryProvider;
         $this->attributeProvider = $attributeProvider;
+        $this->emulation = $emulation;
     }
 
     /**
@@ -122,7 +133,13 @@ class ProductProvider
         }
 
         // Save product
-        $product = $this->productRepository->save($product);
+        $this->emulation->startEnvironmentEmulation(Store::DEFAULT_STORE_ID, Area::AREA_ADMINHTML);
+        try {
+            $product = $this->productRepository->save($product);
+        } finally {
+            $this->emulation->stopEnvironmentEmulation();
+        }
+
 
         // Ensure product qty
         $data['qty'] = $data['qty'] ?? [self::DEFAULT_STOCK_QTY];
