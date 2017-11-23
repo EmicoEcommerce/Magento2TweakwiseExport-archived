@@ -97,11 +97,8 @@ class StockTest extends ExportTest
         $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, false);
         $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 5);
 
-        $productInStock = $this->productData->create(['qty' => 6]);
-        $this->productData->updateStockItem($productInStock, ['use_config_min_qty' => false, 'min_qty' => 5]);
-
-        $productOutStock = $this->productData->create(['qty' => 4]);
-        $this->productData->updateStockItem($productOutStock, ['use_config_min_qty' => false, 'min_qty' => 5]);
+        $productInStock = $this->productData->create(['qty' => 6, 'use_config_min_qty' => false, 'min_qty' => 5]);
+        $productOutStock = $this->productData->create(['qty' => 4, 'use_config_min_qty' => false, 'min_qty' => 5]);
 
         $feed = $this->exportFeed();
 
