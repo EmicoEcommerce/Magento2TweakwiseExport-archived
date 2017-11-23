@@ -91,4 +91,24 @@ class ConfigurableStockTest extends ExportTest
         $feed = $this->exportFeed();
         $this->assertProductData($feed, $product->getSku(), null, null, ['color' => ['blue']]);
     }
+
+    /**
+     * When product specific configuration is set check and all children are not valid check if entire product will be skipped.
+     *
+     * @magentoDbIsolation enabled
+     */
+    public function testProductNotExportWhenOutStockWithProductSpecificConfiguration()
+    {
+        $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
+        $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, false);
+        $this->setConfig(Config::PATH_OUT_OF_STOCK_CHILDREN, false);
+
+        $product = $this->configurableProvider->create([
+            ['color' => 'black', 'qty' => 0],
+            ['color' => 'white', 'qty' => 2, 'use_config_min_qty' => false, 'min_qty' => 5],
+        ]);
+
+        $feed = $this->exportFeed();
+        $this->assertNull($this->feedData->getProductData($feed, $product->getSku()));
+    }
 }
