@@ -9,10 +9,23 @@
 namespace Emico\TweakwiseExport\Test\Integration\Export\Product;
 
 use Emico\TweakwiseExport\Test\Integration\ExportTest;
+use Magento\Catalog\Model\Product;
+use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use \Magento\CatalogInventory\Model\Configuration as StockConfiguration;
 
 class StockTest extends ExportTest
 {
+    /**
+     * @param Product $product
+     * @param callable $callback
+     */
+    protected function updateStockItem(Product $product, callable $callback)
+    {
+        $stockItem = $this->stockRegistry->getStockItemBySku($product->getSku());
+        $callback($stockItem);
+        $this->stockRegistry->updateStockItemBySku($product->getSku(), $stockItem);
+    }
+
     /**
      * Test export with one product and check on product data
      */
@@ -39,5 +52,52 @@ class StockTest extends ExportTest
 
         $feed = $this->exportFeed();
         $this->assertProductData($feed, $product->getSku());
+    }
+
+    /**
+     * - Product with qty > 0 but less then configured qty threshold should not be exported.
+     * - Product with qty > qty threshold should be exported.
+     */
+    public function testInStockWithQtyThreshold()
+    {
+        $productInStock = $this->createSavedProduct(6);
+        $productOutStock = $this->createSavedProduct(4);
+
+        $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
+        $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 5);
+
+        $feed = $this->exportFeed();
+
+        $this->assertProductData($feed, $productInStock->getSku());
+        $this->assertNull($this->getProductItem($feed, $productOutStock->getSku()));
+    }
+
+    /**
+     * - Product with qty < General qty threshold but qty threshold on product < qty should be exported.
+     * - Product with qty > General qty threshold but qty threshold on product > qty should not be exported.
+     */
+    public function testInStockWithQtyThresholdOnProduct()
+    {
+        $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
+        $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 10);
+
+        $productInStock = $this->createSavedProduct(6);
+        $this->updateStockItem($productInStock, function(StockItemInterface $stockItem) {
+            $stockItem->setUseConfigMinQty(false);
+            $stockItem->setMinQty(5);
+        });
+        $productOutStock = $this->createSavedProduct(4);
+        $this->updateStockItem($productOutStock, function(StockItemInterface $stockItem) {
+            $stockItem->setUseConfigMinQty(false);
+            $stockItem->setMinQty(5);
+        });
+
+        $this->setConfig(StockConfiguration::XML_PATH_MANAGE_STOCK, true);
+        $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 5);
+
+        $feed = $this->exportFeed();
+
+        $this->assertProductData($feed, $productInStock->getSku());
+        $this->assertNull($this->getProductItem($feed, $productOutStock->getSku()));
     }
 }
