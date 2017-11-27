@@ -80,11 +80,20 @@ class Collection implements IteratorAggregate, Countable
      */
     public function get(int $id): ExportEntity
     {
-        if (!isset($this->entities[$id])) {
+        if (!$this->has($id)) {
             throw new InvalidArgumentException(sprintf('Could not find export entity with id %s', $id));
         }
 
         return $this->entities[$id];
+    }
+
+    /**
+     * @param int $id
+     * @return bool
+     */
+    public function has(int $id): bool
+    {
+        return isset($this->entities[$id]);
     }
 
     /**

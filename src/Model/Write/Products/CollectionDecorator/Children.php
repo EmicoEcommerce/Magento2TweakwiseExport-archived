@@ -6,7 +6,9 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
+use Emico\TweakwiseExport\Model\Write\EavIteratorFactory;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Emico\TweakwiseExport\Model\Write\Products\CollectionFactory;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntityFactory;
 use Emico\TweakwiseExport\Model\Write\Products\IteratorInitializer;
@@ -37,7 +39,7 @@ class Children extends AbstractDecorator
     private $entityFactory;
 
     /**
-     * @var ExportEntity[]
+     * @var Collection
      */
     protected $childEntities;
 
@@ -45,6 +47,10 @@ class Children extends AbstractDecorator
      * @var IteratorInitializer
      */
     private $iteratorInitializer;
+    /**
+     * @var CollectionFactory
+     */
+    private $collectionFactory;
 
     /**
      * ChildId constructor.
@@ -52,14 +58,17 @@ class Children extends AbstractDecorator
      * @param DbContext $dbContext
      * @param ProductType $productType
      * @param EavIteratorFactory $eavIteratorFactory
+     * @param IteratorInitializer $iteratorInitializer
      * @param ExportEntityFactory $entityFactory
+     * @param CollectionFactory $collectionFactory
      */
     public function __construct(
         DbContext $dbContext,
         ProductType $productType,
         EavIteratorFactory $eavIteratorFactory,
         IteratorInitializer $iteratorInitializer,
-        ExportEntityFactory $entityFactory
+        ExportEntityFactory $entityFactory,
+        CollectionFactory $collectionFactory
     )
     {
         parent::__construct($dbContext);
@@ -67,6 +76,7 @@ class Children extends AbstractDecorator
         $this->eavIteratorFactory = $eavIteratorFactory;
         $this->entityFactory = $entityFactory;
         $this->iteratorInitializer = $iteratorInitializer;
+        $this->collectionFactory = $collectionFactory;
     }
 
     /**
@@ -74,7 +84,7 @@ class Children extends AbstractDecorator
      */
     public function decorate(Collection $collection)
     {
-        $this->childEntities = [];
+        $this->childEntities = $this->collectionFactory->create(['storeId' => $collection->getStoreId()]);
         $this->createChildEntities($collection);
         $this->loadChildAttributes();
     }
@@ -119,7 +129,7 @@ class Children extends AbstractDecorator
     {
         $groups = [];
         foreach ($collection as $entity) {
-            $typeId = $entity->getAttribute('type_id');
+            $typeId = $entity->getAttribute('type_id', false);
             if (!isset($groups[$typeId])) {
                 $groups[$typeId] = [];
             }
@@ -192,11 +202,11 @@ class Children extends AbstractDecorator
      */
     private function addChild(Collection $collection, int $parentId, int $childId)
     {
-        if (!isset($this->childEntities[$childId])) {
-            $child = $this->entityFactory->create(['entity_id' => $childId]);
-            $this->childEntities[$childId] = $child;
+        if (!$this->childEntities->has($childId)) {
+            $child = $this->entityFactory->create(['storeId' => $childId]);
+            $this->childEntities->add($child);
         } else {
-            $child = $this->childEntities[$childId];
+            $child = $this->childEntities->get($childId);
         }
 
         $collection->get($parentId)->addChild($child);
@@ -207,8 +217,12 @@ class Children extends AbstractDecorator
      */
     private function loadChildAttributes()
     {
+        if ($this->childEntities->count() === 0) {
+            return;
+        }
+
         $iterator = $this->eavIteratorFactory->create();
-        $iterator->setEntityIds(array_keys($this->childEntities));
+        $iterator->setEntityIds($this->childEntities->getIds());
         $this->iteratorInitializer->initializeAttributes($iterator);
 
         foreach ($iterator as $child) {
