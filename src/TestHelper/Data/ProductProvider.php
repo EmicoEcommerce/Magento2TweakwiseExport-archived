@@ -146,7 +146,7 @@ class ProductProvider
         $this->updateStockItem($product, $data);
 
         // Assign product to categories
-        $categoryIds = $data['category_ids'] ?? $this->categoryProvider->getDefaultCategoryIds();
+        $categoryIds = $data['category_ids'] ?? [$this->categoryProvider->getDefaultRootId()];
         $this->categoryLinkManagement->assignProductToCategories($product->getSku(), $categoryIds);
 
         return $product;

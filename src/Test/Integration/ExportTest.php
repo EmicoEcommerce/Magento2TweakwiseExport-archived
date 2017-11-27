@@ -15,7 +15,7 @@ use Emico\TweakwiseExport\Model\Write\Writer;
 use Emico\TweakwiseExport\TestHelper\Data\CategoryProvider;
 use Emico\TweakwiseExport\TestHelper\Data\ProductProvider;
 use Emico\TweakwiseExport\TestHelper\FeedData;
-use SimpleXMLElement;
+use Emico\TweakwiseExport\TestHelper\FeedDataFactory;
 
 abstract class ExportTest extends TestCase
 {
@@ -35,9 +35,9 @@ abstract class ExportTest extends TestCase
     protected $categoryData;
 
     /**
-     * @var FeedData
+     * @var FeedDataFactory
      */
-    protected $feedData;
+    protected $feedDataFactory;
 
     /**
      * Make sure export is enabled and set some much used objects
@@ -50,7 +50,7 @@ abstract class ExportTest extends TestCase
 
         $this->productData = $this->getObject(ProductProvider::class);
         $this->categoryData = $this->getObject(CategoryProvider::class);
-        $this->feedData = $this->getObject(FeedData::class);
+        $this->feedDataFactory = $this->getObject(FeedDataFactory::class);
 
         $this->writer = $this->getObject(Writer::class);
         $this->writer->setNow(DateTime::createFromFormat('Y-d-m H:i:s', '2017-01-01 00:00:00'));
@@ -65,9 +65,9 @@ abstract class ExportTest extends TestCase
     }
 
     /**
-     * @return SimpleXMLElement
+     * @return FeedData
      */
-    protected function exportFeed(): SimpleXMLElement
+    protected function exportFeed(): FeedData
     {
         $resource = fopen('php://temp/maxmemory:' . (256 * 1024 * 1023), 'wb+');
         if (!is_resource($resource)) {
@@ -77,25 +77,12 @@ abstract class ExportTest extends TestCase
         try {
             $this->getExporter()->generateFeed($resource);
             rewind($resource);
-            $xml = stream_get_contents($resource);
-            return simplexml_load_string($xml);
+            $feed = stream_get_contents($resource);
+
+            return $this->feedDataFactory->create(['test' => $this, 'feed' => $feed]);
         } finally {
             fclose($resource);
         }
-    }
-
-    /**
-     * @param string $file
-     * @param SimpleXMLElement $result
-     */
-    protected function assertFeedResult(string $file, SimpleXMLElement $result = null)
-    {
-        if ($result === null) {
-            $result = $this->exportFeed();
-        }
-
-        $file = __DIR__ . '/../../../tests/data/' . ltrim($file, '/');
-        $this->assertStringEqualsFile($file, trim($result->asXML()));
     }
 
     /**
@@ -129,21 +116,11 @@ abstract class ExportTest extends TestCase
         }
 
         if ($attributes !== null) {
-            foreach ($attributes as $key => $value) {
-                $this->assertArrayHasKey($key, $productData['attributes']);
-                if (\is_array($value)) {
-                    asort($value);
-                }
 
-                if (\is_array($productData['attributes'][$key])) {
-                    asort($productData['attributes'][$key]);
-                }
-                $this->assertEquals($value, $productData['attributes'][$key]);
-            }
         }
 
         if ($categories !== null) {
-            $this->assertArraySubset($categories, $productData['categories']);
+
         }
     }
 }

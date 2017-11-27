@@ -37,6 +37,7 @@ class Helper
      *
      * @param ProductMetadataInterface $productMetadata
      * @param Config $config
+     * @param TimezoneInterface $localDate
      */
     public function __construct(ProductMetadataInterface $productMetadata, Config $config, TimezoneInterface $localDate)
     {
@@ -50,7 +51,7 @@ class Helper
      * @param int $entityId
      * @return string
      */
-    public function getTweakwiseId($storeId, $entityId)
+    public function getTweakwiseId(int $storeId, int $entityId): string
     {
         if (!$storeId) {
             return $entityId;
@@ -64,7 +65,7 @@ class Helper
      *
      * @return int
      */
-    public function getStoreId($id)
+    public function getStoreId(int $id): int
     {
         return (int) substr($id, 5);
     }

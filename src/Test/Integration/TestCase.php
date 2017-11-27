@@ -8,23 +8,18 @@
 
 namespace Emico\TweakwiseExport\Test\Integration;
 
-use Magento\Framework\App\Area;
 use Magento\Store\Model\ScopeInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\Framework\App\Config\MutableScopeConfigInterface;
 
+/**
+ * Class TestCase
+ *
+ * @package Emico\TweakwiseExport\Test\Integration
+ * @magentoAppArea adminhtml
+ */
 abstract class TestCase extends \Emico\TweakwiseExport\Test\TestCase
 {
-    /**
-     * Set admin area
-     */
-    protected function setUp()
-    {
-        parent::setUp();
-
-        Bootstrap::getInstance()->loadArea(Area::AREA_ADMINHTML);
-    }
-
     /**
      * @param string $type
      * @return mixed
@@ -47,14 +42,15 @@ abstract class TestCase extends \Emico\TweakwiseExport\Test\TestCase
     /**
      * @param string $path
      * @param mixed $value
-     * @param string|null $storeCode
+     * @param string|null $store
+     * @param string $scope
      * @return $this
      */
-    protected function setConfig(string $path, $value, string $storeCode = null)
+    protected function setConfig(string $path, $value, string $store = null, string $scope = ScopeInterface::SCOPE_STORE)
     {
         /** @var MutableScopeConfigInterface $config */
         $config = $this->getObject(MutableScopeConfigInterface::class);
-        $config->setValue($path, $value, ScopeInterface::SCOPE_STORE, $storeCode);
+        $config->setValue($path, $value, $scope, $store);
         return $this;
     }
 }

@@ -46,8 +46,7 @@ class ConfigurableStockTest extends ExportTest
             ['color' => 'white', 'qty' => 2],
         ]);
 
-        $feed = $this->exportFeed();
-        $this->assertProductData($feed, $product->getSku(), null, null, ['color' => ['black', 'blue', 'white']]);
+        $this->exportFeed()->getProduct($product->getId())->assertAttributes(['color' => ['black', 'blue', 'white']]);
     }
 
     /**
@@ -67,8 +66,7 @@ class ConfigurableStockTest extends ExportTest
             ['color' => 'white', 'qty' => 2],
         ]);
 
-        $feed = $this->exportFeed();
-        $this->assertProductData($feed, $product->getSku(), null, null, ['color' => ['blue', 'white']]);
+        $this->exportFeed()->getProduct($product->getId())->assertAttributes(['color' => ['blue', 'white']]);
     }
 
     /**
@@ -88,8 +86,7 @@ class ConfigurableStockTest extends ExportTest
             ['color' => 'white', 'qty' => 2, 'use_config_min_qty' => false, 'min_qty' => 5],
         ]);
 
-        $feed = $this->exportFeed();
-        $this->assertProductData($feed, $product->getSku(), null, null, ['color' => 'blue']);
+        $this->exportFeed()->getProduct($product->getId())->assertAttributes(['color' => 'blue']);
     }
 
     /**
@@ -108,7 +105,6 @@ class ConfigurableStockTest extends ExportTest
             ['color' => 'white', 'qty' => 2, 'use_config_min_qty' => false, 'min_qty' => 5],
         ]);
 
-        $feed = $this->exportFeed();
-        $this->assertNull($this->feedData->getProductData($feed, $product->getSku()));
+        $this->exportFeed()->assertProductMissing($product->getId());
     }
 }

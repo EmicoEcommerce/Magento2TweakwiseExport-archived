@@ -8,92 +8,212 @@
 
 namespace Emico\TweakwiseExport\TestHelper;
 
-use SimpleXMLElement;
+use Emico\TweakwiseExport\Model\Helper;
+use Emico\TweakwiseExport\Test\TestCase;
+use Emico\TweakwiseExport\TestHelper\FeedData\CategoryData;
+use Emico\TweakwiseExport\TestHelper\FeedData\CategoryDataFactory;
+use Emico\TweakwiseExport\TestHelper\FeedData\ProductData;
+use Emico\TweakwiseExport\TestHelper\FeedData\ProductDataFactory;
+use Magento\Store\Model\StoreManagerInterface;
 
 class FeedData
 {
     /**
-     * @param string $id
-     * @param array $attributes
-     * @param string $sku
-     * @return bool
+     * @var Helper
      */
-    protected function elementMatchSku(string $id, array $attributes, string $sku): bool
+    private $helper;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
+     * @var string
+     */
+    private $feed;
+
+    /**
+     * @var TestCase
+     */
+    private $test;
+
+    /**
+     * @var CategoryData[]
+     */
+    private $categories;
+
+    /**
+     * @var ProductData[]
+     */
+    private $products;
+
+    /**
+     * @var ProductDataFactory
+     */
+    private $productDataFactory;
+
+    /**
+     * @var CategoryDataFactory
+     */
+    private $categoryDataFactory;
+
+    /**
+     * FeedData constructor.
+     *
+     * @param Helper $helper
+     * @param StoreManagerInterface $storeManager
+     * @param ProductDataFactory $productDataFactory
+     * @param CategoryDataFactory $categoryDataFactory
+     * @param TestCase $test
+     * @param string $feed
+     */
+    public function __construct(
+        Helper $helper,
+        StoreManagerInterface $storeManager,
+        ProductDataFactory $productDataFactory,
+        CategoryDataFactory $categoryDataFactory,
+        TestCase $test,
+        string $feed
+    )
     {
-        if (!isset($attributes['sku'])) {
-            return $sku === $id;
-        }
-
-        if (!\is_array($attributes['sku'])) {
-            return $attributes['sku'] === $sku;
-        }
-
-        return \in_array($sku, $attributes['sku'], true);
+        $this->helper = $helper;
+        $this->storeManager = $storeManager;
+        $this->feed = $feed;
+        $this->test = $test;
+        $this->productDataFactory = $productDataFactory;
+        $this->categoryDataFactory = $categoryDataFactory;
     }
 
     /**
-     * @param SimpleXMLElement $feed
-     * @param string $sku
-     * @return array|null
+     * @param int $entityId
+     * @param int|null $storeId
+     * @return CategoryData
      */
-    public function getProductData(SimpleXMLElement $feed, string $sku)
+    public function getCategory(int $entityId, int $storeId = null): CategoryData
     {
-        foreach ($feed->xpath('//item') as $element) {
+        $this->parseCategories();
+
+        if ($storeId === null) {
+            $storeId = $this->getDefaultStoreId();
+        }
+
+        $tweakwiseId = $this->helper->getTweakwiseId($storeId, $entityId);
+        if (!isset($this->categories[$tweakwiseId])) {
+            $this->test->fail(sprintf('Could not find category for store %s with id %s', $storeId, $entityId));
+        }
+
+        return $this->categories[$tweakwiseId];
+    }
+
+    /**
+     * @param int $entityId
+     * @param int|null $storeId
+     * @return ProductData
+     */
+    public function getProduct(int $entityId, int $storeId = null): ProductData
+    {
+        $this->parseProducts();
+
+        if ($storeId === null) {
+            $storeId = $this->getDefaultStoreId();
+        }
+
+        $tweakwiseId = $this->helper->getTweakwiseId($storeId, $entityId);
+        if (!isset($this->products[$tweakwiseId])) {
+            $this->test->fail(sprintf('Could not find product for store %s with id %s', $storeId, $entityId));
+        }
+
+        return $this->products[$tweakwiseId];
+    }
+
+    /**
+     * @param int $entityId
+     * @param int|null $storeId
+     */
+    public function assertProductMissing(int $entityId, int $storeId = null)
+    {
+        $this->parseProducts();
+
+        if ($storeId === null) {
+            $storeId = $this->getDefaultStoreId();
+        }
+
+        $tweakwiseId = $this->helper->getTweakwiseId($storeId, $entityId);
+        if (!isset($this->products[$tweakwiseId])) {
+            return;
+        }
+
+        $this->test->fail(sprintf(
+            'Product for store %s with id %s was not supposed to be in de the feed.',
+            $this->getStoreCode($storeId),
+            $entityId
+        ));
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return trim($this->feed);
+    }
+
+    /**
+     * Parse category data
+     */
+    private function parseCategories()
+    {
+        if ($this->categories === null) {
+            return;
+        }
+
+        $this->categories = [];
+        $this->products = [];
+
+        $xml = simplexml_load_string($this->feed);
+        foreach ($xml->xpath('//category') as $element) {
             $id = (string) $element->id;
-            $attributes = $this->getItemAttributes($element);
-
-            if (!$this->elementMatchSku($id, $attributes, $sku)) {
-                continue;
-            }
-
-            return [
-                'xml' => $element,
-                'id' => $id,
-                'name' => (string) $element->name,
-                'price' => (float) $element->price,
-                'attributes' => $attributes,
-                'categories' => $this->getItemCategories($element),
-            ];
+            $this->products[$id] = $this->categoryDataFactory->create(['test' => $this->test, 'element' => $element]);
         }
-
-        return null;
     }
 
     /**
-     * @param SimpleXMLElement $element
-     * @return array
+     * Parse product data
      */
-    private function getItemCategories(SimpleXMLElement $element): array
+    private function parseProducts()
     {
-        $result = [];
-        foreach ($element->categories->children() as $categoryElement) {
-            $result[] = (string) $categoryElement;
+        if ($this->products !== null) {
+            return;
         }
-        return $result;
+
+        $this->products = [];
+
+        $xml = simplexml_load_string($this->feed);
+        foreach ($xml->xpath('//item') as $element) {
+            $id = (string) $element->id;
+            $this->products[$id] = $this->productDataFactory->create(['test' => $this->test, 'element' => $element]);
+        }
     }
 
     /**
-     * @param SimpleXMLElement $element
-     * @return array
+     * @return int
      */
-    private function getItemAttributes(SimpleXMLElement $element): array
+    private function getDefaultStoreId(): int
     {
-        $result = [];
-        foreach ($element->attributes->children() as $attributeElement) {
-            $name = (string) $attributeElement->name;
-            $value = (string) $attributeElement->value;
-
-            if (isset($result[$name])) {
-                // Ensure data is array
-                if (!\is_array($result[$name])) {
-                    $result[$name] = [$result[$name]];
-                }
-
-                $result[$name][] = $value;
-            } else {
-                $result[$name] = $value;
-            }
+        $defaultStore = $this->storeManager->getDefaultStoreView();
+        if (!$defaultStore) {
+            $this->test->fail('Default store not set and no store id provided.');
         }
-        return $result;
+        return (int) $defaultStore->getId();
+    }
+
+    /**
+     * @param int $storeId
+     * @return string
+     */
+    private function getStoreCode(int $storeId): string
+    {
+        return $this->storeManager->getStore($storeId)->getCode();
     }
 }

@@ -11,10 +11,10 @@ namespace Emico\TweakwiseExport\TestHelper\Data;
 class CategoryProvider
 {
     /**
-     * @return array
+     * @return int
      */
-    public function getDefaultCategoryIds(): array
+    public function getDefaultRootId(): int
     {
-        return [2];
+        return 2;
     }
 }

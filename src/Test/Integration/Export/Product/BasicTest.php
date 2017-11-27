@@ -17,7 +17,8 @@ class BasicTest extends ExportTest
      */
     public function testEmptyExport()
     {
-        $this->assertFeedResult('integration/export/product/basic/empty.xml');
+        $file = __DIR__ . '/../../../../../tests/data/integration/export/product/basic/empty.xml';
+        $this->assertStringEqualsFile($file, (string) $this->exportFeed());
     }
 
     /**
@@ -30,25 +31,21 @@ class BasicTest extends ExportTest
         $product = $this->productData->create();
         $feed = $this->exportFeed();
 
-        $this->assertProductData(
-            $feed,
-            $product->getSku(),
-            $product->getName(),
-            $product->getPrice(),
-            [
-                'sku' => $product->getSku(),
-                'type_id' => 'simple',
-                'status' => 'Enabled',
-                'visibility' => '4',
-                'tax_class_id' => 'Taxable Goods',
-                'price' => $product->getPrice(),
-                'old_price' => $product->getPrice(),
-                'min_price' => $product->getPrice(),
-                'max_price' => $product->getPrice(),
-            ],
-            [
-                100012
-            ]
-        );
+        $feedProduct = $feed->getProduct($product->getId());
+        $feedProduct->assertSku($product->getSku());
+        $feedProduct->assertName($product->getName());
+        $feedProduct->assertPrice($product->getPrice());
+        $feedProduct->assertAttributes([
+            'sku' => $product->getSku(),
+            'type_id' => 'simple',
+            'status' => 'Enabled',
+            'visibility' => '4',
+            'tax_class_id' => 'Taxable Goods',
+            'price' => $product->getPrice(),
+            'old_price' => $product->getPrice(),
+            'min_price' => $product->getPrice(),
+            'max_price' => $product->getPrice(),
+        ]);
+        $feedProduct->assertCategories([100012]);
     }
 }

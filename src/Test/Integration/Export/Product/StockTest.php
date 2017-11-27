@@ -27,9 +27,8 @@ class StockTest extends ExportTest
         $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, false);
 
         $feed = $this->exportFeed();
-
-        $this->assertProductData($feed, $productInStock->getSku());
-        $this->assertNull($this->feedData->getProductData($feed, $productOutStock->getSku()));
+        $feed->getProduct($productInStock->getId());
+        $feed->assertProductMissing($productOutStock->getId());
     }
 
     /**
@@ -45,8 +44,7 @@ class StockTest extends ExportTest
         $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, true);
 
         $feed = $this->exportFeed();
-
-        $this->assertProductData($feed, $productOutStock->getSku());
+        $feed->getProduct($productOutStock->getId());
     }
 
     /**
@@ -61,7 +59,7 @@ class StockTest extends ExportTest
         $this->setConfig(StockConfiguration::XML_PATH_SHOW_OUT_OF_STOCK, false);
 
         $feed = $this->exportFeed();
-        $this->assertProductData($feed, $product->getSku());
+        $feed->getProduct($product->getId());
     }
 
     /**
@@ -80,9 +78,8 @@ class StockTest extends ExportTest
         $this->setConfig(StockConfiguration::XML_PATH_STOCK_THRESHOLD_QTY, 5);
 
         $feed = $this->exportFeed();
-
-        $this->assertProductData($feed, $productInStock->getSku());
-        $this->assertNull($this->feedData->getProductData($feed, $productOutStock->getSku()));
+        $feed->getProduct($productInStock->getId());
+        $feed->assertProductMissing($productOutStock->getId());
     }
 
     /**
@@ -101,8 +98,7 @@ class StockTest extends ExportTest
         $productOutStock = $this->productData->create(['qty' => 4, 'use_config_min_qty' => false, 'min_qty' => 5]);
 
         $feed = $this->exportFeed();
-
-        $this->assertProductData($feed, $productInStock->getSku());
-        $this->assertNull($this->feedData->getProductData($feed, $productOutStock->getSku()));
+        $feed->getProduct($productInStock->getId());
+        $feed->assertProductMissing($productOutStock->getId());
     }
 }

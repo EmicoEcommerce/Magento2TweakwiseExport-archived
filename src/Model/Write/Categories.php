@@ -69,7 +69,7 @@ class Categories implements WriterInterface
         $xml->startElement('categories');
         $writer->flush();
 
-        $this->writeCategory($xml, null, ['entity_id' => 1, 'name' => 'Root', 'position' => 0]);
+        $this->writeCategory($xml, 0, ['entity_id' => 1, 'name' => 'Root', 'position' => 0]);
         /** @var Store $store */
         foreach ($this->storeManager->getStores() as $store) {
             if ($this->config->isEnabled($store)) {
@@ -148,7 +148,7 @@ class Categories implements WriterInterface
      * @param array $data
      * @return $this
      */
-    protected function writeCategory(XmlWriter $xml, $storeId, array $data)
+    protected function writeCategory(XmlWriter $xml, int $storeId, array $data)
     {
         $tweakwiseId = $this->helper->getTweakwiseId($storeId, $data['entity_id']);
         $xml->addCategoryExport($tweakwiseId);
