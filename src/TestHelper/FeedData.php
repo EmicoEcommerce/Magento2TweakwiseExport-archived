@@ -14,6 +14,7 @@ use Emico\TweakwiseExport\TestHelper\FeedData\CategoryData;
 use Emico\TweakwiseExport\TestHelper\FeedData\CategoryDataFactory;
 use Emico\TweakwiseExport\TestHelper\FeedData\ProductData;
 use Emico\TweakwiseExport\TestHelper\FeedData\ProductDataFactory;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 class FeedData
@@ -87,20 +88,18 @@ class FeedData
 
     /**
      * @param int $entityId
-     * @param int|null $storeId
+     * @param string|null $storeCode
      * @return CategoryData
      */
-    public function getCategory(int $entityId, int $storeId = null): CategoryData
+    public function getCategory(int $entityId, string $storeCode = null): CategoryData
     {
         $this->parseCategories();
 
-        if ($storeId === null) {
-            $storeId = $this->getDefaultStoreId();
-        }
+        $store = $this->getStore($storeCode);
+        $tweakwiseId = $this->helper->getTweakwiseId($store->getId(), $entityId);
 
-        $tweakwiseId = $this->helper->getTweakwiseId($storeId, $entityId);
         if (!isset($this->categories[$tweakwiseId])) {
-            $this->test->fail(sprintf('Could not find category for store %s with id %s', $storeId, $entityId));
+            $this->test->fail(sprintf('Could not find category for store %s with id %s', $store->getCode(), $entityId));
         }
 
         return $this->categories[$tweakwiseId];
@@ -108,20 +107,18 @@ class FeedData
 
     /**
      * @param int $entityId
-     * @param int|null $storeId
+     * @param string|null $storeCode
      * @return ProductData
      */
-    public function getProduct(int $entityId, int $storeId = null): ProductData
+    public function getProduct(int $entityId, string $storeCode = null): ProductData
     {
         $this->parseProducts();
 
-        if ($storeId === null) {
-            $storeId = $this->getDefaultStoreId();
-        }
+        $store = $this->getStore($storeCode);
+        $tweakwiseId = $this->helper->getTweakwiseId($store->getId(), $entityId);
 
-        $tweakwiseId = $this->helper->getTweakwiseId($storeId, $entityId);
         if (!isset($this->products[$tweakwiseId])) {
-            $this->test->fail(sprintf('Could not find product for store %s with id %s', $storeId, $entityId));
+            $this->test->fail(sprintf('Could not find product for store %s with id %s', $store->getCode(), $entityId));
         }
 
         return $this->products[$tweakwiseId];
@@ -129,24 +126,22 @@ class FeedData
 
     /**
      * @param int $entityId
-     * @param int|null $storeId
+     * @param string|null $storeCode
      */
-    public function assertProductMissing(int $entityId, int $storeId = null)
+    public function assertProductMissing(int $entityId, string $storeCode = null)
     {
         $this->parseProducts();
 
-        if ($storeId === null) {
-            $storeId = $this->getDefaultStoreId();
-        }
+        $store = $this->getStore($storeCode);
+        $tweakwiseId = $this->helper->getTweakwiseId($store->getId(), $entityId);
 
-        $tweakwiseId = $this->helper->getTweakwiseId($storeId, $entityId);
         if (!isset($this->products[$tweakwiseId])) {
             return;
         }
 
         $this->test->fail(sprintf(
             'Product for store %s with id %s was not supposed to be in de the feed.',
-            $this->getStoreCode($storeId),
+            $store->getCode(),
             $entityId
         ));
     }
@@ -197,23 +192,20 @@ class FeedData
     }
 
     /**
-     * @return int
+     * @param string|null $storeCode
+     * @return StoreInterface
      */
-    private function getDefaultStoreId(): int
+    private function getStore(string $storeCode = null): StoreInterface
     {
-        $defaultStore = $this->storeManager->getDefaultStoreView();
-        if (!$defaultStore) {
+        if ($storeCode === null) {
+            $store = $this->storeManager->getDefaultStoreView();
+        } else {
+            $store = $this->storeManager->getStore($storeCode);
+        }
+
+        if (!$store) {
             $this->test->fail('Default store not set and no store id provided.');
         }
-        return (int) $defaultStore->getId();
-    }
-
-    /**
-     * @param int $storeId
-     * @return string
-     */
-    private function getStoreCode(int $storeId): string
-    {
-        return $this->storeManager->getStore($storeId)->getCode();
+        return $store;
     }
 }
