@@ -39,7 +39,6 @@ class BasicTest extends ExportTest
         $feedProduct->assertAttributes([
             'sku' => $product->getSku(),
             'type_id' => 'simple',
-            'status' => 'Enabled',
             'visibility' => '4',
             'tax_class_id' => 'Taxable Goods',
             'price' => $product->getPrice(),

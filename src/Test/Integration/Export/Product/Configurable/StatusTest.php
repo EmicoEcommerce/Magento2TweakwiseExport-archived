@@ -44,4 +44,18 @@ class StatusTest extends ExportTest
 
         $this->exportFeed()->getProduct($product->getId())->assertAttributes(['color' => ['black', 'blue']]);
     }
+
+    /**
+     * Test to see if product will not be exported if all simples are disabled
+     */
+    public function testWhenAllSimpleDisabled()
+    {
+        $product = $this->configurableProvider->create([
+            ['color' => 'black', 'status' => Status::STATUS_DISABLED],
+            ['color' => 'blue', 'status' => Status::STATUS_DISABLED],
+            ['color' => 'white', 'status' => Status::STATUS_DISABLED],
+        ]);
+
+        $this->exportFeed()->assertProductMissing($product->getId());
+    }
 }

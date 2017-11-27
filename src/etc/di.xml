@@ -54,4 +54,20 @@
             </argument>
         </arguments>
     </type>
+
+    <type name="Emico\TweakwiseExport\Model\Write\Products\Iterator">
+        <arguments>
+            <argument name="helper" xsi:type="object">Emico\TweakwiseExport\Model\Helper</argument>
+            <argument name="eavConfig" xsi:type="object">Magento\Eav\Model\Config</argument>
+            <argument name="dbContext" xsi:type="object">Magento\Framework\Model\ResourceModel\Db\Context</argument>
+            <argument name="entityFactory" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\ExportEntityFactory</argument>
+            <argument name="collectionFactory" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionFactory</argument>
+            <argument name="collectionDecorators" xsi:type="array">
+                <item name="children" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Children</item>
+                <item name="stock_data" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData</item>
+                <item name="category_reference" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\CategoryReference</item>
+                <item name="price" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Price</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
