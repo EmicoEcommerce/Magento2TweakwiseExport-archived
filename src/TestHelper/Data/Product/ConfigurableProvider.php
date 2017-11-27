@@ -129,7 +129,9 @@ class ConfigurableProvider
                 ));
             }
 
-            $data[$attributeCode] = $this->attributeProvider->getOptionId($attributeCode, $data[$attributeCode]);
+            if (!\is_int($data[$attributeCode])) {
+                $data[$attributeCode] = $this->attributeProvider->getOptionId($attributeCode, $data[$attributeCode]);
+            }
         }
 
         if (!isset($data['visibility'])) {

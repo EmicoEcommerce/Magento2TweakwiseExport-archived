@@ -9,7 +9,6 @@
 namespace Emico\TweakwiseExport\TestHelper\Data\Product;
 
 use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Catalog\Setup\CategorySetup;
 use Magento\Eav\Api\AttributeOptionManagementInterface;
 use Magento\Eav\Api\Data\AttributeInterface;
