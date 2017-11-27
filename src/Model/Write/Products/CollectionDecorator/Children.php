@@ -9,6 +9,7 @@ namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntityFactory;
+use Emico\TweakwiseExport\Model\Write\Products\IteratorInitializer;
 use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Type as ProductType;
@@ -28,7 +29,7 @@ class Children extends AbstractDecorator
     /**
      * @var EavIteratorFactory
      */
-    private $eavIterator;
+    private $eavIteratorFactory;
 
     /**
      * @var ExportEntityFactory
@@ -41,24 +42,31 @@ class Children extends AbstractDecorator
     protected $childEntities;
 
     /**
+     * @var IteratorInitializer
+     */
+    private $iteratorInitializer;
+
+    /**
      * ChildId constructor.
      *
      * @param DbContext $dbContext
      * @param ProductType $productType
-     * @param EavIteratorFactory $eavIterator
+     * @param EavIteratorFactory $eavIteratorFactory
      * @param ExportEntityFactory $entityFactory
      */
     public function __construct(
         DbContext $dbContext,
         ProductType $productType,
-        EavIteratorFactory $eavIterator,
+        EavIteratorFactory $eavIteratorFactory,
+        IteratorInitializer $iteratorInitializer,
         ExportEntityFactory $entityFactory
     )
     {
         parent::__construct($dbContext);
         $this->productType = $productType;
-        $this->eavIterator = $eavIterator;
+        $this->eavIteratorFactory = $eavIteratorFactory;
         $this->entityFactory = $entityFactory;
+        $this->iteratorInitializer = $iteratorInitializer;
     }
 
     /**
@@ -67,6 +75,15 @@ class Children extends AbstractDecorator
     public function decorate(Collection $collection)
     {
         $this->childEntities = [];
+        $this->createChildEntities($collection);
+        $this->loadChildAttributes();
+    }
+
+    /**
+     * @param Collection $collection
+     */
+    private function createChildEntities(Collection $collection)
+    {
         foreach ($this->getGroupedEntities($collection) as $typeId => $group) {
             // Create fake product type to trick type factory to use getTypeId
             /** @var Product $fakeProduct */
@@ -183,5 +200,20 @@ class Children extends AbstractDecorator
         }
 
         $collection->get($parentId)->addChild($child);
+    }
+
+    /**
+     * Load child attribute data
+     */
+    private function loadChildAttributes()
+    {
+        $iterator = $this->eavIteratorFactory->create();
+        $iterator->setEntityIds(array_keys($this->childEntities));
+        $this->iteratorInitializer->initializeAttributes($iterator);
+
+        foreach ($iterator as $child) {
+            $entity = $this->entityFactory->create($child);
+            $this->childEntities[$entity->getId()]->setFromArray($child);
+        }
     }
 }

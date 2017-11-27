@@ -13,9 +13,7 @@ use Emico\TweakwiseExport\Model\Write\EavIterator;
 use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\DecoratorInterface;
 use Generator;
 use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Eav\Model\Config as EavConfig;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 
 class Iterator extends EavIterator
@@ -48,6 +46,7 @@ class Iterator extends EavIterator
      * @param DbContext $dbContext
      * @param ExportEntityFactory $entityFactory
      * @param CollectionFactory $collectionFactory
+     * @param IteratorInitializer $iteratorInitializer
      * @param DecoratorInterface[] $collectionDecorators
      */
     public function __construct(
@@ -56,6 +55,7 @@ class Iterator extends EavIterator
         DbContext $dbContext,
         ExportEntityFactory $entityFactory,
         CollectionFactory $collectionFactory,
+        IteratorInitializer $iteratorInitializer,
         array $collectionDecorators
     ) {
         parent::__construct($helper, $eavConfig, $dbContext, Product::ENTITY, []);
@@ -64,38 +64,7 @@ class Iterator extends EavIterator
         $this->collectionFactory = $collectionFactory;
         $this->collectionDecorators = $collectionDecorators;
 
-        $this->initializeAttributes($this);
-    }
-
-    /**
-     * Select all attributes who should be exported
-     *
-     * @param EavIterator $iterator
-     * @return $this
-     * @throws LocalizedException
-     */
-    protected function initializeAttributes(EavIterator $iterator): self
-    {
-        // Add default attributes
-        $iterator->selectAttribute('name');
-        $iterator->selectAttribute('sku');
-        $iterator->selectAttribute('url_key');
-        $iterator->selectAttribute('status');
-        $iterator->selectAttribute('visibility');
-        $iterator->selectAttribute('type_id');
-
-        // Add configured attributes
-        $type = $this->eavConfig->getEntityType($this->entityCode);
-
-        /** @var Attribute $attribute */
-        foreach ($type->getAttributeCollection() as $attribute) {
-            if (!$this->helper->shouldExportAttribute($attribute)) {
-                continue;
-            }
-
-            $iterator->selectAttribute($attribute->getAttributeCode());
-        }
-        return $this;
+        $iteratorInitializer->initializeAttributes($this);
     }
 
     /**
