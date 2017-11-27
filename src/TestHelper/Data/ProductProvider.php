@@ -16,12 +16,13 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\Data\ProductInterfaceFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Framework\App\Area;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\Store;
-use Zend\Hydrator\ClassMethods as ObjectHydrator;
+use Magento\Store\Model\StoreManagerInterface;
 
 class ProductProvider
 {
@@ -56,9 +57,9 @@ class ProductProvider
     private $categoryLinkManagement;
 
     /**
-     * @var ObjectHydrator
+     * @var EntityHydrator
      */
-    private $objectHydrator;
+    private $hydrator;
 
     /**
      * @var CategoryProvider
@@ -75,26 +76,40 @@ class ProductProvider
     private $emulation;
 
     /**
+     * @var ProductResource
+     */
+    private $productResource;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
      * CategoryDataProvider constructor.
      *
      * @param ProductRepositoryInterface $productRepository
      * @param ProductInterfaceFactory $productFactory
      * @param StockRegistryInterface $stockRegistry
      * @param CategoryLinkManagementInterface $categoryLinkManagement
-     * @param ObjectHydrator $objectHydrator
+     * @param EntityHydrator $hydrator
      * @param CategoryProvider $categoryProvider
      * @param AttributeProvider $attributeProvider
      * @param Emulation $emulation
+     * @param ProductResource $productResource
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         ProductRepositoryInterface $productRepository,
         ProductInterfaceFactory $productFactory,
         StockRegistryInterface $stockRegistry,
         CategoryLinkManagementInterface $categoryLinkManagement,
-        ObjectHydrator $objectHydrator,
+        EntityHydrator $hydrator,
         CategoryProvider $categoryProvider,
         AttributeProvider $attributeProvider,
-        Emulation $emulation
+        Emulation $emulation,
+        ProductResource $productResource,
+        StoreManagerInterface $storeManager
     )
     {
         $this->faker = Factory::create();
@@ -102,10 +117,12 @@ class ProductProvider
         $this->productFactory = $productFactory;
         $this->stockRegistry = $stockRegistry;
         $this->categoryLinkManagement = $categoryLinkManagement;
-        $this->objectHydrator = $objectHydrator;
+        $this->hydrator = $hydrator;
         $this->categoryProvider = $categoryProvider;
         $this->attributeProvider = $attributeProvider;
         $this->emulation = $emulation;
+        $this->productResource = $productResource;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -126,11 +143,7 @@ class ProductProvider
         $product->setStatus(Product\Attribute\Source\Status::STATUS_ENABLED);
 
         // Overwrite with provided data
-        if (method_exists($product, 'addData')) {
-            $product->addData($data);
-        } else {
-            $this->objectHydrator->hydrate($data, $product);
-        }
+        $this->hydrator->hydrate($data, $product);
 
         // Save product
         $this->emulation->startEnvironmentEmulation(Store::DEFAULT_STORE_ID, Area::AREA_ADMINHTML);
@@ -154,13 +167,34 @@ class ProductProvider
 
     /**
      * @param ProductInterface $product
+     * @param string $attribute
+     * @param $value
+     * @param string|null $store
+     */
+    public function saveAttribute(ProductInterface $product, string $attribute, $value, string $store = null)
+    {
+        $product = clone $product;
+
+        $updateData = [$attribute => $value];
+        if ($store) {
+            $updateData['store_id'] = $this->storeManager->getStore($store)->getId();
+        }
+
+        $this->hydrator->hydrate($updateData, $product);
+
+        /** @var $product Product */
+        $this->productResource->saveAttribute($product, $attribute);
+    }
+
+    /**
+     * @param ProductInterface $product
      * @param array $data
      * @return StockItemInterface
      */
     public function updateStockItem(ProductInterface $product, array $data): StockItemInterface
     {
         $stockItem = $this->stockRegistry->getStockItemBySku($product->getSku());
-        $this->objectHydrator->hydrate($data, $stockItem);
+        $this->hydrator->hydrate($data, $stockItem);
         $this->stockRegistry->updateStockItemBySku($product->getSku(), $stockItem);
         return $stockItem;
     }

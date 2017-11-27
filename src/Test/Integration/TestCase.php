@@ -16,7 +16,6 @@ use Magento\Framework\App\Config\MutableScopeConfigInterface;
  * Class TestCase
  *
  * @package Emico\TweakwiseExport\Test\Integration
- * @magentoAppArea adminhtml
  */
 abstract class TestCase extends \Emico\TweakwiseExport\Test\TestCase
 {

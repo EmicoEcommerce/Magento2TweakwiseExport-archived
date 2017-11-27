@@ -10,6 +10,9 @@ namespace Emico\TweakwiseExport\Test\Integration\Export\Product;
 
 use Emico\TweakwiseExport\Test\Integration\ExportTest;
 
+/**
+ * @magentoDbIsolation enabled
+ */
 class BasicTest extends ExportTest
 {
     /**
@@ -23,8 +26,6 @@ class BasicTest extends ExportTest
 
     /**
      * Test export with one product and check on product data
-     *
-     * @magentoDbIsolation enabled
      */
     public function testOneProduct()
     {

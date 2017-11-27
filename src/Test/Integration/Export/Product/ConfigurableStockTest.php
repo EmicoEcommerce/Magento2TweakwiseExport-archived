@@ -13,6 +13,9 @@ use Emico\TweakwiseExport\Test\Integration\ExportTest;
 use Emico\TweakwiseExport\TestHelper\Data\Product\ConfigurableProvider;
 use Magento\CatalogInventory\Model\Configuration as StockConfiguration;
 
+/**
+ * @magentoDbIsolation enabled
+ */
 class ConfigurableStockTest extends ExportTest
 {
     /**
@@ -31,8 +34,6 @@ class ConfigurableStockTest extends ExportTest
 
     /**
      * Test to see if show out of stock children is handled when set to true
-     *
-     * @magentoDbIsolation enabled
      */
     public function testAttributesVisibleWhenOutStock()
     {
@@ -51,8 +52,6 @@ class ConfigurableStockTest extends ExportTest
 
     /**
      * Test to see if show out of stock children is handled when set to false
-     *
-     * @magentoDbIsolation enabled
      */
     public function testAttributesNotVisibleWhenOutStock()
     {
@@ -71,8 +70,6 @@ class ConfigurableStockTest extends ExportTest
 
     /**
      * When product specific configuration is set check if child product will not be exported.
-     *
-     * @magentoDbIsolation enabled
      */
     public function testAttributesNotVisibleWhenOutStockWithProductSpecificConfiguration()
     {
@@ -91,8 +88,6 @@ class ConfigurableStockTest extends ExportTest
 
     /**
      * When product specific configuration is set check and all children are not valid check if entire product will be skipped.
-     *
-     * @magentoDbIsolation enabled
      */
     public function testProductNotExportWhenOutStockWithProductSpecificConfiguration()
     {

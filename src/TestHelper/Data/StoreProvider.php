@@ -20,7 +20,6 @@ use Magento\Store\Model\GroupFactory;
 use Magento\Store\Model\StoreFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Store\Model\WebsiteFactory;
-use Zend\Hydrator\ClassMethods;
 
 class StoreProvider
 {
@@ -30,7 +29,7 @@ class StoreProvider
     private $faker;
 
     /**
-     * @var ClassMethods
+     * @var EntityHydrator
      */
     private $hydrator;
 
@@ -67,7 +66,7 @@ class StoreProvider
     /**
      * StoreProvider constructor.
      *
-     * @param ClassMethods $hydrator
+     * @param EntityHydrator $hydrator
      * @param WebsiteFactory $websiteFactory
      * @param GroupFactory $groupFactory
      * @param StoreFactory $storeFactory
@@ -76,7 +75,7 @@ class StoreProvider
      * @param IndexerInterfaceFactory $indexerFactory
      */
     public function __construct(
-        ClassMethods $hydrator,
+        EntityHydrator $hydrator,
         WebsiteFactory $websiteFactory,
         GroupFactory $groupFactory,
         StoreFactory $storeFactory,

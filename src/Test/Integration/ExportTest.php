@@ -84,43 +84,4 @@ abstract class ExportTest extends TestCase
             fclose($resource);
         }
     }
-
-    /**
-     * @param SimpleXMLElement $feed
-     * @param string|null $sku
-     * @param string|null $name
-     * @param float|null $price
-     * @param array|null $attributes
-     * @param array|null $categories
-     */
-    protected function assertProductData(
-        SimpleXMLElement $feed,
-        string $sku,
-        string $name = null,
-        float $price = null,
-        array $attributes = null,
-        array $categories = null
-    )
-    {
-        $productData = $this->feedData->getProductData($feed, $sku);
-        $this->assertNotNull($productData);
-
-        if ($price !== null) {
-            $this->assertArrayHasKey('price', $productData);
-            $this->assertEquals($price, $productData['price']);
-        }
-
-        if ($name !== null) {
-            $this->assertArrayHasKey('name', $productData);
-            $this->assertEquals($name, $productData['name']);
-        }
-
-        if ($attributes !== null) {
-
-        }
-
-        if ($categories !== null) {
-
-        }
-    }
 }
