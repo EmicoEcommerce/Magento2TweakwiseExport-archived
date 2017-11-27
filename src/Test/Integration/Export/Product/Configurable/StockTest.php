@@ -6,7 +6,7 @@
  * @license   Proprietary and confidential, Unauthorized copying of this file, via any medium is strictly prohibited
  */
 
-namespace Emico\TweakwiseExport\Test\Integration\Export\Product;
+namespace Emico\TweakwiseExport\Test\Integration\Export\Product\Configurable;
 
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Test\Integration\ExportTest;
@@ -16,7 +16,7 @@ use Magento\CatalogInventory\Model\Configuration as StockConfiguration;
 /**
  * @magentoDbIsolation enabled
  */
-class ConfigurableStockTest extends ExportTest
+class StockTest extends ExportTest
 {
     /**
      * @var ConfigurableProvider
