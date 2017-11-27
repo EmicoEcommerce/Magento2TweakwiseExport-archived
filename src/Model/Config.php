@@ -11,7 +11,6 @@ namespace Emico\TweakwiseExport\Model;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\App\ScopeInterface as AppScopeInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
 use RuntimeException;
@@ -84,7 +83,7 @@ class Config
      */
     public function isRealTime(): bool
     {
-        return (bool) $this->config->isSetFlag(self::PATH_REAL_TIME, AppScopeInterface::SCOPE_DEFAULT);
+        return (bool) $this->config->isSetFlag(self::PATH_REAL_TIME);
     }
 
     /**
@@ -96,7 +95,7 @@ class Config
             return false;
         }
 
-        return (bool) $this->config->isSetFlag(self::PATH_VALIDATE, AppScopeInterface::SCOPE_DEFAULT);
+        return (bool) $this->config->isSetFlag(self::PATH_VALIDATE);
     }
 
     /**
@@ -104,7 +103,7 @@ class Config
      */
     public function getApiImportUrl(): string
     {
-        return (string) $this->config->getValue(self::PATH_API_IMPORT_URL, AppScopeInterface::SCOPE_DEFAULT);
+        return (string) $this->config->getValue(self::PATH_API_IMPORT_URL);
     }
 
     /**
@@ -130,7 +129,7 @@ class Config
      */
     public function getKey(): string
     {
-        return (string) $this->config->getValue(self::PATH_FEED_KEY, AppScopeInterface::SCOPE_DEFAULT);
+        return (string) $this->config->getValue(self::PATH_FEED_KEY);
     }
 
     /**
