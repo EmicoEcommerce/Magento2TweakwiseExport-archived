@@ -40,7 +40,6 @@ class BasicTest extends ExportTest
             'sku' => $product->getSku(),
             'type_id' => 'simple',
             'tax_class_id' => 'Taxable Goods',
-            'price' => $product->getPrice(),
             'old_price' => $product->getPrice(),
             'min_price' => $product->getPrice(),
             'max_price' => $product->getPrice(),

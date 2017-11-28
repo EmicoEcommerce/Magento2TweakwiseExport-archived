@@ -12,6 +12,7 @@ use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\EavIterator;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
+use Magento\Framework\DB\Select;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 
 class Iterator extends EavIterator
@@ -41,7 +42,7 @@ class Iterator extends EavIterator
     /**
      * {@inheritdoc}
      */
-    protected function getStaticAttributeSelect(array $attributes)
+    protected function getStaticAttributeSelect(array $attributes): array
     {
         $selects = parent::getStaticAttributeSelect($attributes);
 
@@ -55,7 +56,7 @@ class Iterator extends EavIterator
     /**
      * {@inheritdoc}
      */
-    protected function createEavAttributeGroupSelect($group, array $attributes)
+    protected function createEavAttributeGroupSelect(string $group, array $attributes): Select
     {
         $select = parent::createEavAttributeGroupSelect($group, $attributes);
 

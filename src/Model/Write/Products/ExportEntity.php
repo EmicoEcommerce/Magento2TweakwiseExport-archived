@@ -248,15 +248,21 @@ class ExportEntity
     }
 
     /**
-     * @return Generator|array[]
+     * @return array[]
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
+        $result = [];
         foreach ($this->attributes as $attribute => $values) {
             foreach ($values as $value => $junk) {
-                yield ['attribute' => $attribute, 'value' => $value];
+                $result[$attribute . $value] = ['attribute' => $attribute, 'value' => $value];
             }
         }
+
+        $childrenAttributes = array_map(function(ExportEntity $child) { return $child->getAttributes(); }, $this->children);
+        $result = array_merge($result, ...$childrenAttributes);
+
+        return $result;
     }
 
     /**

@@ -6,6 +6,7 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
+use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Write\EavIteratorFactory;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\CollectionFactory;
@@ -47,10 +48,16 @@ class Children extends AbstractDecorator
      * @var IteratorInitializer
      */
     private $iteratorInitializer;
+
     /**
      * @var CollectionFactory
      */
     private $collectionFactory;
+
+    /**
+     * @var Config
+     */
+    private $config;
 
     /**
      * ChildId constructor.
@@ -61,6 +68,7 @@ class Children extends AbstractDecorator
      * @param IteratorInitializer $iteratorInitializer
      * @param ExportEntityFactory $entityFactory
      * @param CollectionFactory $collectionFactory
+     * @param Config $config
      */
     public function __construct(
         DbContext $dbContext,
@@ -68,7 +76,8 @@ class Children extends AbstractDecorator
         EavIteratorFactory $eavIteratorFactory,
         IteratorInitializer $iteratorInitializer,
         ExportEntityFactory $entityFactory,
-        CollectionFactory $collectionFactory
+        CollectionFactory $collectionFactory,
+        Config $config
     )
     {
         parent::__construct($dbContext);
@@ -77,6 +86,7 @@ class Children extends AbstractDecorator
         $this->entityFactory = $entityFactory;
         $this->iteratorInitializer = $iteratorInitializer;
         $this->collectionFactory = $collectionFactory;
+        $this->config = $config;
     }
 
     /**
@@ -224,6 +234,12 @@ class Children extends AbstractDecorator
         $iterator = $this->eavIteratorFactory->create();
         $iterator->setEntityIds($this->childEntities->getIds());
         $this->iteratorInitializer->initializeAttributes($iterator);
+
+        foreach ($iterator->getAttributes() as $attribute) {
+            if ($this->config->getSkipChildAttribute($attribute->getAttributeCode())) {
+                $iterator->removeAttribute($attribute->getAttributeCode());
+            }
+        }
 
         foreach ($iterator as $child) {
             $entity = $this->entityFactory->create($child);

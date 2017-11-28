@@ -147,7 +147,7 @@ class Config
      * @param string|null $attribute
      * @return bool|string[]
      */
-    public function getSkipAttribute($attribute = null, $store = null)
+    public function getSkipChildAttribute($attribute = null, $store = null)
     {
         if (!$this->skipAttributes) {
             $value = $this->config->getValue(self::PATH_EXCLUDE_CHILD_ATTRIBUTES, ScopeInterface::SCOPE_STORE, $store);

@@ -103,20 +103,21 @@ class Categories implements WriterInterface
         // Set root category as exported
         $exportedCategories = [1 => true];
         $storeId = $store->getId();
-        $storeRootCategoryId = $store->getRootCategoryId();
+        $storeRootCategoryId = (int) $store->getRootCategoryId();
         $this->iterator->setStoreId($storeId);
 
         foreach ($this->iterator as $data) {
             // Skip magento root since we injected our fake root
-            if ($data['entity_id'] == 1) {
+            if ($data['entity_id'] === 1) {
                 continue;
             }
 
+            $parentId = (int) $data['parent_id'];
             // Store root category extend name so it is clear in tweakwise
             // Always export store root category whether it is enabled or not
-            if ($data['parent_id'] == 1) {
+            if ($parentId === 1) {
                 // Skip category if not root of current store
-                if ($data['entity_id'] != $storeRootCategoryId) {
+                if ($data['entity_id'] !== $storeRootCategoryId) {
                     continue;
                 }
 
@@ -129,7 +130,7 @@ class Categories implements WriterInterface
                 continue;
             }
 
-            if (!isset($exportedCategories[$data['parent_id']])) {
+            if (!isset($exportedCategories[$parentId])) {
                 continue;
             }
 
@@ -161,9 +162,9 @@ class Categories implements WriterInterface
         if (isset($data['parent_id']) && $data['parent_id']) {
             $xml->startElement('parents');
 
-            $parentId = $data['parent_id'];
-            if ($parentId != 1) {
-                $parentId = $this->helper->getTweakwiseId($storeId, $data['parent_id']);
+            $parentId = (int) $data['parent_id'];
+            if ($parentId !== 1) {
+                $parentId = $this->helper->getTweakwiseId($storeId, $parentId);
             }
             $xml->writeElement('categoryid', $parentId);
             $xml->endElement(); // </parents>

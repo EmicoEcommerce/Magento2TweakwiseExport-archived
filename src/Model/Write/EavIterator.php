@@ -8,6 +8,7 @@
 
 namespace Emico\TweakwiseExport\Model\Write;
 
+use Emico\TweakwiseExport\Exception\InvalidArgumentException;
 use Emico\TweakwiseExport\Model\Helper;
 use IteratorAggregate;
 use Magento\Eav\Model\Config as EavConfig;
@@ -53,7 +54,7 @@ class EavIterator implements IteratorAggregate
     /**
      * @var int[]
      */
-    protected $entityIds;
+    protected $entityIds = [];
 
     /**
      * @var Helper
@@ -82,7 +83,7 @@ class EavIterator implements IteratorAggregate
      * @param string $entityCode
      * @param string[] $attributes
      */
-    public function __construct(Helper $helper, EavConfig $eavConfig, DbContext $dbContext, $entityCode, array $attributes)
+    public function __construct(Helper $helper, EavConfig $eavConfig, DbContext $dbContext, string $entityCode, array $attributes)
     {
         $this->eavConfig = $eavConfig;
         $this->entityCode = $entityCode;
@@ -98,12 +99,31 @@ class EavIterator implements IteratorAggregate
      * @param string $attributeCode
      * @return $this
      */
-    public function selectAttribute($attributeCode)
+    public function selectAttribute(string $attributeCode)
     {
         $attribute = $this->eavConfig->getAttribute($this->entityCode, $attributeCode);
-        $attributeKey = $attribute->getId() ? $attribute->getId() : $attributeCode;
+        $attributeKey = $attribute->getId() ?: $attributeCode;
+
         $this->attributes[$attributeKey] = $attribute;
         $this->attributesByCode[$attributeCode] = $attribute;
+        return $this;
+    }
+
+    /**
+     * @param string $attributeCode
+     * @return $this
+     */
+    public function removeAttribute(string $attributeCode)
+    {
+        $attribute = $this->eavConfig->getAttribute($this->entityCode, $attributeCode);
+        $attributeKey = $attribute->getId() ?: $attributeCode;
+
+        if (!isset($this->attributes[$attributeKey])) {
+            throw new InvalidArgumentException(sprintf('Attribute %s not found', $attributeCode));
+        }
+
+        unset($this->attributes[$attributeKey], $this->attributesByCode[$attributeCode]);
+
         return $this;
     }
 
@@ -111,9 +131,9 @@ class EavIterator implements IteratorAggregate
      * @param int $storeId
      * @return $this
      */
-    public function setStoreId($storeId)
+    public function setStoreId(int $storeId)
     {
-        $this->storeId = (int) $storeId;
+        $this->storeId = $storeId;
         return $this;
     }
 
@@ -130,7 +150,7 @@ class EavIterator implements IteratorAggregate
     /**
      * @return int[]
      */
-    public function getEntityIds()
+    public function getEntityIds(): array
     {
         return $this->entityIds;
     }
@@ -152,8 +172,9 @@ class EavIterator implements IteratorAggregate
 
             $attribute = $this->attributes[$attributeId];
             $attributeCode = $attribute->getAttributeCode();
+            $rowEntityId = (int) $row['entity_id'];
 
-            if ($entity['entity_id'] != $row['entity_id']) {
+            if ($entity['entity_id'] !== $rowEntityId) {
                 // If current loop entity is new yield return this entity
                 if ($entity['entity_id']) {
                     yield $entity;
@@ -184,7 +205,7 @@ class EavIterator implements IteratorAggregate
     /**
      * @return Zend_Db_Select
      */
-    protected function createSelect()
+    protected function createSelect(): Zend_Db_Select
     {
         $select = $this->getConnection()
             ->select()
@@ -228,9 +249,17 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
+     * @return AbstractAttribute[]
+     */
+    public function getAttributes(): array
+    {
+        return $this->attributes;
+    }
+
+    /**
      * @return AdapterInterface
      */
-    protected function getConnection()
+    protected function getConnection(): AdapterInterface
     {
         return $this->getResources()->getConnection();
     }
@@ -238,7 +267,7 @@ class EavIterator implements IteratorAggregate
     /**
      * @return ResourceConnection
      */
-    protected function getResources()
+    protected function getResources(): ResourceConnection
     {
         return $this->dbContext->getResources();
     }
@@ -246,7 +275,7 @@ class EavIterator implements IteratorAggregate
     /**
      * @return Type
      */
-    protected function getEntityType()
+    protected function getEntityType(): Type
     {
         return $this->eavConfig->getEntityType($this->entityCode);
     }
@@ -255,7 +284,7 @@ class EavIterator implements IteratorAggregate
      * @param AbstractAttribute[] $attributes
      * @return Select[]
      */
-    protected function getStaticAttributeSelect(array $attributes)
+    protected function getStaticAttributeSelect(array $attributes): array
     {
         $connection = $this->getConnection();
 
@@ -282,7 +311,7 @@ class EavIterator implements IteratorAggregate
      * @param AbstractAttribute[] $attributes
      * @return Select
      */
-    protected function getAttributeSelectCommunity($table, array $attributes)
+    protected function getAttributeSelectCommunity(string $table, array $attributes): Select
     {
         $connection = $this->getConnection();
         $select = $connection->select()
@@ -303,7 +332,7 @@ class EavIterator implements IteratorAggregate
      * @param AbstractAttribute[] $attributes
      * @return Select
      */
-    protected function getAttributeSelectEnterprise($table, array $attributes)
+    protected function getAttributeSelectEnterprise(string $table, array $attributes): Select
     {
         $connection = $this->getConnection();
         $select = $connection->select()
@@ -329,7 +358,7 @@ class EavIterator implements IteratorAggregate
     /**
      * @return AbstractAttribute[][]
      */
-    protected function getAttributeGroups()
+    protected function getAttributeGroups(): array
     {
         $attributeGroups = [];
         foreach ($this->attributes as $attributeId => $attribute) {
@@ -351,7 +380,7 @@ class EavIterator implements IteratorAggregate
      * @param AbstractAttribute[] $attributes
      * @return Select
      */
-    protected function createEavAttributeGroupSelect($group, array $attributes)
+    protected function createEavAttributeGroupSelect(string $group, array $attributes): Select
     {
         if ($this->helper->isEnterprise()) {
             return $this->getAttributeSelectEnterprise($group, $attributes);
@@ -363,13 +392,13 @@ class EavIterator implements IteratorAggregate
     /**
      * @return Select[]
      */
-    protected function getAttributeSelects()
+    protected function getAttributeSelects(): array
     {
         $selects = [];
         $attributeGroups = $this->getAttributeGroups();
 
         foreach ($attributeGroups as $group => $attributes) {
-            if ($group == '_static') {
+            if ($group === '_static') {
                 foreach ($this->getStaticAttributeSelect($attributes) as $select) {
                     $selects[] = $select;
                 }

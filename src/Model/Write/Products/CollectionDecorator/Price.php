@@ -61,14 +61,11 @@ class Price implements DecoratorInterface
             ]);
         $collectionQuery = $collectionSelect->query();
 
-        $result = [];
         while ($row = $collectionQuery->fetch()) {
             $entityId = $row['entity_id'];
             $row['price'] = $this->getPriceValue($collection->getStoreId(), $row);
             $collection->get($entityId)->setFromArray($row);
         }
-
-        return $result;
     }
 
     /**
@@ -86,6 +83,6 @@ class Price implements DecoratorInterface
             }
         }
 
-        return 0;
+        return 0.0;
     }
 }
