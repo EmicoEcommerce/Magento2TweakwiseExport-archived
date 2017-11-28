@@ -84,10 +84,10 @@ class ConfigurableProvider
             $productData['qty'] = 0;
         }
 
-        $product = $this->productProvider->create($productData);
         foreach ($configurableAttributes as $attribute) {
-            $this->attributeProvider->ensureSet($attribute, $product->getAttributeSetId());
+            $this->attributeProvider->ensureSet($attribute, 'Default');
         }
+        $product = $this->productProvider->create($productData);
 
         $simpleProducts = $this->createSimpleProducts($simpleData, $configurableAttributes);
         $configurableOptions = $this->createConfigurableOptions($configurableAttributes);
