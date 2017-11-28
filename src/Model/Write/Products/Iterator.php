@@ -74,7 +74,7 @@ class Iterator extends EavIterator
     {
         $batch = $this->collectionFactory->create(['storeId' => $this->storeId]);
         foreach (parent::getIterator() as $entityData) {
-            $entity = $this->entityFactory->create(['data' => $entityData]);
+            $entity = $this->entityFactory->create(['storeId' => $this->storeId, 'data' => $entityData]);
             if (!$entity->shouldExport()) {
                 continue;
             }

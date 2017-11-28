@@ -10,9 +10,15 @@ use Emico\TweakwiseExport\Exception\InvalidArgumentException;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
+use Magento\CatalogInventory\Api\StockConfigurationInterface;
 
 class ExportEntity
 {
+    /**
+     * @var int
+     */
+    protected $storeId;
+
     /**
      * @var Visibility
      */
@@ -61,7 +67,7 @@ class ExportEntity
     /**
      * @var bool|null
      */
-    private $isComposite = null;
+    private $isComposite;
 
     /**
      * @var StockItemInterface
@@ -69,16 +75,25 @@ class ExportEntity
     private $stockItem;
 
     /**
+     * @var StockConfigurationInterface
+     */
+    private $stockConfiguration;
+
+    /**
      * ExportEntity constructor.
      *
      * @param int $storeId
+     * @param StockConfigurationInterface $stockConfiguration
      * @param Visibility $visibility
      * @param array $data
+     * @internal param int $storeId
      */
-    public function __construct(Visibility $visibility, array $data = [])
+    public function __construct(int $storeId, StockConfigurationInterface $stockConfiguration, Visibility $visibility, array $data = [])
     {
         $this->setFromArray($data);
         $this->visibilityObject = $visibility;
+        $this->storeId = $storeId;
+        $this->stockConfiguration = $stockConfiguration;
     }
 
     /**
@@ -429,6 +444,10 @@ class ExportEntity
     protected function shouldExportByStock(): bool
     {
         if ($this->stockItem === null) {
+            return true;
+        }
+
+        if ($this->stockConfiguration->isShowOutOfStock($this->storeId)) {
             return true;
         }
 
