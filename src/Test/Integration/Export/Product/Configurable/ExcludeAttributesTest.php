@@ -98,6 +98,6 @@ class ExcludeAttributesTest extends ExportTest
             ['color' => $parentColorId]
         );
 
-        $this->exportFeed()->getProduct($product->getId())->assertAttributes(['color' => ['child color', 'parent color']]);
+        $this->exportFeed()->getProduct($product->getId())->assertAttributes(['color' => ['parent color', 'child color']]);
     }
 }

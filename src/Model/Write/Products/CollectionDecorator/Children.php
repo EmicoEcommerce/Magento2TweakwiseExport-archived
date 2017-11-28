@@ -6,12 +6,10 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
-use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Write\EavIteratorFactory;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\CollectionFactory;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntityChild;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntityChildFactory;
 use Emico\TweakwiseExport\Model\Write\Products\IteratorInitializer;
 use Magento\Bundle\Model\Product\Type as Bundle;
@@ -36,7 +34,7 @@ class Children extends AbstractDecorator
     private $eavIteratorFactory;
 
     /**
-     * @var ExportEntityFactory
+     * @var ExportEntityChildFactory
      */
     private $entityChildFactory;
 
@@ -56,11 +54,6 @@ class Children extends AbstractDecorator
     private $collectionFactory;
 
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
      * ChildId constructor.
      *
      * @param DbContext $dbContext
@@ -69,7 +62,6 @@ class Children extends AbstractDecorator
      * @param IteratorInitializer $iteratorInitializer
      * @param ExportEntityChildFactory $entityChildFactory
      * @param CollectionFactory $collectionFactory
-     * @param Config $config
      */
     public function __construct(
         DbContext $dbContext,
@@ -77,8 +69,7 @@ class Children extends AbstractDecorator
         EavIteratorFactory $eavIteratorFactory,
         IteratorInitializer $iteratorInitializer,
         ExportEntityChildFactory $entityChildFactory,
-        CollectionFactory $collectionFactory,
-        Config $config
+        CollectionFactory $collectionFactory
     )
     {
         parent::__construct($dbContext);
@@ -87,7 +78,6 @@ class Children extends AbstractDecorator
         $this->entityChildFactory = $entityChildFactory;
         $this->iteratorInitializer = $iteratorInitializer;
         $this->collectionFactory = $collectionFactory;
-        $this->config = $config;
     }
 
     /**
