@@ -97,10 +97,24 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * @return int[]
+     * Fetches all entities including children, checked on should export. Array key is entity ID
+     *
+     * @param bool $checkExport
+     * @return ExportEntity[]
      */
-    public function getAllChildIds(): array
+    public function getAll(bool $checkExport = true): array
     {
-        return array_merge(...array_map(function(ExportEntity $entity) { return $entity->getChildIds(); }, $this->entities));
+        $result = [];
+        foreach ($this as $entity) {
+            if ($checkExport && !$entity->shouldExport()) {
+                continue;
+            }
+
+            $result[$entity->getId()] = $entity;
+            foreach ($entity->getChildren() as $child) {
+                $result[$child->getId()] = $child;
+            }
+        }
+        return $result;
     }
 }

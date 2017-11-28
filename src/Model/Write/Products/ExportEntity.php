@@ -9,6 +9,7 @@ namespace Emico\TweakwiseExport\Model\Write\Products;
 use Emico\TweakwiseExport\Exception\InvalidArgumentException;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
+use Magento\CatalogInventory\Api\Data\StockItemInterface;
 
 class ExportEntity
 {
@@ -63,9 +64,9 @@ class ExportEntity
     private $isComposite = null;
 
     /**
-     * @var float
+     * @var StockItemInterface
      */
-    private $stockQty = 0.0;
+    private $stockItem;
 
     /**
      * ExportEntity constructor.
@@ -97,9 +98,6 @@ class ExportEntity
                     break;
                 case 'name';
                     $this->setName((string) $value);
-                    break;
-                case 'qty';
-                    $this->setStockQty((float) $value);
                     break;
                 case 'price';
                     $this->setPrice((float) $value);
@@ -198,7 +196,7 @@ class ExportEntity
      */
     public function getStockQty(): float
     {
-        return $this->stockQty;
+        return (float) $this->stockItem->getQty();
     }
 
     /**
@@ -310,11 +308,25 @@ class ExportEntity
     }
 
     /**
+     * @param bool $checkExport
      * @return ExportEntityChild[]
      */
-    public function getChildren(): array
+    public function getChildren(bool $checkExport = true): array
     {
-        return $this->children;
+        if (!$checkExport) {
+            return $this->children;
+        }
+
+        $result = [];
+        foreach ($this->children as $child) {
+            if (!$child->shouldExport()) {
+                continue;
+            }
+
+            $result[$child->getId()] = $child;
+        }
+
+        return $result;
     }
 
     /**
@@ -324,6 +336,32 @@ class ExportEntity
     public function setIsComposite(bool $isComposite)
     {
         $this->isComposite = $isComposite;
+        return $this;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function isComposite()
+    {
+        return $this->isComposite;
+    }
+
+    /**
+     * @return StockItemInterface
+     */
+    public function getStockItem(): StockItemInterface
+    {
+        return $this->stockItem;
+    }
+
+    /**
+     * @param StockItemInterface $stockItem
+     * @return $this
+     */
+    public function setStockItem(StockItemInterface $stockItem)
+    {
+        $this->stockItem = $stockItem;
         return $this;
     }
 
