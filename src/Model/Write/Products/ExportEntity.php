@@ -29,9 +29,9 @@ class ExportEntity
     private $attributes = [];
 
     /**
-     * @var ExportEntityChild[]
+     * @var ExportEntityChild[]|null
      */
-    private $children = [];
+    private $children;
 
     /**
      * @var int
@@ -71,6 +71,7 @@ class ExportEntity
     /**
      * ExportEntity constructor.
      *
+     * @param int $storeId
      * @param Visibility $visibility
      * @param array $data
      */
@@ -216,7 +217,8 @@ class ExportEntity
     {
         return $this->shouldExportByStatus() &&
             $this->shouldExportByVisibility() &&
-            $this->shouldExportByStock();
+            $this->shouldExportByStock() &&
+            $this->shouldExportByComposite();
     }
 
     /**
@@ -284,11 +286,27 @@ class ExportEntity
     }
 
     /**
+     * @param ExportEntityChild[] $children
+     * @return $this
+     */
+    public function setChildren(array $children)
+    {
+        foreach ($children as $child) {
+            $this->addChild($child);
+        }
+        return $this;
+    }
+
+    /**
      * @param ExportEntityChild $child
      * @return $this
      */
     public function addChild(ExportEntityChild $child)
     {
+        if ($this->children === null) {
+            $this->children = [];
+        }
+
         $this->children[$child->getId()] = $child;
         return $this;
     }
@@ -299,7 +317,7 @@ class ExportEntity
      */
     public function removeChild(ExportEntityChild $child)
     {
-        if (!isset($this->children[$child->getId()])) {
+        if ($this->children === null || !isset($this->children[$child->getId()])) {
             throw new InvalidArgumentException(sprintf('Child %s not set on %s', $child->getId(), $this->getId()));
         }
 
@@ -313,6 +331,10 @@ class ExportEntity
      */
     public function getChildren(bool $checkExport = true): array
     {
+        if ($this->children === null) {
+            return [];
+        }
+
         if (!$checkExport) {
             return $this->children;
         }
@@ -393,8 +415,33 @@ class ExportEntity
     /**
      * @return bool
      */
+    protected function shouldExportByComposite(): bool
+    {
+        if ($this->isComposite === null || $this->isComposite === false) {
+            return true;
+        }
+
+        if ($this->children === null) {
+            return true;
+        }
+
+        return count($this->children) > 0;
+    }
+
+    /**
+     * @return bool
+     */
     protected function shouldExportByStock(): bool
     {
-        return true;
+        if ($this->stockItem === null) {
+            return true;
+        }
+
+        if (!$this->stockItem->getManageStock()) {
+            return true;
+        }
+
+        $minQty = (float) $this->stockItem->getMinQty();
+        return $this->stockItem->getQty() >= $minQty;
     }
 }

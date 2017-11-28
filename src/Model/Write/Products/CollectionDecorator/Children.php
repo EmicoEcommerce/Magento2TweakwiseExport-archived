@@ -103,6 +103,7 @@ class Children extends AbstractDecorator
             $isComposite = $type->isComposite($fakeProduct);
             foreach ($group as $entity) {
                 $entity->setIsComposite($isComposite);
+                $entity->setChildren([]);
             }
 
             $parentIds = array_keys($group);

@@ -10,7 +10,7 @@ use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Config\Source\StockCalculation;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntityFactory;
+use Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory;
 use Magento\CatalogInventory\Api\StockItemCriteriaInterfaceFactory;
 use Magento\CatalogInventory\Api\StockItemRepositoryInterface;
 
@@ -25,27 +25,36 @@ class StockData implements DecoratorInterface
      * @var StockItemCriteriaInterfaceFactory
      */
     private $criteriaFactory;
+
     /**
      * @var Config
      */
     private $config;
 
     /**
+     * @var StockItemInterfaceFactory
+     */
+    private $stockItemFactory;
+
+    /**
      * StockData constructor.
      *
      * @param StockItemRepositoryInterface $stockItemRepository
      * @param StockItemCriteriaInterfaceFactory $criteriaFactory
+     * @param StockItemInterfaceFactory $stockItemFactory
      * @param Config $config
      */
     public function __construct(
         StockItemRepositoryInterface $stockItemRepository,
         StockItemCriteriaInterfaceFactory $criteriaFactory,
+        StockItemInterfaceFactory $stockItemFactory,
         Config $config
     )
     {
         $this->stockItemRepository = $stockItemRepository;
         $this->criteriaFactory = $criteriaFactory;
         $this->config = $config;
+        $this->stockItemFactory = $stockItemFactory;
     }
 
     /**
@@ -53,26 +62,38 @@ class StockData implements DecoratorInterface
      */
     public function decorate(Collection $collection)
     {
-        $this->addStockItems($collection);
-        foreach ($collection as $item) {
+        $entities = $collection->getExportedIncludingChildren();
+
+        $this->addStockItems($collection->getStoreId(), $entities);
+        foreach ($entities as $item) {
             $this->combineStock($item, $collection->getStoreId());
         }
     }
 
     /**
-     * @param Collection $collection
+     * @param int $storeId
+     * @param ExportEntity[] $entities
      */
-    private function addStockItems(Collection $collection)
+    private function addStockItems(int $storeId, array $entities)
     {
-        $entities = $collection->getAll();
-
         $criteria = $this->criteriaFactory->create();
-        $criteria->addFilter('product_id', 'product_id', ['in' => implode(',', array_keys($entities))]);
+        $criteria->setProductsFilter(array_keys($entities));
 
         $items = $this->stockItemRepository->getList($criteria)->getItems();
         foreach ($items as $item) {
             $productId = (int) $item->getProductId();
             $entities[$productId]->setStockItem($item);
+
+            if (method_exists($item, 'setStoreId')) {
+                $item->setStoreId($storeId);
+            }
+
+            unset($entities[$productId]);
+        }
+
+        foreach ($entities as $entityWithoutStock) {
+            $stockItem = $this->stockItemFactory->create();
+            $entityWithoutStock->setStockItem($stockItem);
         }
     }
 
@@ -82,7 +103,7 @@ class StockData implements DecoratorInterface
      */
     private function combineStock(ExportEntity $entity, int $storeId)
     {
-        if ($entity->isComposite()) {
+        if (!$entity->isComposite()) {
             return;
         }
 

@@ -153,9 +153,8 @@ class ProductProvider
             $this->emulation->stopEnvironmentEmulation();
         }
 
-
         // Ensure product qty
-        $data['qty'] = $data['qty'] ?? [self::DEFAULT_STOCK_QTY];
+        $data['qty'] = $data['qty'] ?? self::DEFAULT_STOCK_QTY;
         $this->updateStockItem($product, $data);
 
         // Assign product to categories

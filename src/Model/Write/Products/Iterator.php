@@ -108,7 +108,7 @@ class Iterator extends EavIterator
             }
         }
 
-        foreach ($collection as $entity) {
+        foreach ($collection->getExported() as $entity) {
             yield [
                 'entity_id' => $entity->getId(),
                 'name' => $entity->getName(),

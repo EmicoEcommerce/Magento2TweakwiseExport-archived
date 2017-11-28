@@ -22,7 +22,6 @@ use Magento\Catalog\Model\Product\Attribute\Source\Status;
  */
 class BasicTest extends MultiStoreTest
 {
-
     /**
      * Test multiple stores enabled
      */
