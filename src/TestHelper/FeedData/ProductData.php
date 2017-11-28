@@ -6,6 +6,7 @@
 
 namespace Emico\TweakwiseExport\TestHelper\FeedData;
 
+use ArrayAccess;
 use Emico\TweakwiseExport\Test\TestCase;
 use SimpleXMLElement;
 
@@ -120,6 +121,7 @@ class ProductData
         if ($this->categories === null) {
             $this->parseCategories();
         }
+
 
         $this->test->assertArraySubset($categories, $this->categories);
     }

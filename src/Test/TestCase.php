@@ -18,5 +18,17 @@ if (class_exists('PHPUnit\Framework\TestCase')) {
 
 abstract class TestCase extends BaseTestCase
 {
-
+    /**
+     * Asserts that an array has a specified subset.
+     *
+     * @param array $subset
+     * @param array $array
+     */
+    public function assertArraySubset(array $subset, array $array)
+    {
+        foreach ($subset as $field => $value) {
+            $this->assertArrayHasKey($field, $array);
+            $this->assertEquals($array[$field], $value);
+        }
+    }
 }
