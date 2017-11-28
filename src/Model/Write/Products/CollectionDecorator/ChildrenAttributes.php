@@ -36,7 +36,7 @@ class ChildrenAttributes implements DecoratorInterface
                 continue;
             }
 
-            foreach ($parent->getChildren() as $child) {
+            foreach ($parent->getExportChildren() as $child) {
                 foreach ($child->getAttributes() as $attributeData) {
                     if ($this->config->getSkipChildAttribute($attributeData['attribute'])) {
                         continue;

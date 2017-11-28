@@ -119,7 +119,7 @@ class StockData implements DecoratorInterface
     private function getCombinedStock(ExportEntity $entity, int $storeId): float
     {
         $stockQty = [];
-        foreach ($entity->getChildren() as $child) {
+        foreach ($entity->getExportChildren() as $child) {
             $stockQty[] = $child->getStockQty();
         }
 

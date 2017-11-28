@@ -123,7 +123,7 @@ class Collection implements IteratorAggregate, Countable
         foreach ($this->getExported() as $entity) {
             $result[$entity->getId()] = $entity;
 
-            foreach ($entity->getChildren() as $child) {
+            foreach ($entity->getExportChildren() as $child) {
                 $result[$child->getId()] = $child;
             }
         }

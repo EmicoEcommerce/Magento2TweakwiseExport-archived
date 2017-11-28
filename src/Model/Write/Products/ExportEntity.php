@@ -326,17 +326,12 @@ class ExportEntity
     }
 
     /**
-     * @param bool $checkExport
      * @return ExportEntityChild[]
      */
-    public function getChildren(bool $checkExport = true): array
+    public function getExportChildren(): array
     {
         if ($this->children === null) {
             return [];
-        }
-
-        if (!$checkExport) {
-            return $this->children;
         }
 
         $result = [];
@@ -425,7 +420,7 @@ class ExportEntity
             return true;
         }
 
-        return count($this->children) > 0;
+        return count($this->getExportChildren()) > 0;
     }
 
     /**
