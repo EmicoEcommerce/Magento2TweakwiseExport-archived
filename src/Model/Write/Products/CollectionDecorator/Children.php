@@ -214,7 +214,7 @@ class Children extends AbstractDecorator
     private function addChild(Collection $collection, int $parentId, int $childId)
     {
         if (!$this->childEntities->has($childId)) {
-            $child = $this->entityChildFactory->create(['data' => ['entity_id' => $childId]]);
+            $child = $this->entityChildFactory->create(['storeId' => $collection->getStoreId(), 'data' => ['entity_id' => $childId]]);
             $this->childEntities->add($child);
         } else {
             $child = $this->childEntities->get($childId);
@@ -235,12 +235,6 @@ class Children extends AbstractDecorator
         $iterator = $this->eavIteratorFactory->create(['entityCode' => Product::ENTITY, 'attributes' => []]);
         $iterator->setEntityIds($this->childEntities->getIds());
         $this->iteratorInitializer->initializeAttributes($iterator);
-
-        foreach ($iterator->getAttributes() as $attribute) {
-            if ($this->config->getSkipChildAttribute($attribute->getAttributeCode())) {
-                $iterator->removeAttribute($attribute->getAttributeCode());
-            }
-        }
 
         foreach ($iterator as $childData) {
             $childId = (int) $childData['entity_id'];
