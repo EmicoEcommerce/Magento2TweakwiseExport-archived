@@ -7,69 +7,76 @@
 namespace Emico\TweakwiseExport\Model\Write\Products;
 
 use Emico\TweakwiseExport\Exception\InvalidArgumentException;
-use Generator;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\Catalog\Model\Product\Visibility;
 
 class ExportEntity
 {
     /**
+     * @var Visibility
+     */
+    private $visibilityObject;
+
+    /**
      * @var int[]
      */
-    protected $categories = [];
+    private $categories = [];
 
     /**
      * @var array[]
      */
-    protected $attributes = [];
+    private $attributes = [];
 
     /**
-     * @var ExportEntity[]
+     * @var ExportEntityChild[]
      */
-    protected $children = [];
-
-    /**
-     * @var int
-     */
-    protected $id;
+    private $children = [];
 
     /**
      * @var int
      */
-    protected $status;
+    private $id;
 
     /**
      * @var int
      */
-    protected $visibility;
+    private $status;
+
+    /**
+     * @var int
+     */
+    private $visibility;
 
     /**
      * @var string
      */
-    protected $name = '';
+    private $name = '';
 
     /**
      * @var float
      */
-    protected $price = 0.0;
+    private $price = 0.0;
 
     /**
-     * @var bool
+     * @var bool|null
      */
-    protected $isComposite = false;
+    private $isComposite = null;
 
     /**
      * @var float
      */
-    protected $stockQty = 0.0;
+    private $stockQty = 0.0;
 
     /**
      * ExportEntity constructor.
      *
+     * @param Visibility $visibility
      * @param array $data
      */
-    public function __construct(array $data = [])
+    public function __construct(Visibility $visibility, array $data = [])
     {
         $this->setFromArray($data);
+        $this->visibilityObject = $visibility;
     }
 
     /**
@@ -209,11 +216,9 @@ class ExportEntity
      */
     public function shouldExport(): bool
     {
-        if ($this->getStatus() !== Status::STATUS_ENABLED) {
-            return false;
-        }
-
-        return true;
+        return $this->shouldExportByStatus() &&
+            $this->shouldExportByVisibility() &&
+            $this->shouldExportByStock();
     }
 
     /**
@@ -244,7 +249,7 @@ class ExportEntity
             $this->attributes[$attribute] = [];
         }
 
-        $this->attributes[$attribute][$value] = true;
+        $this->attributes[$attribute][] = $value;
     }
 
     /**
@@ -254,15 +259,12 @@ class ExportEntity
     {
         $result = [];
         foreach ($this->attributes as $attribute => $values) {
-            foreach ($values as $value => $junk) {
+            foreach ($values as $value) {
                 $result[$attribute . $value] = ['attribute' => $attribute, 'value' => $value];
             }
         }
 
-        $childrenAttributes = array_map(function(ExportEntity $child) { return $child->getAttributes(); }, $this->children);
-        $result = array_merge($result, ...$childrenAttributes);
-
-        return $result;
+        return array_values($result);
     }
 
     /**
@@ -284,21 +286,35 @@ class ExportEntity
     }
 
     /**
-     * @param ExportEntity $child
+     * @param ExportEntityChild $child
      * @return $this
      */
-    public function addChild(ExportEntity $child)
+    public function addChild(ExportEntityChild $child)
     {
         $this->children[$child->getId()] = $child;
         return $this;
     }
 
     /**
-     * @return bool
+     * @param ExportEntityChild $child
+     * @return $this
      */
-    public function isComposite(): bool
+    public function removeChild(ExportEntityChild $child)
     {
-        return $this->isComposite;
+        if (!isset($this->children[$child->getId()])) {
+            throw new InvalidArgumentException(sprintf('Child %s not set on %s', $child->getId(), $this->getId()));
+        }
+
+        unset($this->children[$child->getId()]);
+        return $this;
+    }
+
+    /**
+     * @return ExportEntityChild[]
+     */
+    public function getChildren(): array
+    {
+        return $this->children;
     }
 
     /**
@@ -309,5 +325,38 @@ class ExportEntity
     {
         $this->isComposite = $isComposite;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function shouldExportByStatus(): bool
+    {
+        if ($this->status === null) {
+            return true;
+        }
+
+        return $this->getStatus() === Status::STATUS_ENABLED;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function shouldExportByVisibility(): bool
+    {
+        if ($this->visibility === null) {
+            return true;
+        }
+
+        return \in_array($this->getVisibility(), $this->visibilityObject->getVisibleInSiteIds(), true);
+
+    }
+
+    /**
+     * @return bool
+     */
+    protected function shouldExportByStock(): bool
+    {
+        return true;
     }
 }

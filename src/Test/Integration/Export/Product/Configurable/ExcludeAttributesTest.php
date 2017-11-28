@@ -12,6 +12,8 @@ use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Test\Integration\ExportTest;
 use Emico\TweakwiseExport\TestHelper\Data\Product\AttributeProvider;
 use Emico\TweakwiseExport\TestHelper\Data\Product\ConfigurableProvider;
+use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 
 /**
@@ -45,13 +47,22 @@ class ExcludeAttributesTest extends ExportTest
      */
     public function testAttributesWhenDisabled()
     {
+        /** @var Product $product */
         $product = $this->configurableProvider->create([
             ['color' => 'black', 'status' => Status::STATUS_ENABLED],
             ['color' => 'blue', 'status' => Status::STATUS_ENABLED],
             ['color' => 'white', 'status' => Status::STATUS_DISABLED],
         ]);
 
-        $this->exportFeed()->getProduct($product->getId())->assertAttributes(['color' => ['black', 'blue']]);
+        $feed = $this->exportFeed();
+        $feed->getProduct($product->getId())->assertAttributes(['color' => ['black', 'blue']]);
+
+        /** @var ProductInterface[] $children */
+        $children = $product->getData(ConfigurableProvider::GENERATED_CHILD_PRODUCTS);
+        $this->assertCount(3, $children);
+        foreach ($children as $child) {
+            $feed->assertProductMissing($child->getId());
+        }
     }
 
     /**

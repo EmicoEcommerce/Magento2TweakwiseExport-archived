@@ -11,7 +11,8 @@ use Emico\TweakwiseExport\Model\Write\EavIteratorFactory;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\CollectionFactory;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntityFactory;
+use Emico\TweakwiseExport\Model\Write\Products\ExportEntityChild;
+use Emico\TweakwiseExport\Model\Write\Products\ExportEntityChildFactory;
 use Emico\TweakwiseExport\Model\Write\Products\IteratorInitializer;
 use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product;
@@ -37,7 +38,7 @@ class Children extends AbstractDecorator
     /**
      * @var ExportEntityFactory
      */
-    private $entityFactory;
+    private $entityChildFactory;
 
     /**
      * @var Collection
@@ -66,7 +67,7 @@ class Children extends AbstractDecorator
      * @param ProductType $productType
      * @param EavIteratorFactory $eavIteratorFactory
      * @param IteratorInitializer $iteratorInitializer
-     * @param ExportEntityFactory $entityFactory
+     * @param ExportEntityChildFactory $entityChildFactory
      * @param CollectionFactory $collectionFactory
      * @param Config $config
      */
@@ -75,7 +76,7 @@ class Children extends AbstractDecorator
         ProductType $productType,
         EavIteratorFactory $eavIteratorFactory,
         IteratorInitializer $iteratorInitializer,
-        ExportEntityFactory $entityFactory,
+        ExportEntityChildFactory $entityChildFactory,
         CollectionFactory $collectionFactory,
         Config $config
     )
@@ -83,7 +84,7 @@ class Children extends AbstractDecorator
         parent::__construct($dbContext);
         $this->productType = $productType;
         $this->eavIteratorFactory = $eavIteratorFactory;
-        $this->entityFactory = $entityFactory;
+        $this->entityChildFactory = $entityChildFactory;
         $this->iteratorInitializer = $iteratorInitializer;
         $this->collectionFactory = $collectionFactory;
         $this->config = $config;
@@ -213,7 +214,7 @@ class Children extends AbstractDecorator
     private function addChild(Collection $collection, int $parentId, int $childId)
     {
         if (!$this->childEntities->has($childId)) {
-            $child = $this->entityFactory->create(['storeId' => $childId]);
+            $child = $this->entityChildFactory->create(['data' => ['entity_id' => $childId]]);
             $this->childEntities->add($child);
         } else {
             $child = $this->childEntities->get($childId);
@@ -231,7 +232,7 @@ class Children extends AbstractDecorator
             return;
         }
 
-        $iterator = $this->eavIteratorFactory->create();
+        $iterator = $this->eavIteratorFactory->create(['entityCode' => Product::ENTITY, 'attributes' => []]);
         $iterator->setEntityIds($this->childEntities->getIds());
         $this->iteratorInitializer->initializeAttributes($iterator);
 
@@ -241,9 +242,10 @@ class Children extends AbstractDecorator
             }
         }
 
-        foreach ($iterator as $child) {
-            $entity = $this->entityFactory->create($child);
-            $this->childEntities[$entity->getId()]->setFromArray($child);
+        foreach ($iterator as $childData) {
+            $childId = (int) $childData['entity_id'];
+            $childEntity = $this->childEntities->get($childId);
+            $childEntity->setFromArray($childData);
         }
     }
 }

@@ -20,6 +20,11 @@ use Zend\Json\Json;
 class ConfigurableProvider
 {
     /**
+     * Generated child product names
+     */
+    const GENERATED_CHILD_PRODUCTS = '_generated_child_products';
+
+    /**
      * @var ProductProvider
      */
     private $productProvider;
@@ -92,7 +97,9 @@ class ConfigurableProvider
         $extensionAttributes->setConfigurableProductLinks(array_keys($simpleProducts));
         $product->setExtensionAttributes($extensionAttributes);
 
-        return $this->productRepository->save($product);
+        $product = $this->productRepository->save($product);
+        $product->addData([self::GENERATED_CHILD_PRODUCTS => $simpleProducts]);
+        return $product;
     }
 
     /**

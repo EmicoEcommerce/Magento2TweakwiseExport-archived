@@ -11,10 +11,10 @@ use Emico\TweakwiseExport\Model\Write\Products\Collection;
 class AttributeValues extends AbstractDecorator
 {
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function decorate(Collection $collection)
     {
-        // TODO: Implement decorate() method.
+
     }
 }
