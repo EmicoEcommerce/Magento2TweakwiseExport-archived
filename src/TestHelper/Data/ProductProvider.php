@@ -16,9 +16,12 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\Data\ProductInterfaceFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Product as ProductResource;
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Magento\Catalog\Model\ResourceModel\Product\Action as ProductAction;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
+use Magento\Eav\Model\Config as EavConfig;
+use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
 use Magento\Framework\App\Area;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\Store;
@@ -76,14 +79,18 @@ class ProductProvider
     private $emulation;
 
     /**
-     * @var ProductResource
+     * @var ProductAction
      */
-    private $productResource;
+    private $productAction;
 
     /**
      * @var StoreManagerInterface
      */
     private $storeManager;
+    /**
+     * @var EavConfig
+     */
+    private $eavConfig;
 
     /**
      * CategoryDataProvider constructor.
@@ -96,8 +103,9 @@ class ProductProvider
      * @param CategoryProvider $categoryProvider
      * @param AttributeProvider $attributeProvider
      * @param Emulation $emulation
-     * @param ProductResource $productResource
+     * @param ProductAction $productAction
      * @param StoreManagerInterface $storeManager
+     * @param EavConfig $eavConfig
      */
     public function __construct(
         ProductRepositoryInterface $productRepository,
@@ -108,8 +116,9 @@ class ProductProvider
         CategoryProvider $categoryProvider,
         AttributeProvider $attributeProvider,
         Emulation $emulation,
-        ProductResource $productResource,
-        StoreManagerInterface $storeManager
+        ProductAction $productAction,
+        StoreManagerInterface $storeManager,
+        EavConfig $eavConfig
     )
     {
         $this->faker = Factory::create();
@@ -121,8 +130,9 @@ class ProductProvider
         $this->categoryProvider = $categoryProvider;
         $this->attributeProvider = $attributeProvider;
         $this->emulation = $emulation;
-        $this->productResource = $productResource;
+        $this->productAction = $productAction;
         $this->storeManager = $storeManager;
+        $this->eavConfig = $eavConfig;
     }
 
     /**
@@ -174,15 +184,20 @@ class ProductProvider
     {
         $product = clone $product;
 
+        $attributeObject = $this->eavConfig->getAttribute(Product::ENTITY, $attribute);
+        $attributeObject->setData(Attribute::KEY_IS_GLOBAL, ScopedAttributeInterface::SCOPE_STORE);
+
         $updateData = [$attribute => $value];
         if ($store) {
-            $updateData['store_id'] = $this->storeManager->getStore($store)->getId();
+            $storeId = $this->storeManager->getStore($store)->getId();
+        } else {
+            $storeId = Store::DEFAULT_STORE_ID;
         }
 
         $this->hydrator->hydrate($updateData, $product);
 
         /** @var $product Product */
-        $this->productResource->saveAttribute($product, $attribute);
+        $this->productAction->updateAttributes([$product->getId()], $updateData, $storeId);
     }
 
     /**
