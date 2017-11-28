@@ -80,6 +80,10 @@ class ConfigurableProvider
             $productData['type_id'] = Configurable::TYPE_CODE;
         }
 
+        if (!isset($productData['qty'])) {
+            $productData['qty'] = 0;
+        }
+
         $product = $this->productProvider->create($productData);
         foreach ($configurableAttributes as $attribute) {
             $this->attributeProvider->ensureSet($attribute, $product->getAttributeSetId());

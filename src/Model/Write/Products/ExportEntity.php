@@ -436,7 +436,6 @@ class ExportEntity
             return true;
         }
 
-        $minQty = (float) $this->stockItem->getMinQty();
-        return $this->stockItem->getQty() >= $minQty;
+        return $this->stockItem->getQty() > $this->stockItem->getMinQty();
     }
 }

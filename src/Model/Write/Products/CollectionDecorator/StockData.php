@@ -76,8 +76,12 @@ class StockData implements DecoratorInterface
      */
     private function addStockItems(int $storeId, array $entities)
     {
+        if (count($entities) === 0) {
+            return;
+        }
+
         $criteria = $this->criteriaFactory->create();
-        $criteria->setProductsFilter(array_keys($entities));
+        $criteria->setProductsFilter([array_keys($entities)]);
 
         $items = $this->stockItemRepository->getList($criteria)->getItems();
         foreach ($items as $item) {
