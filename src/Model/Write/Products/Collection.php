@@ -113,11 +113,11 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * Fetches all entities including children, checked on should export. Array key is entity ID
+     * Fetches all entity ID's including childen
      *
-     * @return ExportEntity[]
+     * @return int[]
      */
-    public function getExportedIncludingChildren(): array
+    public function getAllIds(): array
     {
         $result = [];
         foreach ($this->getExported() as $entity) {
@@ -127,6 +127,6 @@ class Collection implements IteratorAggregate, Countable
                 $result[$child->getId()] = $child;
             }
         }
-        return $result;
+        return array_keys($result);
     }
 }

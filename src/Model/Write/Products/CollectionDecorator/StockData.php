@@ -10,6 +10,7 @@ use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Config\Source\StockCalculation;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
+use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory;
 use Magento\CatalogInventory\Api\StockItemCriteriaInterfaceFactory;
 use Magento\CatalogInventory\Api\StockItemRepositoryInterface;
@@ -62,43 +63,74 @@ class StockData implements DecoratorInterface
      */
     public function decorate(Collection $collection)
     {
-        $entities = $collection->getExportedIncludingChildren();
+        // This has to be called before setting the stock items. This way the composite
+        // products are not filtered since they mostly have 0 stock.
+        $toBeCombinedEntities = $collection->getExported();
 
-        $this->addStockItems($collection->getStoreId(), $entities);
-        foreach ($entities as $item) {
+        $this->addStockItems($collection->getStoreId(), $collection);
+        foreach ($toBeCombinedEntities as $item) {
             $this->combineStock($item, $collection->getStoreId());
         }
     }
 
     /**
      * @param int $storeId
-     * @param ExportEntity[] $entities
+     * @param Collection $collection
      */
-    private function addStockItems(int $storeId, array $entities)
+    private function addStockItems(int $storeId, Collection $collection)
     {
-        if (count($entities) === 0) {
+        if ($collection->count() === 0) {
             return;
         }
 
-        $criteria = $this->criteriaFactory->create();
-        $criteria->setProductsFilter([array_keys($entities)]);
+        $stockItemMap = $this->getStockItemMap($collection->getAllIds());
 
+        foreach ($collection as $entity) {
+            $this->assignStockItem($stockItemMap, $storeId, $entity);
+
+            foreach ($entity->getExportChildren() as $childEntity) {
+                $this->assignStockItem($stockItemMap, $storeId, $childEntity);
+            }
+        }
+    }
+
+    /**
+     * @param array $stockItemMap
+     * @param int $storeId
+     * @param ExportEntity $entity
+     */
+    private function assignStockItem(array $stockItemMap, int $storeId, ExportEntity $entity)
+    {
+        $entityId = $entity->getId();
+        if (isset($stockItemMap[$entityId])) {
+            $stockItem = $stockItemMap[$entityId];
+        } else {
+            $stockItem = $this->stockItemFactory->create();
+        }
+
+        if (method_exists($stockItem, 'setStoreId')) {
+            $stockItem->setStoreId($storeId);
+        }
+
+        $entity->setStockItem($stockItem);
+    }
+
+    /**
+     * @param array $entityIds
+     * @return StockItemInterface[]
+     */
+    private function getStockItemMap(array $entityIds): array
+    {
+        $criteria = $this->criteriaFactory->create();
+        $criteria->setProductsFilter([$entityIds]);
         $items = $this->stockItemRepository->getList($criteria)->getItems();
+
+        $map = [];
         foreach ($items as $item) {
             $productId = (int) $item->getProductId();
-            $entities[$productId]->setStockItem($item);
-
-            if (method_exists($item, 'setStoreId')) {
-                $item->setStoreId($storeId);
-            }
-
-            unset($entities[$productId]);
+            $map[$productId] = $item;
         }
-
-        foreach ($entities as $entityWithoutStock) {
-            $stockItem = $this->stockItemFactory->create();
-            $entityWithoutStock->setStockItem($stockItem);
-        }
+        return $map;
     }
 
     /**
