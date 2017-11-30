@@ -123,7 +123,7 @@ class ProductData
         }
 
 
-        $this->test->assertArraySubset($categories, $this->categories);
+        $this->test->safeAssertArraySubset($categories, $this->categories);
     }
 
     /**

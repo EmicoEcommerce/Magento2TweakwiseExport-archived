@@ -24,11 +24,15 @@ abstract class TestCase extends BaseTestCase
      * @param array $subset
      * @param array $array
      */
-    public function assertArraySubset(array $subset, array $array)
+    public function safeAssertArraySubset(array $subset, array $array)
     {
-        foreach ($subset as $field => $value) {
-            $this->assertArrayHasKey($field, $array);
-            $this->assertEquals($array[$field], $value);
+        if (method_exists($this, 'assertArraySubset')) {
+            $this->assertArraySubset($subset, $array);
+        } else {
+            foreach ($subset as $field => $value) {
+                $this->assertArrayHasKey($field, $array);
+                $this->assertEquals($array[$field], $value);
+            }
         }
     }
 }
