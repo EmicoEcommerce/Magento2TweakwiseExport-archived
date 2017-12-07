@@ -113,7 +113,7 @@ class Iterator extends EavIterator
                 'entity_id' => $entity->getId(),
                 'name' => $entity->getName(),
                 'price' => $entity->getPrice(),
-                'stock' => $entity->getStockQty(),
+                'stock' => (int) round($entity->getStockQty()),
                 'categories' => $entity->getCategories(),
                 'attributes' => $entity->getAttributes(),
             ];
