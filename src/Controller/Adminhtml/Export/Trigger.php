@@ -8,6 +8,8 @@
 
 namespace Emico\TweakwiseExport\Controller\Adminhtml\Export;
 
+use Emico\TweakwiseExport\Model\Scheduler;
+use Exception;
 use InvalidArgumentException;
 use Magento\Backend\App\Action;
 use Magento\Framework\Controller\Result\Redirect;
@@ -17,6 +19,22 @@ use Magento\Framework\Controller\ResultInterface;
 class Trigger extends Action
 {
     /**
+     * @var Scheduler
+     */
+    private $scheduler;
+
+    /**
+     * Trigger constructor.
+     * @param Action\Context $context
+     * @param Scheduler $scheduler
+     */
+    public function     __construct(Action\Context $context, Scheduler $scheduler)
+    {
+        parent::__construct($context);
+        $this->scheduler = $scheduler;
+    }
+
+    /**
      * Schedule new export
      *
      * @return ResultInterface
@@ -24,11 +42,30 @@ class Trigger extends Action
      */
     public function execute()
     {
+        try {
+            $this->scheduler->schedule();
+            $this->messageManager->addSuccessMessage('Scheduled new TweakwiseExport');
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage('Failed creating Tweakwise job');
+        }
+
+        return $this->createRefererRedirect();
+    }
+
+    /**
+     * @return ResultInterface
+     * @throws InvalidArgumentException
+     */
+    private function createRefererRedirect()
+    {
         /** @var Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-        $resultRedirect->setUrl($this->_redirect->getRefererUrl());
 
-        $this->messageManager->addSuccessMessage('Scheduled new TweakwiseExport');
+        $redirectUrl = $this->_redirect->getRefererUrl();
+        if (!$redirectUrl) {
+            $redirectUrl = $this->_url->getUrl('adminhtml');
+        }
+        $resultRedirect->setUrl($redirectUrl);
 
         return $resultRedirect;
     }

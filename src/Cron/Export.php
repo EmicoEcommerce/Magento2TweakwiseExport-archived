@@ -15,6 +15,11 @@ use Emico\TweakwiseExport\Model\Logger;
 class Export
 {
     /**
+     * Code of the cronjob
+     */
+    const JOB_CODE = 'emico_tweakwise_export';
+
+    /**
      * @var Config
      */
     private $config;
