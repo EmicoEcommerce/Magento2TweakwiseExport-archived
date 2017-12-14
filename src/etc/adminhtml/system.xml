@@ -34,6 +34,14 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
+                <field id="start" translate="label,comment" type="label" sortOrder="12" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Schedule export</label>
+                    <frontend_model>Emico\TweakwiseExport\Block\Config\Form\Field\ExportStart</frontend_model>
+                    <comment>Start export on next cron run</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
                 <field id="feed_key" translate="label,comment" type="text" sortOrder="13" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Key</label>
                     <comment>Export url will be: www.example.com/tweakwise/feed/export/key/XXXX</comment>
