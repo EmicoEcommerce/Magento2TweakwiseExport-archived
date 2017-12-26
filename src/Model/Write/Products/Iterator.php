@@ -86,7 +86,7 @@ class Iterator extends EavIterator
                 foreach ($this->processBatch($batch) as $processedEntity) {
                     yield $processedEntity;
                 }
-                $batch = $this->collectionFactory->create();
+                $batch = $this->collectionFactory->create(['storeId' => $this->storeId]);
             }
         }
 
