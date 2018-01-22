@@ -110,7 +110,7 @@ class AttributeProvider
         $attribute = $this->get($code);
         $options = $attribute->getOptions();
         foreach ($options as $option) {
-            if ($option->getLabel() === $label) {
+            if (\mb_strtolower($option->getLabel()) === \mb_strtolower($label)) {
                 return (int) $option->getValue();
             }
         }
