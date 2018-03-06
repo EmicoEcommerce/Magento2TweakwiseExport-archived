@@ -111,6 +111,7 @@ class ExportEntity
                     break;
                 case 'visibility';
                     $this->setVisibility((int) $value);
+                    $this->addAttribute($key, $value);
                     break;
                 case 'name';
                     $this->setName((string) $value);
