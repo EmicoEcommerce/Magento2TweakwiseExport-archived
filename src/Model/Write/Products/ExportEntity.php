@@ -108,16 +108,19 @@ class ExportEntity
                     break;
                 case 'status';
                     $this->setStatus((int) $value);
+                    $this->addAttribute($key, (int) $value);
                     break;
                 case 'visibility';
                     $this->setVisibility((int) $value);
-                    $this->addAttribute($key, $value);
+                    $this->addAttribute($key, (int) $value);
                     break;
                 case 'name';
                     $this->setName((string) $value);
+                    $this->addAttribute($key, (string) $value);
                     break;
                 case 'price';
                     $this->setPrice((float) $value);
+                    $this->addAttribute($key, (float) $value);
                     break;
                 default:
                     $this->addAttribute($key, $value);
