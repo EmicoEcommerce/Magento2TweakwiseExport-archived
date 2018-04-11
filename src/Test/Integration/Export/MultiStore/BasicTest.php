@@ -61,4 +61,18 @@ class BasicTest extends MultiStoreTest
         $feed->getProduct($product->getId());
         $feed->assertProductMissing($product->getId(), self::STORE_STORE_CODE);
     }
+
+    /**
+     * Test if feed will not be exported for disabled store
+     */
+    public function testUnlinkStore()
+    {
+        $websiteIds = [$this->storeProvider->getStoreView(self::STORE_STORE_CODE)->getWebsiteId()];
+        $product = $this->productData->create();
+        $this->productData->saveWebsiteLink($product, $websiteIds);
+
+        $feed = $this->exportFeed();
+        $feed->assertProductMissing($product->getId());
+        $feed->getProduct($product->getId(), self::STORE_STORE_CODE);
+    }
 }
