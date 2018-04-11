@@ -49,13 +49,13 @@ class ExcludeAttributesTest extends ExportTest
     {
         /** @var Product $product */
         $product = $this->configurableProvider->create([
-            ['color' => 'black', 'status' => Status::STATUS_ENABLED],
-            ['color' => 'blue', 'status' => Status::STATUS_ENABLED],
-            ['color' => 'white', 'status' => Status::STATUS_DISABLED],
+            ['color' => 'Black', 'status' => Status::STATUS_ENABLED],
+            ['color' => 'Blue', 'status' => Status::STATUS_ENABLED],
+            ['color' => 'White', 'status' => Status::STATUS_DISABLED],
         ]);
 
         $feed = $this->exportFeed();
-        $feed->getProduct($product->getId())->assertAttributes(['color' => ['black', 'blue']]);
+        $feed->getProduct($product->getId())->assertAttributes(['color' => ['Black', 'Blue']]);
 
         /** @var ProductInterface[] $children */
         $children = $product->getData(ConfigurableProvider::GENERATED_CHILD_PRODUCTS);

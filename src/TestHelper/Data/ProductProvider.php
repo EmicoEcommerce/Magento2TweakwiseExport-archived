@@ -18,6 +18,7 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Catalog\Model\ResourceModel\Product\Action as ProductAction;
+use Magento\Catalog\Model\ResourceModel\Product\Website\Link as WebsiteLink;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\Eav\Model\Config as EavConfig;
@@ -93,6 +94,11 @@ class ProductProvider
     private $eavConfig;
 
     /**
+     * @var WebsiteLink
+     */
+    private $websiteLink;
+
+    /**
      * CategoryDataProvider constructor.
      *
      * @param ProductRepositoryInterface $productRepository
@@ -106,6 +112,7 @@ class ProductProvider
      * @param ProductAction $productAction
      * @param StoreManagerInterface $storeManager
      * @param EavConfig $eavConfig
+     * @param Link $websiteLink
      */
     public function __construct(
         ProductRepositoryInterface $productRepository,
@@ -118,7 +125,8 @@ class ProductProvider
         Emulation $emulation,
         ProductAction $productAction,
         StoreManagerInterface $storeManager,
-        EavConfig $eavConfig
+        EavConfig $eavConfig,
+        WebsiteLink $websiteLink
     )
     {
         $this->faker = Factory::create();
@@ -133,13 +141,15 @@ class ProductProvider
         $this->productAction = $productAction;
         $this->storeManager = $storeManager;
         $this->eavConfig = $eavConfig;
+        $this->websiteLink = $websiteLink;
     }
 
     /**
      * @param array $data
+     * @param array $extensionAttributeData
      * @return ProductInterface
      */
-    public function create(array $data = []): ProductInterface
+    public function create(array $data = [], array $extensionAttributeData = []): ProductInterface
     {
         $product = $this->productFactory->create();
 
@@ -154,14 +164,10 @@ class ProductProvider
 
         // Overwrite with provided data
         $this->hydrator->hydrate($data, $product);
+        $this->hydrator->hydrate($extensionAttributeData, $product->getExtensionAttributes());
 
         // Save product
-        $this->emulation->startEnvironmentEmulation(Store::DEFAULT_STORE_ID, Area::AREA_ADMINHTML);
-        try {
-            $product = $this->productRepository->save($product);
-        } finally {
-            $this->emulation->stopEnvironmentEmulation();
-        }
+        $product = $this->save($product);
 
         // Ensure product qty
         $data['qty'] = $data['qty'] ?? self::DEFAULT_STOCK_QTY;
@@ -172,6 +178,21 @@ class ProductProvider
         $this->categoryLinkManagement->assignProductToCategories($product->getSku(), $categoryIds);
 
         return $product;
+    }
+
+    /**
+     * @param ProductInterface $product
+     * @return ProductInterface
+     */
+    public function save(ProductInterface $product)
+    {
+        // Save product
+        $this->emulation->startEnvironmentEmulation(Store::DEFAULT_STORE_ID, Area::AREA_ADMINHTML);
+        try {
+            return $this->productRepository->save($product);
+        } finally {
+            $this->emulation->stopEnvironmentEmulation();
+        }
     }
 
     /**
@@ -211,5 +232,14 @@ class ProductProvider
         $this->hydrator->hydrate($data, $stockItem);
         $this->stockRegistry->updateStockItemBySku($product->getSku(), $stockItem);
         return $stockItem;
+    }
+
+    /**
+     * @param ProductInterface $product
+     * @param array $websiteIds
+     */
+    public function saveWebsiteLink(ProductInterface $product, array $websiteIds)
+    {
+        $this->websiteLink->saveWebsiteIds($product, $websiteIds);
     }
 }

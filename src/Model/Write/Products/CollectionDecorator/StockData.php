@@ -121,6 +121,10 @@ class StockData implements DecoratorInterface
      */
     private function getStockItemMap(array $entityIds): array
     {
+        if (\count($entityIds) === 0) {
+            return [];
+        }
+
         $criteria = $this->criteriaFactory->create();
         $criteria->setProductsFilter([$entityIds]);
         $items = $this->stockItemRepository->getList($criteria)->getItems();

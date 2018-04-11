@@ -48,7 +48,7 @@ class EntityHydrator
 
         $class = \get_class($object);
         foreach ($data as $field => $value) {
-            $method = $this->getMethod($class, $field);
+            $method = $this->getSetMethod($class, $field);
             if ($method) {
                 $object->$method($value);
             }
@@ -92,11 +92,11 @@ class EntityHydrator
      * @throws InvalidArgumentException
      * @throws RuntimeException
      */
-    private function getMethod(string $class, string $field)
+    private function getSetMethod(string $class, string $field)
     {
         $key = $class . $field;
         if (!isset($this->methodCache[$key])) {
-            $method = 'get' . $this->getFieldToMethodFilter()->filter($field);
+            $method = 'set' . $this->getFieldToMethodFilter()->filter($field);
             $reflection = $this->getReflectionClass($class);
 
             $this->methodCache[$key] = $reflection->hasMethod($method) ? $method : false;
