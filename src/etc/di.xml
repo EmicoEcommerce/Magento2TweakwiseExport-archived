@@ -68,6 +68,7 @@
                 <item name="children_attributes" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\ChildrenAttributes</item>
                 <item name="category_reference" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\CategoryReference</item>
                 <item name="price" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Price</item>
+                <item name="website_link" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\WebsiteLink</item>
             </argument>
         </arguments>
     </type>
