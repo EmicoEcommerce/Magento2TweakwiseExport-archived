@@ -251,7 +251,8 @@ class ExportEntity
             $this->shouldExportByWebsite() &&
             $this->shouldExportByVisibility() &&
             $this->shouldExportByStock() &&
-            $this->shouldExportByComposite();
+            $this->shouldExportByComposite() &&
+            $this->shouldExportByNameAttribute();
     }
 
     /**
@@ -510,5 +511,13 @@ class ExportEntity
         }
 
         return $this->stockItem->getQty() > $this->stockItem->getMinQty();
+    }
+
+    /**
+     * @return bool
+     */
+    protected function shouldExportByNameAttribute(): bool
+    {
+        return !empty($this->attributes['name']);
     }
 }
