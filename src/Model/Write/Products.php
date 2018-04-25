@@ -303,7 +303,7 @@ class Products implements WriterInterface
         $result = [];
         foreach ($values as $value) {
             $map = $this->getAttributeOptionMap($storeId, $attribute);
-            $result[] = isset($map[$value]) ? $map[$value] : $value;
+            $result[] = $map[$value] ?? null;
         }
 
         return $result;
