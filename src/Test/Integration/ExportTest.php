@@ -16,6 +16,7 @@ use Emico\TweakwiseExport\TestHelper\Data\CategoryProvider;
 use Emico\TweakwiseExport\TestHelper\Data\ProductProvider;
 use Emico\TweakwiseExport\TestHelper\FeedData;
 use Emico\TweakwiseExport\TestHelper\FeedDataFactory;
+use Magento\Eav\Model\Config as EavConfig;
 
 abstract class ExportTest extends TestCase
 {
@@ -65,6 +66,14 @@ abstract class ExportTest extends TestCase
     }
 
     /**
+     * @return EavConfig
+     */
+    protected function getEavConfig(): EavConfig
+    {
+        return $this->getObject(EavConfig::class);
+    }
+
+    /**
      * @return FeedData
      */
     protected function exportFeed(): FeedData
@@ -73,6 +82,8 @@ abstract class ExportTest extends TestCase
         if (!is_resource($resource)) {
             $this->fail('Could not create memory resource for export');
         }
+
+        $this->getEavConfig()->clear();
 
         try {
             $this->getExporter()->generateFeed($resource);

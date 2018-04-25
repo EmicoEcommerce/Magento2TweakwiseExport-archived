@@ -47,7 +47,6 @@ class AttributeOptionTest extends ExportTest
         ]);
 
         // Remove one attribute
-
         $this->attributeProvider->deleteOption('color', 'Blue');
 
         // Ensure deleted attribute is not exported

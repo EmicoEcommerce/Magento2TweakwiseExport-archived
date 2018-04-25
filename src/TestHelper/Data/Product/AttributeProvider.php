@@ -34,10 +34,12 @@ class AttributeProvider
      * @var EavSetup
      */
     private $eavSetup;
+
     /**
      * @var CollectionFactory
      */
     private $attributeOptionCollectionFactory;
+
     /**
      * @var StoreManagerInterface
      */

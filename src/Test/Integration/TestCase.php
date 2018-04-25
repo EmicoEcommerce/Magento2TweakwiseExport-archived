@@ -11,6 +11,7 @@ namespace Emico\TweakwiseExport\Test\Integration;
 use Magento\Store\Model\ScopeInterface;
 use Magento\TestFramework\Helper\Bootstrap;
 use Magento\Framework\App\Config\MutableScopeConfigInterface;
+use Magento\TestFramework\ObjectManager;
 
 /**
  * Class TestCase
@@ -36,6 +37,18 @@ abstract class TestCase extends \Emico\TweakwiseExport\Test\TestCase
     protected function createObject(string $type, array $arguments = [])
     {
         return Bootstrap::getObjectManager()->create($type, $arguments);
+    }
+
+    /**
+     * Ensure all objects are destroyed
+     * @param string $type
+     */
+    protected function clearObject(string $type)
+    {
+        $objectManager = Bootstrap::getObjectManager();
+        if ($objectManager instanceof ObjectManager) {
+            $objectManager->removeSharedInstance($type);
+        }
     }
 
     /**
