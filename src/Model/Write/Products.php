@@ -139,7 +139,7 @@ class Products implements WriterInterface
         $tweakwiseId = $this->helper->getTweakwiseId($storeId, $data['entity_id']);
         $xml->writeElement('id', $tweakwiseId);
         $xml->writeElement('price', $data['price']);
-        $xml->writeElement('name', $data['name']);
+        $xml->writeElement('name', $this->scalarValue($data['name']));
         $xml->writeElement('stock', $data['stock']);
 
         // Write product categories
@@ -245,7 +245,7 @@ class Products implements WriterInterface
             }
         }
 
-        return $value;
+        return html_entity_decode($value, ENT_NOQUOTES | ENT_HTML5);
     }
 
     /**
