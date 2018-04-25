@@ -21,7 +21,7 @@ class Iterator extends EavIterator
     /**
      * Collection size to fetch extra product data.
      */
-    const BATCH_SIZE = 1000;
+    const BATCH_SIZE = 500;
 
     /**
      * @var ExportEntityFactory
