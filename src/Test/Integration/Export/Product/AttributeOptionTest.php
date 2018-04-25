@@ -51,6 +51,6 @@ class AttributeOptionTest extends ExportTest
 
         // Ensure deleted attribute is not exported
         $feed = $this->exportFeed();
-        $feed->getProduct($product->getId())->assertAttributes(['color' => ['Black']]);
+        $feed->getProduct($product->getId())->assertAttributes(['color' => 'Black']);
     }
 }
