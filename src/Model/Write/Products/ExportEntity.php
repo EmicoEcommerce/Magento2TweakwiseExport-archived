@@ -11,6 +11,7 @@ use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockConfigurationInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class ExportEntity
 {
@@ -80,20 +81,32 @@ class ExportEntity
     private $stockConfiguration;
 
     /**
+     * @var int[]|null
+     */
+    private $linkedWebsiteIds;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
      * ExportEntity constructor.
      *
      * @param int $storeId
+     * @param StoreManagerInterface $storeManager
      * @param StockConfigurationInterface $stockConfiguration
      * @param Visibility $visibility
      * @param array $data
      * @internal param int $storeId
      */
-    public function __construct(int $storeId, StockConfigurationInterface $stockConfiguration, Visibility $visibility, array $data = [])
+    public function __construct(int $storeId, StoreManagerInterface $storeManager, StockConfigurationInterface $stockConfiguration, Visibility $visibility, array $data = [])
     {
         $this->setFromArray($data);
         $this->visibilityObject = $visibility;
         $this->storeId = $storeId;
         $this->stockConfiguration = $stockConfiguration;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -235,6 +248,7 @@ class ExportEntity
     public function shouldExport(): bool
     {
         return $this->shouldExportByStatus() &&
+            $this->shouldExportByWebsite() &&
             $this->shouldExportByVisibility() &&
             $this->shouldExportByStock() &&
             $this->shouldExportByComposite();
@@ -402,6 +416,25 @@ class ExportEntity
     }
 
     /**
+     * @param int $id
+     */
+    public function addLinkedWebsiteId(int $id)
+    {
+        $this->ensureWebsiteLinkedIdsSet();
+        $this->linkedWebsiteIds[] = $id;
+    }
+
+    /**
+     * Ensure linked website ids is no longer NULL
+     */
+    public function ensureWebsiteLinkedIdsSet()
+    {
+        if ($this->linkedWebsiteIds === null) {
+            $this->linkedWebsiteIds = [];
+        }
+    }
+
+    /**
      * @return bool
      */
     protected function shouldExportByStatus(): bool
@@ -411,6 +444,23 @@ class ExportEntity
         }
 
         return $this->getStatus() === Status::STATUS_ENABLED;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function shouldExportByWebsite(): bool
+    {
+        if ($this->linkedWebsiteIds === null) {
+            return true;
+        }
+
+        if ($this->storeManager->isSingleStoreMode()) {
+            return true;
+        }
+
+        $websiteId = (int) $this->storeManager->getStore($this->storeId)->getWebsiteId();
+        return \in_array($websiteId, $this->linkedWebsiteIds, true);
     }
 
     /**

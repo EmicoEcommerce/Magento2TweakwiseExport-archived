@@ -31,7 +31,7 @@ abstract class MultiStoreTest extends ExportTest
     /**
      * @var StoreProvider
      */
-    private $storeProvider;
+    protected $storeProvider;
 
     /**
      * {@inheritdoc}
