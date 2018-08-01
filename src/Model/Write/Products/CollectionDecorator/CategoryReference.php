@@ -16,10 +16,11 @@ class CategoryReference extends AbstractDecorator
      */
     public function decorate(Collection $collection)
     {
+        $tableName = sprintf('%s_store%d', AbstractAction::MAIN_INDEX_TABLE, $collection->getStoreId());
+
         $query = $this->getConnection()
             ->select()
-            ->from($this->getTableName(AbstractAction::MAIN_INDEX_TABLE), ['category_id', 'product_id'])
-            ->where('store_id = ?', $collection->getStoreId())
+            ->from($this->getTableName($tableName), ['category_id', 'product_id'])
             ->where('product_id IN(' . implode(',', $collection->getIds()) . ')')
             ->query();
 
