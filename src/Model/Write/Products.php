@@ -295,8 +295,7 @@ class Products implements WriterInterface
             $values = $this->explodeValues($values);
         }
 
-        $source = $attribute->getSource();
-        if (!$source instanceof SourceInterface) {
+        if (!$attribute->getSourceModel()) {
             return $values;
         }
 
