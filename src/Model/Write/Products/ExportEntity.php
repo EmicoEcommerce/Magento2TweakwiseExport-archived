@@ -510,7 +510,7 @@ class ExportEntity
             return true;
         }
 
-        return $this->stockItem->getQty() > $this->stockItem->getMinQty();
+        return $this->stockItem->getIsInStock() && $this->stockItem->getQty() > $this->stockItem->getMinQty();
     }
 
     /**
