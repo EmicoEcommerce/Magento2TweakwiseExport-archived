@@ -16,6 +16,8 @@ use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Type as ProductType;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Enterprise\Model\ProductMetadata;
+use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Magento\GroupedProduct\Model\Product\Type\Grouped;
@@ -54,6 +56,11 @@ class Children extends AbstractDecorator
     private $collectionFactory;
 
     /**
+     * @var ProductMetadataInterface
+     */
+    private $appInfo;
+
+    /**
      * ChildId constructor.
      *
      * @param DbContext $dbContext
@@ -62,6 +69,7 @@ class Children extends AbstractDecorator
      * @param IteratorInitializer $iteratorInitializer
      * @param ExportEntityChildFactory $entityChildFactory
      * @param CollectionFactory $collectionFactory
+     * @param ProductMetadataInterface $appInfo
      */
     public function __construct(
         DbContext $dbContext,
@@ -69,7 +77,8 @@ class Children extends AbstractDecorator
         EavIteratorFactory $eavIteratorFactory,
         IteratorInitializer $iteratorInitializer,
         ExportEntityChildFactory $entityChildFactory,
-        CollectionFactory $collectionFactory
+        CollectionFactory $collectionFactory,
+        ProductMetadataInterface $appInfo
     )
     {
         parent::__construct($dbContext);
@@ -78,6 +87,7 @@ class Children extends AbstractDecorator
         $this->entityChildFactory = $entityChildFactory;
         $this->iteratorInitializer = $iteratorInitializer;
         $this->collectionFactory = $collectionFactory;
+        $this->appInfo = $appInfo;
     }
 
     /**
@@ -148,11 +158,19 @@ class Children extends AbstractDecorator
     private function addBundleChildren(Collection $collection, array $parentIds)
     {
         $connection = $this->getConnection();
+        $select = $connection->select();
+        $select->from(['bundle_selection' => $this->getTableName('catalog_product_bundle_selection')]);
 
-        $select = $connection->select()
-            ->from($this->getTableName('catalog_product_bundle_selection'), ['product_id', 'parent_product_id'])
-            ->where('parent_product_id IN (?)', $parentIds);
-
+        if ($this->isEnterprise()) {
+            $select->columns(['parent_product_id'])->join(
+                ['product_table' => $this->getTableName('catalog_product_entity')],
+                'bundle_selection.product_id = product_table.row_id',
+                ['product_id' => 'row_id']
+            );
+        } else {
+            $select->columns(['product_id', 'parent_product_id']);
+        }
+        $select->where('parent_product_id IN (?)', $parentIds);
         $query = $select->query();
         while ($row = $query->fetch()) {
             $this->addChild($collection, (int) $row['parent_product_id'], (int) $row['product_id']);
@@ -167,9 +185,20 @@ class Children extends AbstractDecorator
     private function addLinkChildren(Collection $collection, array $parentIds, $typeId)
     {
         $connection = $this->getConnection();
+        $select = $connection->select();
+        $select->from(['link_table' => $this->getTableName('catalog_product_link')]);
 
-        $select = $connection->select()
-            ->from($this->getTableName('catalog_product_link'), ['linked_product_id', 'product_id'])
+        if ($this->isEnterprise()) {
+            $select->columns(['product_id']);
+            $select->join(
+                ['product_table' => $this->getTableName('catalog_product_entity')],
+                'link_table.linked_product_id = product_table.row_id',
+                ['linked_product_id' => 'row_id']
+            );
+        } else {
+            $select->columns(['linked_product_id', 'product_id']);
+        }
+        $select
             ->where('link_type_id = ?', $typeId)
             ->where('product_id IN (?)', $parentIds);
 
@@ -186,10 +215,19 @@ class Children extends AbstractDecorator
     private function addConfigurableChildren(Collection $collection, array $parentIds)
     {
         $connection = $this->getConnection();
+        $select = $connection->select();
+        $select->from(['link_table' => $this->getTableName('catalog_product_super_link')]);
 
-        $select = $connection->select()
-            ->from($this->getTableName('catalog_product_super_link'), ['product_id', 'parent_id'])
-            ->where('parent_id IN (?)', $parentIds);
+        if ($this->isEnterprise()) {
+            $select->columns(['parent_id'])->join(
+                ['product_table' => $this->getTableName('catalog_product_entity')],
+                'link_table.product_id = product_table.row_id',
+                ['product_id' => 'row_id']
+            );
+        } else {
+            $select->columns(['product_id', 'parent_id']);
+        }
+        $select->where('parent_id IN (?)', $parentIds);
 
         $query = $select->query();
         while ($row = $query->fetch()) {
@@ -233,5 +271,13 @@ class Children extends AbstractDecorator
             $childEntity = $this->childEntities->get($childId);
             $childEntity->setFromArray($childData);
         }
+    }
+
+    /**
+     * @return bool
+     */
+    private function isEnterprise()
+    {
+        return $this->appInfo->getEdition() === ProductMetadata::EDITION_NAME;
     }
 }
