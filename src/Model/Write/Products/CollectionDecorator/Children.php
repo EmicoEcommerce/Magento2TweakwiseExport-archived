@@ -16,7 +16,6 @@ use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Type as ProductType;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
-use Magento\Enterprise\Model\ProductMetadata;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
@@ -278,6 +277,6 @@ class Children extends AbstractDecorator
      */
     private function isEnterprise()
     {
-        return $this->appInfo->getEdition() === ProductMetadata::EDITION_NAME;
+        return $this->appInfo->getEdition() !== 'Community';
     }
 }
