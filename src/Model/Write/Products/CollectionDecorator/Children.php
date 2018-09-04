@@ -6,6 +6,7 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
+use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\EavIteratorFactory;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\CollectionFactory;
@@ -55,9 +56,9 @@ class Children extends AbstractDecorator
     private $collectionFactory;
 
     /**
-     * @var ProductMetadataInterface
+     * @var Helper
      */
-    private $appInfo;
+    private $helper;
 
     /**
      * ChildId constructor.
@@ -68,7 +69,7 @@ class Children extends AbstractDecorator
      * @param IteratorInitializer $iteratorInitializer
      * @param ExportEntityChildFactory $entityChildFactory
      * @param CollectionFactory $collectionFactory
-     * @param ProductMetadataInterface $appInfo
+     * @param Helper $helper
      */
     public function __construct(
         DbContext $dbContext,
@@ -77,7 +78,7 @@ class Children extends AbstractDecorator
         IteratorInitializer $iteratorInitializer,
         ExportEntityChildFactory $entityChildFactory,
         CollectionFactory $collectionFactory,
-        ProductMetadataInterface $appInfo
+        Helper $helper
     )
     {
         parent::__construct($dbContext);
@@ -86,7 +87,7 @@ class Children extends AbstractDecorator
         $this->entityChildFactory = $entityChildFactory;
         $this->iteratorInitializer = $iteratorInitializer;
         $this->collectionFactory = $collectionFactory;
-        $this->appInfo = $appInfo;
+        $this->helper = $helper;
     }
 
     /**
@@ -160,7 +161,7 @@ class Children extends AbstractDecorator
         $select = $connection->select();
         $select->from(['bundle_selection' => $this->getTableName('catalog_product_bundle_selection')]);
 
-        if ($this->isEnterprise()) {
+        if ($this->helper->isEnterprise()) {
             $select->columns(['parent_product_id'])->join(
                 ['product_table' => $this->getTableName('catalog_product_entity')],
                 'bundle_selection.product_id = product_table.row_id',
@@ -187,7 +188,7 @@ class Children extends AbstractDecorator
         $select = $connection->select();
         $select->from(['link_table' => $this->getTableName('catalog_product_link')]);
 
-        if ($this->isEnterprise()) {
+        if ($this->helper->isEnterprise()) {
             $select->columns(['product_id']);
             $select->join(
                 ['product_table' => $this->getTableName('catalog_product_entity')],
@@ -217,7 +218,7 @@ class Children extends AbstractDecorator
         $select = $connection->select();
         $select->from(['link_table' => $this->getTableName('catalog_product_super_link')]);
 
-        if ($this->isEnterprise()) {
+        if ($this->helper->isEnterprise()) {
             $select->columns(['parent_id'])->join(
                 ['product_table' => $this->getTableName('catalog_product_entity')],
                 'link_table.product_id = product_table.row_id',
@@ -270,13 +271,5 @@ class Children extends AbstractDecorator
             $childEntity = $this->childEntities->get($childId);
             $childEntity->setFromArray($childData);
         }
-    }
-
-    /**
-     * @return bool
-     */
-    private function isEnterprise()
-    {
-        return $this->appInfo->getEdition() !== 'Community';
     }
 }
