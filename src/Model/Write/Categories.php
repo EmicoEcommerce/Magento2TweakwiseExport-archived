@@ -108,6 +108,10 @@ class Categories implements WriterInterface
 
         foreach ($this->iterator as $data) {
             // Skip magento root since we injected our fake root
+            if ($data['row_id']) {
+                $data['entity_id'] = $data['row_id'];
+                unset($data['row_id']);
+            }
             if ($data['entity_id'] === 1) {
                 continue;
             }

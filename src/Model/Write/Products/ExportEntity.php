@@ -116,6 +116,7 @@ class ExportEntity
     {
         foreach ($data as $key => $value) {
             switch ($key) {
+                case 'row_id';
                 case 'entity_id';
                     $this->id = (int) $value;
                     break;

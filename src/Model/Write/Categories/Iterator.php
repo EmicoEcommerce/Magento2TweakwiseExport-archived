@@ -18,13 +18,16 @@ use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 class Iterator extends EavIterator
 {
     /**
-     * {@inheritDoc}
+     * @return array
      */
-    protected $eavSelectOrder = [
-        'path',
-        'entity_id',
-        'store_id',
-    ];
+    protected function getEavSelectOrder(): array
+    {
+        return [
+            'path',
+            $this->getIdentifierField(),
+            'store_id',
+        ];
+    }
 
     /**
      * Iterator constructor.
@@ -59,23 +62,20 @@ class Iterator extends EavIterator
     protected function createEavAttributeGroupSelect(string $group, array $attributes): Select
     {
         $select = parent::createEavAttributeGroupSelect($group, $attributes);
+        $identifier = $this->getIdentifierField();
 
-        if ($this->helper->isEnterprise()) {
-            $select->columns('main_table.path');
-        } else {
-            /** @var AbstractAttribute $staticAttribute */
-            $staticAttribute = reset($this->getAttributeGroups()['_static']);
+        /** @var AbstractAttribute $staticAttribute */
+        $staticAttribute = reset($this->getAttributeGroups()['_static']);
+        /** @var AbstractAttribute $eavAttribute */
+        $eavAttribute = reset($attributes);
 
-            /** @var AbstractAttribute $eavAttribute */
-            $eavAttribute = reset($attributes);
+        $select->join(
+            $staticAttribute->getBackendTable(),
+            $staticAttribute->getBackendTable() . ".{$identifier} = " . $eavAttribute->getBackendTable() . ".{$identifier}",
+            ['path']
+        );
 
-            $select->join(
-                $staticAttribute->getBackendTable(),
-                $staticAttribute->getBackendTable() . '.entity_id = ' . $eavAttribute->getBackendTable() . '.entity_id',
-                ['path']
-            );
-        }
-        
+
         return $select;
     }
 }

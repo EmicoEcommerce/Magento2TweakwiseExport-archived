@@ -67,14 +67,6 @@ class EavIterator implements IteratorAggregate
     protected $dbContext;
 
     /**
-     * @var array
-     */
-    protected $eavSelectOrder = [
-        'entity_id',
-        'store_id',
-    ];
-
-    /**
      * EavIterator constructor.
      *
      * @param Helper $helper
@@ -161,7 +153,8 @@ class EavIterator implements IteratorAggregate
      */
     protected function loopUnionRows(MysqlStatement $stmt)
     {
-        $entity = ['entity_id' => null];
+        $identifier = $this->getIdentifierField();
+        $entity = [$identifier => null];
         while ($row = $stmt->fetch()) {
             $attributeId = $row['attribute_id'];
             $value = $row['value'];
@@ -172,16 +165,16 @@ class EavIterator implements IteratorAggregate
 
             $attribute = $this->attributes[$attributeId];
             $attributeCode = $attribute->getAttributeCode();
-            $rowEntityId = (int) $row['entity_id'];
+            $rowEntityId = (int) $row[$identifier];
 
-            if ($entity['entity_id'] !== $rowEntityId) {
+            if ($entity[$identifier] !== $rowEntityId) {
                 // If current loop entity is new yield return this entity
-                if ($entity['entity_id']) {
+                if ($entity[$identifier]) {
                     yield $entity;
                 }
 
                 $entity = [
-                    'entity_id' => (int) $row['entity_id'],
+                    $identifier => (int) $row[$identifier],
                     $attributeCode => $value,
                 ];
             } else {
@@ -197,7 +190,7 @@ class EavIterator implements IteratorAggregate
             }
         }
 
-        if ($entity['entity_id']) {
+        if ($entity[$identifier]) {
             yield $entity;
         }
     }
@@ -211,11 +204,19 @@ class EavIterator implements IteratorAggregate
             ->select()
             ->union($this->getAttributeSelects());
 
-        foreach ($this->eavSelectOrder as $field) {
+        foreach ($this->getEavSelectOrder() as $field) {
             $select->order($field);
         }
 
         return $select;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getEavSelectOrder(): array
+    {
+        return [$this->getIdentifierField(), 'store_id'];
     }
 
     /**
@@ -281,22 +282,21 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
-     * @param AbstractAttribute[] $attributes
-     * @return Select[]
+     * @param array $attributes
+     * @return array
      */
     protected function getStaticAttributeSelect(array $attributes): array
     {
         $connection = $this->getConnection();
 
         $selects = [];
-        $identifierField = $this->getIdentifierField();
         foreach ($attributes as $attributeKey => $attribute) {
             $attributeExpression = new Zend_Db_Expr($connection->quote($attributeKey));
             $selects[] = $connection->select()
                 ->from(
                     $attribute->getBackendTable(),
                     [
-                        'entity_id' => $identifierField,
+                        $this->getIdentifierField(),
                         'store_id' => new Zend_Db_Expr('0'),
                         'attribute_id' => $attributeExpression,
                         'value' => $attribute->getAttributeCode()
@@ -310,63 +310,9 @@ class EavIterator implements IteratorAggregate
     /**
      * @return string
      */
-    public function getIdentifierField(): string
+    protected function getIdentifierField()
     {
-        if ($this->helper->isEnterprise()) {
-            return 'row_id';
-        }
-
-        return 'entity_id';
-    }
-
-    /**
-     * @param string $table
-     * @param AbstractAttribute[] $attributes
-     * @return Select
-     */
-    protected function getAttributeSelectCommunity(string $table, array $attributes): Select
-    {
-        $connection = $this->getConnection();
-        $select = $connection->select()
-            ->from($table, ['entity_id', 'store_id', 'attribute_id', 'value'])
-            ->where('attribute_id IN (?)', array_keys($attributes));
-
-        if ($this->storeId) {
-            $select->where('store_id = 0 OR store_id = ?', $this->storeId);
-        } else {
-            $select->where('store_id = 0');
-        }
-
-        return $select;
-    }
-
-    /**
-     * @param string $table
-     * @param AbstractAttribute[] $attributes
-     * @return Select
-     */
-    protected function getAttributeSelectEnterprise(string $table, array $attributes): Select
-    {
-        $connection = $this->getConnection();
-        $identifier = $this->getIdentifierField();
-        $select = $connection->select()
-            ->from(['attribute_table' => $table], [])
-            ->join(['main_table' => $this->getEntityType()->getEntityTable()], 'attribute_table.row_id = main_table.row_id', [])
-            ->columns([
-                'entity_id' => 'main_table.' . $identifier,
-                'store_id' => 'attribute_table.store_id',
-                'attribute_id' => 'attribute_table.attribute_id',
-                'value' => 'attribute_table.value'
-            ])
-            ->where('attribute_id IN (?)', array_keys($attributes));
-
-        if ($this->storeId) {
-            $select->where('store_id = 0 OR store_id = ?', $this->storeId);
-        } else {
-            $select->where('store_id = 0');
-        }
-
-        return $select;
+        return $this->helper->getIdentifierField();
     }
 
     /**
@@ -394,13 +340,20 @@ class EavIterator implements IteratorAggregate
      * @param AbstractAttribute[] $attributes
      * @return Select
      */
-    protected function createEavAttributeGroupSelect(string $group, array $attributes): Select
+    protected function createEavAttributeGroupSelect(string $table, array $attributes): Select
     {
-        if ($this->helper->isEnterprise()) {
-            return $this->getAttributeSelectEnterprise($group, $attributes);
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($table, [$this->getIdentifierField(), 'store_id', 'attribute_id', 'value'])
+            ->where('attribute_id IN (?)', array_keys($attributes));
+
+        if ($this->storeId) {
+            $select->where('store_id = 0 OR store_id = ?', $this->storeId);
+        } else {
+            $select->where('store_id = 0');
         }
 
-        return $this->getAttributeSelectCommunity($group, $attributes);
+        return $select;
     }
 
     /**
@@ -423,7 +376,7 @@ class EavIterator implements IteratorAggregate
 
         if ($this->entityIds) {
             foreach ($selects as $select) {
-                $select->where('entity_id IN (?)', $this->entityIds);
+                $select->where("{$this->getIdentifierField()} IN (?)", $this->entityIds);
             }
         }
 
