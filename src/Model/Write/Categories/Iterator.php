@@ -14,6 +14,7 @@ use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
+use Zend_Db_Expr;
 
 class Iterator extends EavIterator
 {
@@ -47,13 +48,74 @@ class Iterator extends EavIterator
      */
     protected function getStaticAttributeSelect(array $attributes): array
     {
-        $selects = parent::getStaticAttributeSelect($attributes);
+        if (!$this->helper->isEnterprise()) {
+            $selects = parent::getStaticAttributeSelect($attributes);
+        } else {
+            $selects = $this->getEnterpriseStaticAttributeSelect($attributes);
+        }
 
         foreach ($selects as $select) {
-            $select->columns('path');
+            $select->columns($this->getConnection()->getTableName('catalog_category_entity') . '.path');
         }
 
         return $selects;
+    }
+
+    /**
+     * @param array $attributes
+     * @return array
+     */
+    protected function getEnterpriseStaticAttributeSelect(array $attributes): array
+    {
+        $connection = $this->getConnection();
+
+        $selects = [];
+        foreach ($attributes as $attributeKey => $attribute) {
+            if ($attributeKey === 'parent_id') {
+                $select = $this->getParentAttributeSelect($attribute);
+                $selects[] = $select;
+                continue;
+            }
+            $attributeExpression = new Zend_Db_Expr($connection->quote($attributeKey));
+            $select = $connection->select()
+                ->from(
+                    $attribute->getBackendTable(),
+                    [
+                        $this->getIdentifierField(),
+                        'store_id' => new Zend_Db_Expr('0'),
+                        'attribute_id' => $attributeExpression,
+                        'value' => $attribute->getAttributeCode()
+                    ]
+                );
+            $selects[] = $select;
+        }
+
+        return $selects;
+    }
+
+    /**
+     * @param $attribute
+     */
+    protected function getParentAttributeSelect($attribute)
+    {
+        $connection = $this->getConnection();
+        $attributeExpression = new Zend_Db_Expr($connection->quote('parent_id'));
+        $select = $connection->select()
+            ->from($attribute->getBackendTable())
+            ->reset('columns')
+            ->columns([
+                $this->getIdentifierField(),
+                'store_id' => new Zend_Db_Expr('0'),
+                'attribute_id' => $attributeExpression,
+            ]);
+        $select->join(
+                ['parent_ids' => $attribute->getBackendTable()],
+                'catalog_category_entity.parent_id = parent_ids.entity_id',
+                ['value' => 'parent_ids.row_id']
+            );
+
+        return $select;
+
     }
 
     /**

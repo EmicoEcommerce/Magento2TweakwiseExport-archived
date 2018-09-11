@@ -6,6 +6,7 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
+use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
@@ -20,15 +21,22 @@ class WebsiteLink extends AbstractDecorator
     private $storeManager;
 
     /**
+     * @var Helper
+     */
+    private $helper;
+
+    /**
      * WebsiteLink constructor.
      *
-     * @param StoreManagerInterface $storeManager
      * @param DbContext $context
+     * @param StoreManagerInterface $storeManager
+     * @param Helper $helper
      */
-    public function __construct(StoreManagerInterface $storeManager, DbContext $context)
+    public function __construct(DbContext $context, StoreManagerInterface $storeManager, Helper $helper)
     {
         parent::__construct($context);
         $this->storeManager = $storeManager;
+        $this->helper = $helper;
     }
 
     /**
@@ -57,13 +65,42 @@ class WebsiteLink extends AbstractDecorator
 
     /**
      * @param Collection $collection
-     * @throws Zend_Db_Statement_Exception
      */
     private function addLinkedWebsiteIds(Collection $collection)
     {
+        if ($this->helper->isEnterprise()) {
+            $this->addLinkedWebsiteIdsEnterprise($collection);
+        } else {
+            $this->addLinkedWebsiteIdsCommunity($collection);
+        }
+    }
+
+    /**
+     * @param Collection $collection
+     */
+    private function addLinkedWebsiteIdsEnterprise(Collection $collection)
+    {
+        $entityRowIdMap = $this->getEntityIdRowIdMap($collection->getIds());
+        $entityIds = array_keys($entityRowIdMap);
         $select = $this->getConnection()->select()
             ->from($this->getProductWebsiteTable(), ['product_id', 'website_id'])
-            ->where('product_id in(' . implode(',', $collection->getIds()) . ')');
+            ->where('product_id IN (?)', $entityIds);
+        $query = $select->query();
+
+        while ($row = $query->fetch()) {
+            $productId = (int)$row['product_id'];
+            $collection->get($entityRowIdMap[$productId])->addLinkedWebsiteId((int)$row['website_id']);
+        }
+    }
+
+    /**
+     * @param Collection $collection
+     */
+    private function addLinkedWebsiteIdsCommunity(Collection $collection)
+    {
+        $select = $this->getConnection()->select()
+            ->from($this->getProductWebsiteTable(), ['product_id', 'website_id'])
+            ->where('product_id IN (?)', $collection->getIds());
         $query = $select->query();
 
         while ($row = $query->fetch()) {
