@@ -289,14 +289,13 @@ class EavIterator implements IteratorAggregate
         $connection = $this->getConnection();
 
         $selects = [];
-        $identifierField = $this->getIdentifierField();
         foreach ($attributes as $attributeKey => $attribute) {
             $attributeExpression = new Zend_Db_Expr($connection->quote($attributeKey));
             $selects[] = $connection->select()
                 ->from(
                     $attribute->getBackendTable(),
                     [
-                        'entity_id' => $identifierField,
+                        'entity_id',
                         'store_id' => new Zend_Db_Expr('0'),
                         'attribute_id' => $attributeExpression,
                         'value' => $attribute->getAttributeCode()
@@ -305,18 +304,6 @@ class EavIterator implements IteratorAggregate
         }
 
         return $selects;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIdentifierField(): string
-    {
-        if ($this->helper->isEnterprise()) {
-            return 'row_id';
-        }
-
-        return 'entity_id';
     }
 
     /**
@@ -348,12 +335,11 @@ class EavIterator implements IteratorAggregate
     protected function getAttributeSelectEnterprise(string $table, array $attributes): Select
     {
         $connection = $this->getConnection();
-        $identifier = $this->getIdentifierField();
         $select = $connection->select()
             ->from(['attribute_table' => $table], [])
             ->join(['main_table' => $this->getEntityType()->getEntityTable()], 'attribute_table.row_id = main_table.row_id', [])
             ->columns([
-                'entity_id' => 'main_table.' . $identifier,
+                'entity_id' => 'main_table.entity_id',
                 'store_id' => 'attribute_table.store_id',
                 'attribute_id' => 'attribute_table.attribute_id',
                 'value' => 'attribute_table.value'
