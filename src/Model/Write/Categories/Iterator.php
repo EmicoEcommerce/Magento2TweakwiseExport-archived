@@ -14,21 +14,17 @@ use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
-use Zend_Db_Expr;
 
 class Iterator extends EavIterator
 {
     /**
-     * @return array
+     * {@inheritDoc}
      */
-    protected function getEavSelectOrder(): array
-    {
-        return [
-            'path',
-            $this->getIdentifierField(),
-            'store_id',
-        ];
-    }
+    protected $eavSelectOrder = [
+        'path',
+        'entity_id',
+        'store_id',
+    ];
 
     /**
      * Iterator constructor.
@@ -48,74 +44,13 @@ class Iterator extends EavIterator
      */
     protected function getStaticAttributeSelect(array $attributes): array
     {
-        if (!$this->helper->isEnterprise()) {
-            $selects = parent::getStaticAttributeSelect($attributes);
-        } else {
-            $selects = $this->getEnterpriseStaticAttributeSelect($attributes);
-        }
+        $selects = parent::getStaticAttributeSelect($attributes);
 
         foreach ($selects as $select) {
-            $select->columns($this->getConnection()->getTableName('catalog_category_entity') . '.path');
+            $select->columns('path');
         }
 
         return $selects;
-    }
-
-    /**
-     * @param array $attributes
-     * @return array
-     */
-    protected function getEnterpriseStaticAttributeSelect(array $attributes): array
-    {
-        $connection = $this->getConnection();
-
-        $selects = [];
-        foreach ($attributes as $attributeKey => $attribute) {
-            if ($attributeKey === 'parent_id') {
-                $select = $this->getParentAttributeSelect($attribute);
-                $selects[] = $select;
-                continue;
-            }
-            $attributeExpression = new Zend_Db_Expr($connection->quote($attributeKey));
-            $select = $connection->select()
-                ->from(
-                    $attribute->getBackendTable(),
-                    [
-                        $this->getIdentifierField(),
-                        'store_id' => new Zend_Db_Expr('0'),
-                        'attribute_id' => $attributeExpression,
-                        'value' => $attribute->getAttributeCode()
-                    ]
-                );
-            $selects[] = $select;
-        }
-
-        return $selects;
-    }
-
-    /**
-     * @param $attribute
-     */
-    protected function getParentAttributeSelect($attribute)
-    {
-        $connection = $this->getConnection();
-        $attributeExpression = new Zend_Db_Expr($connection->quote('parent_id'));
-        $select = $connection->select()
-            ->from($attribute->getBackendTable())
-            ->reset('columns')
-            ->columns([
-                $this->getIdentifierField(),
-                'store_id' => new Zend_Db_Expr('0'),
-                'attribute_id' => $attributeExpression,
-            ]);
-        $select->join(
-                ['parent_ids' => $attribute->getBackendTable()],
-                'catalog_category_entity.parent_id = parent_ids.entity_id',
-                ['value' => 'parent_ids.row_id']
-            );
-
-        return $select;
-
     }
 
     /**
@@ -124,20 +59,23 @@ class Iterator extends EavIterator
     protected function createEavAttributeGroupSelect(string $group, array $attributes): Select
     {
         $select = parent::createEavAttributeGroupSelect($group, $attributes);
-        $identifier = $this->getIdentifierField();
 
-        /** @var AbstractAttribute $staticAttribute */
-        $staticAttribute = reset($this->getAttributeGroups()['_static']);
-        /** @var AbstractAttribute $eavAttribute */
-        $eavAttribute = reset($attributes);
+        if ($this->helper->isEnterprise()) {
+            $select->columns('main_table.path');
+        } else {
+            /** @var AbstractAttribute $staticAttribute */
+            $staticAttribute = reset($this->getAttributeGroups()['_static']);
 
-        $select->join(
-            $staticAttribute->getBackendTable(),
-            $staticAttribute->getBackendTable() . ".{$identifier} = " . $eavAttribute->getBackendTable() . ".{$identifier}",
-            ['path']
-        );
+            /** @var AbstractAttribute $eavAttribute */
+            $eavAttribute = reset($attributes);
 
-
+            $select->join(
+                $staticAttribute->getBackendTable(),
+                $staticAttribute->getBackendTable() . '.entity_id = ' . $eavAttribute->getBackendTable() . '.entity_id',
+                ['path']
+            );
+        }
+        
         return $select;
     }
 }

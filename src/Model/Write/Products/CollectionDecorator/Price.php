@@ -7,7 +7,6 @@
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Model\Config;
-use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Store\Model\StoreManagerInterface;
@@ -30,22 +29,16 @@ class Price implements DecoratorInterface
     private $config;
 
     /**
-     * @var Helper
-     */
-    private $helper;
-
-    /**
      * Price constructor.
      * @param CollectionFactory $collectionFactory
      * @param StoreManagerInterface $storeManager
      * @param Config $config
      */
-    public function __construct(CollectionFactory $collectionFactory, StoreManagerInterface $storeManager, Config $config, Helper $helper)
+    public function __construct(CollectionFactory $collectionFactory, StoreManagerInterface $storeManager, Config $config)
     {
         $this->collectionFactory = $collectionFactory;
         $this->storeManager = $storeManager;
         $this->config = $config;
-        $this->helper = $helper;
     }
 
     /**
@@ -53,14 +46,13 @@ class Price implements DecoratorInterface
      */
     public function decorate(Collection $collection)
     {
-        $identifier = $this->helper->getIdentifierField();
         $collectionSelect = $this->collectionFactory->create()
-            ->addAttributeToFilter($identifier, ['in' => $collection->getIds()])
+            ->addAttributeToFilter('entity_id', ['in' => $collection->getIds()])
             ->addPriceData(0, $this->storeManager->getStore($collection->getStoreId())->getWebsiteId())
             ->getSelect()
             ->reset(Zend_Db_Select::COLUMNS)
             ->columns([
-                $identifier,
+                'entity_id',
                 'price' => 'price_index.price',
                 'final_price' => 'price_index.final_price',
                 'old_price' => 'price_index.price',
@@ -70,7 +62,7 @@ class Price implements DecoratorInterface
         $collectionQuery = $collectionSelect->query();
 
         while ($row = $collectionQuery->fetch()) {
-            $entityId = $row[$identifier];
+            $entityId = $row['entity_id'];
             $row['price'] = $this->getPriceValue($collection->getStoreId(), $row);
             $collection->get($entityId)->setFromArray($row);
         }
@@ -85,7 +77,7 @@ class Price implements DecoratorInterface
     {
         $priceFields = $this->config->getPriceFields($storeId);
         foreach ($priceFields as $field) {
-            $value = (float)$priceData[$field];
+            $value = (float) $priceData[$field];
             if ($value > 0.00001) {
                 return $value;
             }

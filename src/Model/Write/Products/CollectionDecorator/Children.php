@@ -17,6 +17,7 @@ use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Type as ProductType;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\DataObject;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Magento\GroupedProduct\Model\Product\Type\Grouped;
@@ -141,7 +142,6 @@ class Children extends AbstractDecorator
         $groups = [];
         foreach ($collection as $entity) {
             $typeId = $entity->getAttribute('type_id', false);
-            /** @var string $typeId */
             if (!isset($groups[$typeId])) {
                 $groups[$typeId] = [];
             }
@@ -159,18 +159,24 @@ class Children extends AbstractDecorator
     {
         $connection = $this->getConnection();
         $select = $connection->select();
-        $select->from(['bundle_selection' => $this->getTableName('catalog_product_bundle_selection')]);
-        $select->reset('columns');
+
         if ($this->helper->isEnterprise()) {
-            $select->columns(['parent_product_id'])->join(
-                ['product_table' => $this->getTableName('catalog_product_entity')],
-                'bundle_selection.product_id = product_table.entity_id',
-                ['product_id' => 'product_table.row_id']
-            );
+            $select
+                ->from(['product_table' => $this->getTableName('catalog_product_entity')])
+                ->reset('columns')
+                ->columns(['parent_product_id' => 'product_table.entity_id'])
+                ->join(
+                    ['bundle_selection' => $this->getTableName('catalog_product_bundle_selection')],
+                    'bundle_selection.parent_product_id = product_table.row_id',
+                    ['product_id']
+                )
+                ->where('product_table.row_id IN (?)', $parentIds);
         } else {
-            $select->columns(['product_id', 'parent_product_id']);
+            $select
+                ->from(['bundle_selection' => $this->getTableName('catalog_product_bundle_selection')])
+                ->columns(['product_id', 'parent_product_id'])
+                ->where('parent_product_id IN (?)', $parentIds);
         }
-        $select->where('parent_product_id IN (?)', $parentIds);
 
         $query = $select->query();
         while ($row = $query->fetch()) {
@@ -187,21 +193,26 @@ class Children extends AbstractDecorator
     {
         $connection = $this->getConnection();
         $select = $connection->select();
-        $select->from(['link_table' => $this->getTableName('catalog_product_link')]);
-        $select->reset('columns');
+
         if ($this->helper->isEnterprise()) {
-            $select->columns(['product_id']);
-            $select->join(
-                ['product_table' => $this->getTableName('catalog_product_entity')],
-                'link_table.linked_product_id = product_table.entity_id',
-                ['linked_product_id' => 'product_table.row_id']
-            );
+            $select
+                ->from(['product_table' => $this->getTableName('catalog_product_entity')])
+                ->reset('columns')
+                ->columns(['parent_id' => 'product_table.entity_id'])
+                ->join(
+                    ['link_table' => $this->getTableName('catalog_product_link')],
+                    'link_table.product_id = product_table.row_id',
+                    ['linked_product_id']
+                )
+                ->where('product_table.entity_id IN (?)', $parentIds)
+                ->where('link_table.link_type_id = ?', $typeId);
         } else {
-            $select->columns(['linked_product_id', 'product_id']);
+            $select
+                ->from(['link_table' => $this->getTableName('catalog_product_link')])
+                ->where('link_type_id = ?', $typeId)
+                ->where('product_id IN (?)', $parentIds);
         }
-        $select
-            ->where('link_type_id = ?', $typeId)
-            ->where('product_id IN (?)', $parentIds);
+
 
         $query = $select->query();
         while ($row = $query->fetch()) {
@@ -217,18 +228,26 @@ class Children extends AbstractDecorator
     {
         $connection = $this->getConnection();
         $select = $connection->select();
-        $select->from(['link_table' => $this->getTableName('catalog_product_super_link')]);
-        $select->reset('columns');
+
+
         if ($this->helper->isEnterprise()) {
-            $select->columns(['parent_id'])->join(
-                ['product_table' => $this->getTableName('catalog_product_entity')],
-                'link_table.product_id = product_table.entity_id',
-                ['product_id' => 'product_table.row_id']
-            );
+            $select
+                ->from(['product_table' => $this->getTableName('catalog_product_entity')])
+                ->reset('columns')
+                ->columns(['parent_id' => 'product_table.entity_id'])
+                ->join(
+                    ['link_table' => $this->getTableName('catalog_product_super_link')],
+                    'link_table.parent_id = product_table.row_id',
+                    ['product_id']
+                )
+                ->where('product_table.entity_id IN (?)', $parentIds);
         } else {
-            $select->columns(['product_id', 'parent_id']);
+            $select
+                ->from(['link_table' => $this->getTableName('catalog_product_super_link')])
+                ->columns(['product_id', 'parent_id'])
+                ->where('parent_id IN (?)', $parentIds);
         }
-        $select->where('parent_id IN (?)', $parentIds);
+
 
         $query = $select->query();
         while ($row = $query->fetch()) {
@@ -266,10 +285,9 @@ class Children extends AbstractDecorator
         $iterator->setEntityIds($this->childEntities->getIds());
         $iterator->setStoreId($storeId);
         $this->iteratorInitializer->initializeAttributes($iterator);
-        $identifier = $this->helper->getIdentifierField();
 
         foreach ($iterator as $childData) {
-            $childId = (int) $childData[$identifier];
+            $childId = (int) $childData['entity_id'];
             $childEntity = $this->childEntities->get($childId);
             $childEntity->setFromArray($childData);
         }

@@ -69,8 +69,7 @@ class Categories implements WriterInterface
         $xml->startElement('categories');
         $writer->flush();
 
-        $identifier = $this->helper->getIdentifierField();
-        $this->writeCategory($xml, 0, [$identifier => 1, 'name' => 'Root', 'position' => 0]);
+        $this->writeCategory($xml, 0, ['entity_id' => 1, 'name' => 'Root', 'position' => 0]);
         /** @var Store $store */
         foreach ($this->storeManager->getStores() as $store) {
             if ($this->config->isEnabled($store)) {
@@ -108,9 +107,8 @@ class Categories implements WriterInterface
         $this->iterator->setStoreId($storeId);
 
         foreach ($this->iterator as $data) {
-            $identifier = $this->helper->getIdentifierField();
             // Skip magento root since we injected our fake root
-            if ($data[$identifier] === 1) {
+            if ($data['entity_id'] === 1) {
                 continue;
             }
 
@@ -119,7 +117,7 @@ class Categories implements WriterInterface
             // Always export store root category whether it is enabled or not
             if ($parentId === 1) {
                 // Skip category if not root of current store
-                if ($data[$identifier] !== $storeRootCategoryId) {
+                if ($data['entity_id'] !== $storeRootCategoryId) {
                     continue;
                 }
 
@@ -137,7 +135,7 @@ class Categories implements WriterInterface
             }
 
             // Set category as exported
-            $exportedCategories[$data[$identifier]] = true;
+            $exportedCategories[$data['entity_id']] = true;
             $this->writeCategory($xml, $storeId, $data);
 
             $writer->flush();
@@ -153,8 +151,7 @@ class Categories implements WriterInterface
      */
     protected function writeCategory(XmlWriter $xml, int $storeId, array $data)
     {
-        $identifier = $this->helper->getIdentifierField();
-        $tweakwiseId = $this->helper->getTweakwiseId($storeId, $data[$identifier]);
+        $tweakwiseId = $this->helper->getTweakwiseId($storeId, $data['entity_id']);
         $xml->addCategoryExport($tweakwiseId);
 
         $xml->startElement('category');
@@ -178,6 +175,8 @@ class Categories implements WriterInterface
         }
 
         $xml->endElement(); // </category>
+
+
 
         return $this;
     }

@@ -8,16 +8,14 @@ namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Config\Source\StockCalculation;
-use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory;
 use Magento\CatalogInventory\Api\StockItemCriteriaInterfaceFactory;
 use Magento\CatalogInventory\Api\StockItemRepositoryInterface;
-use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 
-class StockData extends AbstractDecorator
+class StockData implements DecoratorInterface
 {
     /**
      * @var StockItemRepositoryInterface
@@ -40,35 +38,24 @@ class StockData extends AbstractDecorator
     private $stockItemFactory;
 
     /**
-     * @var Helper
-     */
-    private $helper;
-
-    /**
      * StockData constructor.
      *
-     * @param DbContext $dbContext
      * @param StockItemRepositoryInterface $stockItemRepository
      * @param StockItemCriteriaInterfaceFactory $criteriaFactory
      * @param StockItemInterfaceFactory $stockItemFactory
      * @param Config $config
-     * @param Helper $helper
      */
     public function __construct(
-        DbContext $dbContext,
         StockItemRepositoryInterface $stockItemRepository,
         StockItemCriteriaInterfaceFactory $criteriaFactory,
         StockItemInterfaceFactory $stockItemFactory,
-        Config $config,
-        Helper $helper
+        Config $config
     )
     {
-        parent::__construct($dbContext);
         $this->stockItemRepository = $stockItemRepository;
         $this->criteriaFactory = $criteriaFactory;
         $this->config = $config;
         $this->stockItemFactory = $stockItemFactory;
-        $this->helper = $helper;
     }
 
     /**
@@ -134,19 +121,6 @@ class StockData extends AbstractDecorator
      */
     private function getStockItemMap(array $entityIds): array
     {
-        if ($this->helper->isEnterprise()) {
-            return $this->getStockItemMapEnterprise($entityIds);
-        }
-
-        return $this->getStockItemMapCommunity($entityIds);
-    }
-
-    /**
-     * @param array $entityIds
-     * @return array
-     */
-    private function getStockItemMapCommunity(array $entityIds): array
-    {
         if (\count($entityIds) === 0) {
             return [];
         }
@@ -159,31 +133,6 @@ class StockData extends AbstractDecorator
         foreach ($items as $item) {
             $productId = (int) $item->getProductId();
             $map[$productId] = $item;
-        }
-        return $map;
-    }
-
-    /**
-     * @param array $entityIds
-     * @return array
-     */
-    private function getStockItemMapEnterprise(array $entityIds): array
-    {
-        if (\count($entityIds) === 0) {
-            return [];
-        }
-
-        $entityRowIdMap = $this->getEntityIdRowIdMap($entityIds);
-        $entityIds = array_keys($entityRowIdMap);
-
-        $criteria = $this->criteriaFactory->create();
-        $criteria->setProductsFilter([$entityIds]);
-        $items = $this->stockItemRepository->getList($criteria)->getItems();
-
-        $map = [];
-        foreach ($items as $item) {
-            $productId = (int) $item->getProductId();
-            $map[$entityRowIdMap[$productId]] = $item;
         }
         return $map;
     }
