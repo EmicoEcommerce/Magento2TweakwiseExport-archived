@@ -51,22 +51,4 @@ abstract class AbstractDecorator implements DecoratorInterface
     {
         return $this->dbContext->getResources();
     }
-
-    /**
-     * @param array $rowIds
-     * @return array
-     */
-    protected function getEntityIdRowIdMap(array $rowIds): array
-    {
-        $select = $this->getConnection()->select();
-        $select->from($this->getTableName('catalog_product_entity'))
-            ->reset('columns')
-            ->columns(['entity_id', 'row_id'])
-            ->where('row_id IN (?)', $rowIds);
-
-        $result = $select->query()->fetchAll();
-        $rowIds = array_column($result, 'row_id');
-        $entityIds = array_column($result, 'entity_id');
-        return array_combine($entityIds, $rowIds);
-    }
 }
