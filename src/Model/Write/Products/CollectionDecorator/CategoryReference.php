@@ -16,20 +16,37 @@ class CategoryReference extends AbstractDecorator
      */
     public function decorate(Collection $collection)
     {
-        $query = $this->getConnection()
+        $storeId = $collection->getStoreId();
+        $select = $this->getConnection()
             ->select()
-            ->from($this->getTableName(AbstractAction::MAIN_INDEX_TABLE), ['category_id', 'product_id'])
+            ->from($this->getIndexTableName($storeId), ['category_id', 'product_id'])
             ->where('store_id = ?', $collection->getStoreId())
-            ->where('product_id IN(' . implode(',', $collection->getIds()) . ')')
-            ->query();
+            ->where('product_id IN(' . implode(',', $collection->getIds()) . ')');
+        $resultSet = $select->query();
 
         $result = [];
-        while ($row = $query->fetch()) {
+        while ($row = $resultSet->fetch()) {
             $entityId = (int) $row['product_id'];
             $entity = $collection->get($entityId);
             $entity->addCategoryId((int) $row['category_id']);
         }
 
         return $result;
+    }
+
+    /**
+     * @param int $storeId
+     * @return string
+     */
+    protected function getIndexTableName(int $storeId)
+    {
+        $connection = $this->getConnection();
+        $baseTableName = AbstractAction::MAIN_INDEX_TABLE;
+        $storeCategoryProductIndexTableName = sprintf('%s_store%s', $baseTableName, $storeId);
+        if ($connection->isTableExists($connection->getTableName($storeCategoryProductIndexTableName))) {
+            return $connection->getTableName($storeCategoryProductIndexTableName);
+        }
+
+        return $connection->getTableName($baseTableName);
     }
 }
