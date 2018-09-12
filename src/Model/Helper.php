@@ -27,7 +27,6 @@ class Helper
      * @var Config
      */
     private $config;
-
     /**
      * @var TimezoneInterface
      */
@@ -90,18 +89,6 @@ class Helper
         }
 
         return true;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIdentifierField()
-    {
-        if ($this->isEnterprise()) {
-            return 'row_id';
-        }
-
-        return 'entity_id';
     }
 
     /**

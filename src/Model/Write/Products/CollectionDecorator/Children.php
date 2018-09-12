@@ -141,7 +141,6 @@ class Children extends AbstractDecorator
         $groups = [];
         foreach ($collection as $entity) {
             $typeId = $entity->getAttribute('type_id', false);
-            /** @var string $typeId */
             if (!isset($groups[$typeId])) {
                 $groups[$typeId] = [];
             }
@@ -160,18 +159,17 @@ class Children extends AbstractDecorator
         $connection = $this->getConnection();
         $select = $connection->select();
         $select->from(['bundle_selection' => $this->getTableName('catalog_product_bundle_selection')]);
-        $select->reset('columns');
+
         if ($this->helper->isEnterprise()) {
             $select->columns(['parent_product_id'])->join(
                 ['product_table' => $this->getTableName('catalog_product_entity')],
-                'bundle_selection.product_id = product_table.entity_id',
-                ['product_id' => 'product_table.row_id']
+                'bundle_selection.product_id = product_table.row_id',
+                ['product_id' => 'row_id']
             );
         } else {
             $select->columns(['product_id', 'parent_product_id']);
         }
         $select->where('parent_product_id IN (?)', $parentIds);
-
         $query = $select->query();
         while ($row = $query->fetch()) {
             $this->addChild($collection, (int) $row['parent_product_id'], (int) $row['product_id']);
@@ -188,13 +186,13 @@ class Children extends AbstractDecorator
         $connection = $this->getConnection();
         $select = $connection->select();
         $select->from(['link_table' => $this->getTableName('catalog_product_link')]);
-        $select->reset('columns');
+
         if ($this->helper->isEnterprise()) {
             $select->columns(['product_id']);
             $select->join(
                 ['product_table' => $this->getTableName('catalog_product_entity')],
-                'link_table.linked_product_id = product_table.entity_id',
-                ['linked_product_id' => 'product_table.row_id']
+                'link_table.linked_product_id = product_table.row_id',
+                ['linked_product_id' => 'row_id']
             );
         } else {
             $select->columns(['linked_product_id', 'product_id']);
@@ -218,12 +216,12 @@ class Children extends AbstractDecorator
         $connection = $this->getConnection();
         $select = $connection->select();
         $select->from(['link_table' => $this->getTableName('catalog_product_super_link')]);
-        $select->reset('columns');
+
         if ($this->helper->isEnterprise()) {
             $select->columns(['parent_id'])->join(
                 ['product_table' => $this->getTableName('catalog_product_entity')],
-                'link_table.product_id = product_table.entity_id',
-                ['product_id' => 'product_table.row_id']
+                'link_table.product_id = product_table.row_id',
+                ['product_id' => 'row_id']
             );
         } else {
             $select->columns(['product_id', 'parent_id']);
@@ -266,10 +264,9 @@ class Children extends AbstractDecorator
         $iterator->setEntityIds($this->childEntities->getIds());
         $iterator->setStoreId($storeId);
         $this->iteratorInitializer->initializeAttributes($iterator);
-        $identifier = $this->helper->getIdentifierField();
 
         foreach ($iterator as $childData) {
-            $childId = (int) $childData[$identifier];
+            $childId = (int) $childData['entity_id'];
             $childEntity = $this->childEntities->get($childId);
             $childEntity->setFromArray($childData);
         }
