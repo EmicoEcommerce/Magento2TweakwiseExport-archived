@@ -116,7 +116,7 @@ class Products implements WriterInterface
     {
         $storeId = $store->getId();
         $this->iterator->setStoreId($storeId);
-
+        
         foreach ($this->iterator as $data) {
             $this->writeProduct($xml, $storeId, $data);
             $writer->flush();
@@ -291,19 +291,20 @@ class Products implements WriterInterface
         }
 
         // Explode values if source is used (multi select)
-        if ($attribute->getFrontendInput() == 'multiselect' || $attribute->getFrontendInput() == 'select') {
-            $values = $this->explodeValues($values);
+        if (!$attribute->usesSource()) {
+            return $values;
         }
 
-        $source = $attribute->getSource();
-        if (!$source instanceof SourceInterface) {
+        // Apparently Magento adds a default source model to the attribute even if it does not use a source
+        $values = $this->explodeValues($values);
+        if (!$attribute->getSource() instanceof SourceInterface) {
             return $values;
         }
 
         $result = [];
-        foreach ($values as $value) {
+        foreach ($values as $attributeValue) {
             $map = $this->getAttributeOptionMap($storeId, $attribute);
-            $result[] = $map[$value] ?? null;
+            $result[] = $map[$attributeValue] ?? null;
         }
 
         return $result;
