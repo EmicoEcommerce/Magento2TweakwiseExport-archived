@@ -198,7 +198,7 @@ class Children extends AbstractDecorator
             $select
                 ->from(['product_table' => $this->getTableName('catalog_product_entity')])
                 ->reset('columns')
-                ->columns(['parent_id' => 'product_table.entity_id'])
+                ->columns(['product_id' => 'product_table.entity_id'])
                 ->join(
                     ['link_table' => $this->getTableName('catalog_product_link')],
                     'link_table.product_id = product_table.row_id',
