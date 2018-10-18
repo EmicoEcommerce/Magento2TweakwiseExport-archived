@@ -8,9 +8,30 @@ namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Magento\Catalog\Model\Indexer\Category\Product\AbstractAction;
+use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
+use Magento\Catalog\Model\Indexer\Category\Product\TableMaintainer;
 
 class CategoryReference extends AbstractDecorator
 {
+    /**
+     * @var TableMaintainer
+     */
+    protected $tableMaintainer;
+
+    /**
+     * Constructor.
+     *
+     * @param DbContext       $dbContext
+     * @param TableMaintainer $tableMaintainer
+     */
+    public function __construct(
+        DbContext $dbContext,
+        TableMaintainer $tableMaintainer
+    ) {
+        parent::__construct($dbContext);
+        $this->tableMaintainer = $tableMaintainer;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -18,8 +39,7 @@ class CategoryReference extends AbstractDecorator
     {
         $query = $this->getConnection()
             ->select()
-            ->from($this->getTableName(AbstractAction::MAIN_INDEX_TABLE), ['category_id', 'product_id'])
-            ->where('store_id = ?', $collection->getStoreId())
+            ->from($this->getTableName($this->tableMaintainer->getMainTable($collection->getStoreId())), ['category_id', 'product_id'])
             ->where('product_id IN(' . implode(',', $collection->getIds()) . ')')
             ->query();
 
