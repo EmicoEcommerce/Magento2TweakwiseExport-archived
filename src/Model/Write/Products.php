@@ -290,12 +290,12 @@ class Products implements WriterInterface
             return $values;
         }
 
-        // Explode values if source is used (multi select)
+        // Apparently Magento adds a default source model to the attribute even if it does not use a source
         if (!$attribute->usesSource()) {
             return $values;
         }
 
-        // Apparently Magento adds a default source model to the attribute even if it does not use a source
+        // Explode values if source is used (multi select)
         $values = $this->explodeValues($values);
         if (!$attribute->getSource() instanceof SourceInterface) {
             return $values;
