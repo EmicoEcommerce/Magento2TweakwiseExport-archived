@@ -8,7 +8,9 @@ namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Magento\CatalogRule\Model\ResourceModel\Rule as CatalogRuleResource;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Customer\Model\Group;
 use Magento\Store\Model\StoreManagerInterface;
 use Zend_Db_Select;
 
@@ -29,16 +31,23 @@ class Price implements DecoratorInterface
     private $config;
 
     /**
+     * @var CatalogRuleResource
+     */
+    private $catalogRuleResource;
+
+    /**
      * Price constructor.
      * @param CollectionFactory $collectionFactory
      * @param StoreManagerInterface $storeManager
      * @param Config $config
+     * @param CatalogRuleResource $catalogRuleResource
      */
-    public function __construct(CollectionFactory $collectionFactory, StoreManagerInterface $storeManager, Config $config)
+    public function __construct(CollectionFactory $collectionFactory, StoreManagerInterface $storeManager, Config $config, CatalogRuleResource $catalogRuleResource)
     {
         $this->collectionFactory = $collectionFactory;
         $this->storeManager = $storeManager;
         $this->config = $config;
+        $this->catalogRuleResource = $catalogRuleResource;
     }
 
     /**
@@ -46,9 +55,11 @@ class Price implements DecoratorInterface
      */
     public function decorate(Collection $collection)
     {
+        $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
+
         $collectionSelect = $this->collectionFactory->create()
             ->addAttributeToFilter('entity_id', ['in' => $collection->getIds()])
-            ->addPriceData(0, $this->storeManager->getStore($collection->getStoreId())->getWebsiteId())
+            ->addPriceData(0, $websiteId)
             ->getSelect()
             ->reset(Zend_Db_Select::COLUMNS)
             ->columns([
@@ -61,11 +72,29 @@ class Price implements DecoratorInterface
             ]);
         $collectionQuery = $collectionSelect->query();
 
+        $catalogRulePrices = $this->getCatalogRulePrices($websiteId, $collection->getIds());
+
         while ($row = $collectionQuery->fetch()) {
             $entityId = $row['entity_id'];
+            $row['rule_price'] = isset($catalogRulePrices[$entityId]) ? $catalogRulePrices[$entityId] : null;
             $row['price'] = $this->getPriceValue($collection->getStoreId(), $row);
             $collection->get($entityId)->setFromArray($row);
         }
+    }
+
+    /**
+     * @param int $websiteId
+     * @param array $productIds
+     * @return array
+     */
+    protected function getCatalogRulePrices($websiteId, array $productIds)
+    {
+        return $this->catalogRuleResource->getRulePrices(
+            new \DateTime(),
+            $websiteId,
+            Group::NOT_LOGGED_IN_ID,
+            $productIds
+        );
     }
 
     /**
