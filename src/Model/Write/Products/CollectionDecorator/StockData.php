@@ -183,7 +183,6 @@ class StockData implements DecoratorInterface
         }
 
         $inStockchildrenCount = \count(\array_filter($entity->getExportChildren(), [$this, 'isInStock']));
-
         return ($inStockchildrenCount / $childrenCount) * 100;
     }
 
