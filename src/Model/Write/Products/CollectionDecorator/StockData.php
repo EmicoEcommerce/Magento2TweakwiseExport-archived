@@ -177,9 +177,9 @@ class StockData implements DecoratorInterface
         }
 
         $childrenCount = \count($entity->getExportChildren());
-        // Just to be sure we dont divide by 0
+        // Just to be sure we dont divide by 0, we really should not get here
         if ($childrenCount <= 0) {
-            return 100;
+            return (int) $this->isInStock($entity) * 100;
         }
 
         $inStockchildrenCount = \count(\array_filter($entity->getExportChildren(), [$this, 'isInStock']));
