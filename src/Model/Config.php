@@ -25,6 +25,7 @@ class Config
     const PATH_VALIDATE = 'tweakwise/export/validate';
     const PATH_API_IMPORT_URL = 'tweakwise/export/api_import_url';
     const PATH_STOCK_CALCULATION = 'tweakwise/export/stock_calculation';
+    const PATH_STOCK_PERCENTAGE = 'tweakwise/export/stock_percentage';
     const PATH_OUT_OF_STOCK_CHILDREN = 'tweakwise/export/out_of_stock_children';
     const PATH_FEED_KEY = 'tweakwise/export/feed_key';
     const PATH_PRICE_FIELD = 'tweakwise/export/price_field';
@@ -113,6 +114,15 @@ class Config
     public function getStockCalculation($store = null): string
     {
         return (string) $this->config->getValue(self::PATH_STOCK_CALCULATION, ScopeInterface::SCOPE_STORE, $store);
+    }
+
+    /**
+     * @param Store|int|string|null $store $store
+     * @return bool
+     */
+    public function isStockPercentage($store = null): bool
+    {
+        return (bool) $this->config->getValue(self::PATH_STOCK_PERCENTAGE, ScopeInterface::SCOPE_STORE, $store);
     }
 
     /**

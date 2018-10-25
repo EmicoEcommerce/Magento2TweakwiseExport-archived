@@ -66,10 +66,12 @@ class StockData implements DecoratorInterface
         // This has to be called before setting the stock items. This way the composite
         // products are not filtered since they mostly have 0 stock.
         $toBeCombinedEntities = $collection->getExported();
+        $storeId = $collection->getStoreId();
 
-        $this->addStockItems($collection->getStoreId(), $collection);
+        $this->addStockItems($storeId, $collection);
         foreach ($toBeCombinedEntities as $item) {
-            $this->combineStock($item, $collection->getStoreId());
+            $this->combineStock($item, $storeId);
+            $this->addStockPercentage($item, $storeId);
         }
     }
 
@@ -84,7 +86,6 @@ class StockData implements DecoratorInterface
         }
 
         $stockItemMap = $this->getStockItemMap($collection->getAllIds());
-
         foreach ($collection as $entity) {
             $this->assignStockItem($stockItemMap, $storeId, $entity);
 
@@ -156,21 +157,76 @@ class StockData implements DecoratorInterface
      * @param int $storeId
      * @return float
      */
+    private function addStockPercentage(ExportEntity $entity, int $storeId)
+    {
+        if (!$this->config->isStockPercentage($storeId)) {
+            return;
+        }
+
+        $entity->addAttribute('stock_percentage', $this->calculateStockPercentage($entity));
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @return float
+     */
+    private function calculateStockPercentage(ExportEntity $entity): float
+    {
+        if (!$entity->isComposite()) {
+            return (int) $this->isInStock($entity) * 100;
+        }
+
+        $childrenCount = \count($entity->getExportChildren());
+        // Just to be sure we dont divide by 0
+        if ($childrenCount <= 0) {
+            return 100;
+        }
+
+        $inStockchildrenCount = \count(\array_filter($entity->getExportChildren(), [$this, 'isInStock']));
+
+        return ($inStockchildrenCount / $childrenCount) * 100;
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @return bool
+     */
+    private function isInStock(ExportEntity $entity): bool
+    {
+        return (bool) $entity->getStockItem()->getIsInStock();
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @param int $storeId
+     * @return float
+     */
     private function getCombinedStock(ExportEntity $entity, int $storeId): float
+    {
+        $stockQuantities = $this->getStockQuantities($entity);
+
+        switch ($this->config->getStockCalculation($storeId)) {
+            case StockCalculation::OPTION_MAX:
+                return max($stockQuantities);
+            case StockCalculation::OPTION_MIN:
+                return min($stockQuantities);
+            case StockCalculation::OPTION_SUM:
+            default:
+                return array_sum($stockQuantities);
+        }
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @return float[]
+     */
+    private function getStockQuantities(ExportEntity $entity)
     {
         $stockQty = [];
         foreach ($entity->getExportChildren() as $child) {
             $stockQty[] = $child->getStockQty();
         }
 
-        switch ($this->config->getStockCalculation($storeId)) {
-            case StockCalculation::OPTION_MAX:
-                return max($stockQty);
-            case StockCalculation::OPTION_MIN:
-                return min($stockQty);
-            case StockCalculation::OPTION_SUM:
-            default:
-                return array_sum($stockQty);
-        }
+        return $stockQty;
     }
 }
