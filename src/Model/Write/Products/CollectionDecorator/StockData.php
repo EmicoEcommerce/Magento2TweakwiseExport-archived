@@ -219,7 +219,7 @@ class StockData implements DecoratorInterface
      * @param ExportEntity $entity
      * @return float[]
      */
-    private function getStockQuantities(ExportEntity $entity)
+    private function getStockQuantities(ExportEntity $entity): array
     {
         $stockQty = [];
         foreach ($entity->getExportChildren() as $child) {
