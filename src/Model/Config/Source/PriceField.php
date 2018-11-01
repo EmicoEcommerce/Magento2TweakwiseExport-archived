@@ -22,6 +22,15 @@ class PriceField implements ArrayInterface
     public function toOptionArray()
     {
         return [
+            ['value' => 'rule_price,final_price,price,min_price', 'label' => 'Rule Price -> Final Price -> Price -> Min price'],
+            ['value' => 'final_price,rule_price,price,min_price', 'label' => 'Final Price -> Rule Price -> Price -> Min price'],
+            ['value' => 'final_price,rule_price,price,max_price', 'label' => 'Final Price -> Rule Price -> Price -> Max price'],
+            ['value' => 'final_price,price,rule_price,min_price', 'label' => 'Final Price -> Price -> Rule Price -> Min price'],
+            ['value' => 'final_price,price,rule_price,max_price', 'label' => 'Final Price -> Price -> Rule Price -> Max price'],
+            ['value' => 'price,rule_price,final_price,min_price', 'label' => 'Price -> Rule Price -> Final Price -> Min price'],
+            ['value' => 'price,rule_price,final_price,max_price', 'label' => 'Price -> Rule Price -> Final Price -> Max price'],
+            ['value' => 'price,final_price,rule_price,min_price', 'label' => 'Price -> Final Price -> Rule Price -> Min price'],
+            ['value' => 'price,final_price,rule_price,max_price', 'label' => 'Price -> Final Price -> Rule Price -> Max price'],
             ['value' => 'final_price,price,min_price', 'label' => 'Final Price -> Price -> Min price'],
             ['value' => 'final_price,price,max_price', 'label' => 'Final Price -> Price -> Max price'],
             ['value' => 'price,final_price,min_price', 'label' => 'Price -> Final Price -> Min price'],
@@ -30,6 +39,7 @@ class PriceField implements ArrayInterface
             ['value' => 'final_price,max_price', 'label' => 'Final Price -> Max price'],
             ['value' => 'price,min_price', 'label' => 'Price -> Min price'],
             ['value' => 'price,max_price', 'label' => 'Price -> Max price'],
+            ['value' => 'rule_price', 'label' => 'Rule Price'],
             ['value' => 'final_price', 'label' => 'Final Price'],
             ['value' => 'price', 'label' => 'Price'],
             ['value' => 'min_price', 'label' => 'Min price'],

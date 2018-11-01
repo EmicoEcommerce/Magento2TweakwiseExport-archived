@@ -9,6 +9,7 @@ namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Customer\Model\Group;
 use Magento\Store\Model\StoreManagerInterface;
 use Zend_Db_Select;
 
@@ -46,11 +47,24 @@ class Price implements DecoratorInterface
      */
     public function decorate(Collection $collection)
     {
-        $collectionSelect = $this->collectionFactory->create()
+        $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
+
+        $collectionSelect = $this->collectionFactory->create();
+        $collectionSelect
             ->addAttributeToFilter('entity_id', ['in' => $collection->getIds()])
-            ->addPriceData(0, $this->storeManager->getStore($collection->getStoreId())->getWebsiteId())
+            ->addPriceData(0, $websiteId)
             ->getSelect()
             ->reset(Zend_Db_Select::COLUMNS)
+            ->joinLeft(
+                ['crpp' => $collectionSelect->getTable('catalogrule_product_price')],
+                sprintf(
+                    'e.entity_id = crpp.product_id AND crpp.website_id = %s AND crpp.customer_group_id = %s AND crpp.rule_date = %s',
+                    $collectionSelect->getConnection()->quote($websiteId),
+                    $collectionSelect->getConnection()->quote(Group::NOT_LOGGED_IN_ID),
+                    $collectionSelect->getConnection()->quote((new \DateTime())->format('Y-m-d'))
+                ),
+                ['rule_price' => 'crpp.rule_price']
+            )
             ->columns([
                 'entity_id',
                 'price' => 'price_index.price',
@@ -59,7 +73,7 @@ class Price implements DecoratorInterface
                 'min_price' => 'price_index.min_price',
                 'max_price' => 'price_index.max_price',
             ]);
-        $collectionQuery = $collectionSelect->query();
+        $collectionQuery = $collectionSelect->getSelect()->query();
 
         while ($row = $collectionQuery->fetch()) {
             $entityId = $row['entity_id'];
