@@ -230,29 +230,32 @@ class EavIterator implements IteratorAggregate
      */
     public function getIterator()
     {
-        $entityIds = $this->getEntityBatch();
-        try {
-            Profiler::start('eav-iterator::' . $this->entityCode);
-            $this->setEntityIds($entityIds);
-            $select = $this->createSelect();
-
-            Profiler::start('query');
+        while ($entityIds = $this->getEntityBatch()) {
             try {
-                /** @var MysqlStatement $stmt */
-                $stmt = $select->query();
-            } finally {
-                Profiler::stop('query');
-            }
+                Profiler::start('eav-iterator::' . $this->entityCode);
+                $this->setEntityIds($entityIds);
+                $select = $this->createSelect();
 
-            Profiler::start('loop');
-            try {
-                // Loop over all rows and combine them to one array for entity
-                yield $this->loopUnionRows($stmt);
+                Profiler::start('query');
+                try {
+                    /** @var MysqlStatement $stmt */
+                    $stmt = $select->query();
+                } finally {
+                    Profiler::stop('query');
+                }
+
+                Profiler::start('loop');
+                try {
+                    // Loop over all rows and combine them to one array for entity
+                    foreach ($this->loopUnionRows($stmt) as $result) {
+                        yield $result;
+                    }
+                } finally {
+                    Profiler::stop('loop');
+                }
             } finally {
-                Profiler::stop('loop');
+                Profiler::stop('eav-iterator::' . $this->entityCode);
             }
-        } finally {
-            Profiler::stop('eav-iterator::' . $this->entityCode);
         }
     }
 
