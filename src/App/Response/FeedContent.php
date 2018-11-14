@@ -43,12 +43,11 @@ class FeedContent {
     }
 
     /**
-     * Also renders feed to output stream
-     *
      * @return string
      */
     public function __toString()
     {
+        ob_start();
         $resource = fopen('php://output', 'wb');
         try {
             try {
@@ -59,7 +58,8 @@ class FeedContent {
         } finally {
             fclose($resource);
         }
-
-        return '';
+        $output = ob_get_contents();
+        ob_end_clean();
+        return $output;
     }
 }
