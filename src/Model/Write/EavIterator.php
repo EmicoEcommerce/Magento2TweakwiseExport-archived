@@ -269,6 +269,9 @@ class EavIterator implements IteratorAggregate
             $select = $this->getConnection()->select();
             $select->from($this->getEntityType()->getEntityTable());
             $select->reset('columns')->columns('entity_id');
+            if ($this->getEntityIds()) {
+                $select->where('entity_id IN (?)', $this->getEntityIds());
+            }
             $result = $select->query()->fetchAll();
             $result = array_column($result, 'entity_id');
             $this->entitySet[$storeId] = new \ArrayIterator(array_chunk($result, self::ENTITY_BATCH_SIZE));
