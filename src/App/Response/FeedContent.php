@@ -47,8 +47,7 @@ class FeedContent {
      */
     public function __toString()
     {
-        ob_start();
-        $resource = fopen('php://output', 'wb');
+        $resource = fopen('php://memory', 'wb');
         try {
             try {
                 $this->export->getFeed($resource);
@@ -56,10 +55,10 @@ class FeedContent {
                 $this->log->error(sprintf('Failed to get feed due to %s', $e->getMessage()));
             }
         } finally {
+            rewind($resource);
+            $output = \stream_get_contents($resource);
             fclose($resource);
         }
-        $output = ob_get_contents();
-        ob_end_clean();
         return $output;
     }
 }
