@@ -40,13 +40,18 @@ class CategoryReference extends AbstractDecorator
      */
     protected function getIndexTableName(int $storeId)
     {
-        $connection = $this->getConnection();
         $baseTableName = AbstractAction::MAIN_INDEX_TABLE;
-        $storeCategoryProductIndexTableName = sprintf('%s_store%s', $baseTableName, $storeId);
-        if ($connection->isTableExists($connection->getTableName($storeCategoryProductIndexTableName))) {
-            return $connection->getTableName($storeCategoryProductIndexTableName);
+        $categoryProductIndexTable = sprintf(
+            '%s_store%s',
+            $baseTableName,
+            $storeId
+        );
+        $categoryProductIndexTable = $this->getTableName($categoryProductIndexTable);
+
+        if ($this->getConnection()->isTableExists($categoryProductIndexTable)) {
+            return $categoryProductIndexTable;
         }
 
-        return $connection->getTableName($baseTableName);
+        return $this->getTableName($baseTableName);
     }
 }
