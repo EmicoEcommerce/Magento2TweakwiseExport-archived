@@ -66,9 +66,7 @@ class Export extends Action
             throw new NotFoundException(__('Page not found.'));
         }
 
-        $feedContent = (new FeedContent($this->export, $this->log))->__toString();
-
         $response->setHeader('Content-Type', 'text/xml');
-        $response->setContent($feedContent);
+        (new FeedContent($this->export, $this->log))->__toString();
     }
 }
