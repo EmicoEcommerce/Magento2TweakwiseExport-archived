@@ -262,7 +262,7 @@ class EavIterator implements IteratorAggregate
     /**
      * @return int[]
      */
-    protected function getEntityBatch(): ?array
+    protected function getEntityBatch()
     {
         $storeId = $this->storeId;
         if (!isset($this->entitySet[$storeId])) {
