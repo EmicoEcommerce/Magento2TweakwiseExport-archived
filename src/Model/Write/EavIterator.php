@@ -325,7 +325,7 @@ class EavIterator implements IteratorAggregate
         $selects = [];
         foreach ($attributes as $attributeKey => $attribute) {
             $attributeExpression = new Zend_Db_Expr($connection->quote($attributeKey));
-            $selects[] = $connection->select()
+            $select = $connection->select()
                 ->from(
                     $attribute->getBackendTable(),
                     [
@@ -335,6 +335,11 @@ class EavIterator implements IteratorAggregate
                         'value' => $attribute->getAttributeCode()
                     ]
                 );
+            if ($this->entityIds) {
+                $select->where("{$attribute->getBackendTable()}.entity_id IN (?)", $this->entityIds);
+            }
+
+            $selects[] = $select;
         }
 
         return $selects;
@@ -356,6 +361,10 @@ class EavIterator implements IteratorAggregate
             $select->where('store_id = 0 OR store_id = ?', $this->storeId);
         } else {
             $select->where('store_id = 0');
+        }
+
+        if ($this->entityIds) {
+            $select->where("{$table}.entity_id IN (?)", $this->entityIds);
         }
 
         return $select;
@@ -384,6 +393,10 @@ class EavIterator implements IteratorAggregate
             $select->where('store_id = 0 OR store_id = ?', $this->storeId);
         } else {
             $select->where('store_id = 0');
+        }
+
+        if ($this->entityIds) {
+            $select->where('entity_id IN (?)', $this->entityIds);
         }
 
         return $select;
@@ -438,12 +451,6 @@ class EavIterator implements IteratorAggregate
                 }
             } else {
                 $selects[] = $this->createEavAttributeGroupSelect($group, $attributes);
-            }
-        }
-
-        if ($this->entityIds) {
-            foreach ($selects as $select) {
-                $select->where('entity_id IN (?)', $this->entityIds);
             }
         }
 
