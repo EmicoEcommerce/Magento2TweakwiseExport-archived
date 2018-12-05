@@ -57,6 +57,10 @@ class Price implements DecoratorInterface
     }
 
     /**
+     * We split this according to version number. In 2.3.0 and beyond catalog rule prices are incorporated in the
+     * catalog_product_price_index table hence we do not need to join the rule table for this data. Alas this is not
+     * the case in < 2.3.0. At some point (when we drop support for old magento2 releases) we will remove this split.
+     *
      * @param Collection $collection
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Zend_Db_Statement_Exception
@@ -64,9 +68,9 @@ class Price implements DecoratorInterface
     public function decorate(Collection $collection)
     {
         if (version_compare($this->magentoInfo->getVersion(), '2.3.0', 'lt')) {
-            $this->decorateOld($collection);
+            $this->decorateLT230($collection);
         } else {
-            $this->decorateNew($collection);
+            $this->decorateGTEG230($collection);
         }
     }
 
@@ -75,7 +79,7 @@ class Price implements DecoratorInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Zend_Db_Statement_Exception
      */
-    protected function decorateNew(Collection $collection): void
+    protected function decorateGTEG230(Collection $collection): void
     {
         $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
         $priceSelect = $this->createPriceSelect($collection, $websiteId);
@@ -87,7 +91,7 @@ class Price implements DecoratorInterface
      * @throws \Zend_Db_Statement_Exception
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    protected function decorateOld(Collection $collection): void
+    protected function decorateLT230(Collection $collection): void
     {
         $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
         $priceSelect = $this->createPriceSelect($collection, $websiteId);
