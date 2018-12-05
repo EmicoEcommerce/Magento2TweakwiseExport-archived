@@ -49,7 +49,8 @@ class Price implements DecoratorInterface
         StoreManagerInterface $storeManager,
         Config $config,
         ProductMetadata $magentoInfo
-    ) {
+    )
+    {
         $this->collectionFactory = $collectionFactory;
         $this->storeManager = $storeManager;
         $this->config = $config;
@@ -96,15 +97,15 @@ class Price implements DecoratorInterface
         $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
         $priceSelect = $this->createPriceSelect($collection, $websiteId);
         $priceSelect->getSelect()->joinLeft(
-                ['crpp' => $priceSelect->getTable('catalogrule_product_price')],
-                sprintf(
-                    'e.entity_id = crpp.product_id AND crpp.website_id = %s AND crpp.customer_group_id = %s AND crpp.rule_date = %s',
-                    $priceSelect->getConnection()->quote($websiteId),
-                    $priceSelect->getConnection()->quote(Group::NOT_LOGGED_IN_ID),
-                    $priceSelect->getConnection()->quote((new \DateTime())->format('Y-m-d'))
-                ),
-                ['rule_price' => 'crpp.rule_price']
-            );
+            ['crpp' => $priceSelect->getTable('catalogrule_product_price')],
+            sprintf(
+                'e.entity_id = crpp.product_id AND crpp.website_id = %s AND crpp.customer_group_id = %s AND crpp.rule_date = %s',
+                $priceSelect->getConnection()->quote($websiteId),
+                $priceSelect->getConnection()->quote(Group::NOT_LOGGED_IN_ID),
+                $priceSelect->getConnection()->quote((new \DateTime())->format('Y-m-d'))
+            ),
+            ['rule_price' => 'crpp.rule_price']
+        );
 
         $this->updateProductCollection($priceSelect, $collection);
     }
@@ -161,7 +162,7 @@ class Price implements DecoratorInterface
     {
         $priceFields = $this->config->getPriceFields($storeId);
         foreach ($priceFields as $field) {
-            $value = isset($priceData[$field]) ? (float) $priceData[$field] : 0;
+            $value = isset($priceData[$field]) ? (float)$priceData[$field] : 0;
             if ($value > 0.00001) {
                 return $value;
             }
