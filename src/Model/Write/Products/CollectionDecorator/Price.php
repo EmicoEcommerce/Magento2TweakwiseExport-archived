@@ -83,8 +83,15 @@ class Price implements DecoratorInterface
     protected function decorateGTEQ230(Collection $collection): void
     {
         $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
-        $priceSelect = $this->createPriceSelect($collection, $websiteId);
-        $this->updateProductCollection($priceSelect, $collection);
+        $priceSelect = $this->createPriceSelect($collection->getIds(), $websiteId);
+
+        $priceQuery = $priceSelect->getSelect()->query();
+
+        while ($row = $priceQuery->fetch()) {
+            $entityId = $row['entity_id'];
+            $row['price'] = $this->getPriceValue($collection->getStoreId(), $row);
+            $collection->get($entityId)->setFromArray($row);
+        }
     }
 
     /**
@@ -95,7 +102,7 @@ class Price implements DecoratorInterface
     protected function decorateLT230(Collection $collection): void
     {
         $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
-        $priceSelect = $this->createPriceSelect($collection, $websiteId);
+        $priceSelect = $this->createPriceSelect($collection->getIds(), $websiteId);
         $priceSelect->getSelect()->joinLeft(
             ['crpp' => $priceSelect->getTable('catalogrule_product_price')],
             sprintf(
@@ -107,35 +114,29 @@ class Price implements DecoratorInterface
             ['rule_price' => 'crpp.rule_price']
         );
 
-        $this->updateProductCollection($priceSelect, $collection);
-    }
+        $priceQuery = $priceSelect->getSelect()->query();
 
-    /**
-     * @param ProductCollection $priceSelect
-     * @param Collection $collection
-     * @throws \Zend_Db_Statement_Exception
-     */
-    protected function updateProductCollection(ProductCollection $priceSelect, Collection $collection): void
-    {
-        $collectionQuery = $priceSelect->getSelect()->query();
-
-        while ($row = $collectionQuery->fetch()) {
+        while ($row = $priceQuery->fetch()) {
             $entityId = $row['entity_id'];
+            $entity = $collection->get($entityId);
+            if (!isset($row['rule_price']) && $entity->isComposite()) {
+                $row['rule_price'] = $row['min_price'];
+            }
             $row['price'] = $this->getPriceValue($collection->getStoreId(), $row);
-            $collection->get($entityId)->setFromArray($row);
+            $entity->setFromArray($row);
         }
     }
 
     /**
-     * @param Collection $collection
+     * @param array $ids
      * @param int $websiteId
      * @return ProductCollection
      */
-    protected function createPriceSelect(Collection $collection, int $websiteId): ProductCollection
+    protected function createPriceSelect(array $ids, int $websiteId): ProductCollection
     {
         $priceSelect = $this->collectionFactory->create();
         $priceSelect
-            ->addAttributeToFilter('entity_id', ['in' => $collection->getIds()])
+            ->addAttributeToFilter('entity_id', ['in' => $ids])
             ->addPriceData(0, $websiteId)
             ->getSelect()
             ->reset(Zend_Db_Select::COLUMNS)
