@@ -80,7 +80,7 @@ class Price implements DecoratorInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Zend_Db_Statement_Exception
      */
-    protected function decorateGTEQ230(Collection $collection): void
+    protected function decorateGTEQ230(Collection $collection)
     {
         $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
         $priceSelect = $this->createPriceSelect($collection->getIds(), $websiteId);
@@ -99,7 +99,7 @@ class Price implements DecoratorInterface
      * @throws \Zend_Db_Statement_Exception
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    protected function decorateLT230(Collection $collection): void
+    protected function decorateLT230(Collection $collection)
     {
         $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
         $priceSelect = $this->createPriceSelect($collection->getIds(), $websiteId);
