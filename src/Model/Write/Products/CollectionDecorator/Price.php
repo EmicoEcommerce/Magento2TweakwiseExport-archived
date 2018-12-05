@@ -70,7 +70,7 @@ class Price implements DecoratorInterface
         if (version_compare($this->magentoInfo->getVersion(), '2.3.0', 'lt')) {
             $this->decorateLT230($collection);
         } else {
-            $this->decorateGTEG230($collection);
+            $this->decorateGTEQ230($collection);
         }
     }
 
@@ -79,7 +79,7 @@ class Price implements DecoratorInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Zend_Db_Statement_Exception
      */
-    protected function decorateGTEG230(Collection $collection): void
+    protected function decorateGTEQ230(Collection $collection): void
     {
         $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
         $priceSelect = $this->createPriceSelect($collection, $websiteId);
