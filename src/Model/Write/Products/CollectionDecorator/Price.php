@@ -10,9 +10,7 @@ use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
-use Magento\Customer\Model\Group;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\App\ProductMetadata;
 use Zend_Db_Select;
 
 class Price implements DecoratorInterface
@@ -33,28 +31,20 @@ class Price implements DecoratorInterface
     private $config;
 
     /**
-     * @var ProductMetadata
-     */
-    private $magentoInfo;
-
-    /**
      * Price constructor.
      * @param CollectionFactory $collectionFactory
      * @param StoreManagerInterface $storeManager
      * @param Config $config
-     * @param ProductMetadata $magentoInfo
      */
     public function __construct(
         CollectionFactory $collectionFactory,
         StoreManagerInterface $storeManager,
-        Config $config,
-        ProductMetadata $magentoInfo
+        Config $config
     )
     {
         $this->collectionFactory = $collectionFactory;
         $this->storeManager = $storeManager;
         $this->config = $config;
-        $this->magentoInfo = $magentoInfo;
     }
 
     /**
@@ -68,20 +58,6 @@ class Price implements DecoratorInterface
      */
     public function decorate(Collection $collection)
     {
-        if (version_compare($this->magentoInfo->getVersion(), '2.3.0', 'lt')) {
-            $this->decorateLT230($collection);
-        } else {
-            $this->decorateGTEQ230($collection);
-        }
-    }
-
-    /**
-     * @param Collection $collection
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \Zend_Db_Statement_Exception
-     */
-    protected function decorateGTEQ230(Collection $collection)
-    {
         $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
         $priceSelect = $this->createPriceSelect($collection->getIds(), $websiteId);
 
@@ -91,39 +67,6 @@ class Price implements DecoratorInterface
             $entityId = $row['entity_id'];
             $row['price'] = $this->getPriceValue($collection->getStoreId(), $row);
             $collection->get($entityId)->setFromArray($row);
-        }
-    }
-
-    /**
-     * @param Collection $collection
-     * @throws \Zend_Db_Statement_Exception
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    protected function decorateLT230(Collection $collection)
-    {
-        $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
-        $priceSelect = $this->createPriceSelect($collection->getIds(), $websiteId);
-        $priceSelect->getSelect()->joinLeft(
-            ['crpp' => $priceSelect->getTable('catalogrule_product_price')],
-            sprintf(
-                'e.entity_id = crpp.product_id AND crpp.website_id = %s AND crpp.customer_group_id = %s AND crpp.rule_date = %s',
-                $priceSelect->getConnection()->quote($websiteId),
-                $priceSelect->getConnection()->quote(Group::NOT_LOGGED_IN_ID),
-                $priceSelect->getConnection()->quote((new \DateTime())->format('Y-m-d'))
-            ),
-            ['rule_price' => 'crpp.rule_price']
-        );
-
-        $priceQuery = $priceSelect->getSelect()->query();
-
-        while ($row = $priceQuery->fetch()) {
-            $entityId = $row['entity_id'];
-            $entity = $collection->get($entityId);
-            if (!isset($row['rule_price']) && $entity->isComposite()) {
-                $row['rule_price'] = $row['min_price'];
-            }
-            $row['price'] = $this->getPriceValue($collection->getStoreId(), $row);
-            $entity->setFromArray($row);
         }
     }
 
@@ -145,7 +88,6 @@ class Price implements DecoratorInterface
                     'entity_id',
                     'price' => 'price_index.price',
                     'final_price' => 'price_index.final_price',
-                    'old_price' => 'price_index.price',
                     'min_price' => 'price_index.min_price',
                     'max_price' => 'price_index.max_price'
                 ]
