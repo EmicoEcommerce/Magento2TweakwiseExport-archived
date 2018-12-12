@@ -109,7 +109,7 @@
 
                 <field id="price_field" translate="label,comment" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Price field</label>
-                    <comment>Select which field is used as "price" in Tweakwise, selection will select each attribute in order and return the first nonzero value. Prices are exported from price index table. If your configurable / bundle products do not have a price attribute filled this will be zero.</comment>
+                    <comment>Select which field is used as "price" in Tweakwise, selection will select each price field in order and return the first nonzero value. Prices are exported from price index table, note that catalogrule prices are available in field "min_price" so it could be that this value is lowed then for example "final_price". If your configurable / bundle products do not have a price attribute filled this will be zero.</comment>
                     <source_model>Emico\TweakwiseExport\Model\Config\Source\PriceField</source_model>
                     <depends>
                         <field id="enabled">1</field>

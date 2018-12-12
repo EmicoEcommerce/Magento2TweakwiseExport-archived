@@ -1,15 +1,15 @@
 <?php
 /**
  * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
+ * @copyright (c) Emico B.V. 2018
  */
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
-use Magento\Customer\Model\Group;
 use Magento\Store\Model\StoreManagerInterface;
 use Zend_Db_Select;
 
@@ -24,6 +24,7 @@ class Price implements DecoratorInterface
      * @var StoreManagerInterface
      */
     private $storeManager;
+
     /**
      * @var Config
      */
@@ -35,7 +36,11 @@ class Price implements DecoratorInterface
      * @param StoreManagerInterface $storeManager
      * @param Config $config
      */
-    public function __construct(CollectionFactory $collectionFactory, StoreManagerInterface $storeManager, Config $config)
+    public function __construct(
+        CollectionFactory $collectionFactory,
+        StoreManagerInterface $storeManager,
+        Config $config
+    )
     {
         $this->collectionFactory = $collectionFactory;
         $this->storeManager = $storeManager;
@@ -43,43 +48,52 @@ class Price implements DecoratorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * We split this according to version number. In 2.3.0 and beyond catalog rule prices are incorporated in the
+     * catalog_product_price_index table hence we do not need to join the rule table for this data. Alas this is not
+     * the case in < 2.3.0. At some point (when we drop support for old magento2 releases) we will remove this split.
+     *
+     * @param Collection $collection
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Zend_Db_Statement_Exception
      */
     public function decorate(Collection $collection)
     {
         $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
+        $priceSelect = $this->createPriceSelect($collection->getIds(), $websiteId);
 
-        $collectionSelect = $this->collectionFactory->create();
-        $collectionSelect
-            ->addAttributeToFilter('entity_id', ['in' => $collection->getIds()])
-            ->addPriceData(0, $websiteId)
-            ->getSelect()
-            ->reset(Zend_Db_Select::COLUMNS)
-            ->joinLeft(
-                ['crpp' => $collectionSelect->getTable('catalogrule_product_price')],
-                sprintf(
-                    'e.entity_id = crpp.product_id AND crpp.website_id = %s AND crpp.customer_group_id = %s AND crpp.rule_date = %s',
-                    $collectionSelect->getConnection()->quote($websiteId),
-                    $collectionSelect->getConnection()->quote(Group::NOT_LOGGED_IN_ID),
-                    $collectionSelect->getConnection()->quote((new \DateTime())->format('Y-m-d'))
-                ),
-                ['rule_price' => 'crpp.rule_price']
-            )
-            ->columns([
-                'entity_id',
-                'price' => 'price_index.price',
-                'final_price' => 'price_index.final_price',
-                'old_price' => 'price_index.price',
-                'min_price' => 'price_index.min_price',
-                'max_price' => 'price_index.max_price',
-            ]);
-        $collectionQuery = $collectionSelect->getSelect()->query();
+        $priceQuery = $priceSelect->getSelect()->query();
 
-        while ($row = $collectionQuery->fetch()) {
+        while ($row = $priceQuery->fetch()) {
             $entityId = $row['entity_id'];
             $row['price'] = $this->getPriceValue($collection->getStoreId(), $row);
             $collection->get($entityId)->setFromArray($row);
         }
+    }
+
+    /**
+     * @param array $ids
+     * @param int $websiteId
+     * @return ProductCollection
+     */
+    protected function createPriceSelect(array $ids, int $websiteId): ProductCollection
+    {
+        $priceSelect = $this->collectionFactory->create();
+        $priceSelect
+            ->addAttributeToFilter('entity_id', ['in' => $ids])
+            ->addPriceData(0, $websiteId)
+            ->getSelect()
+            ->reset(Zend_Db_Select::COLUMNS)
+            ->columns(
+                [
+                    'entity_id',
+                    'price' => 'price_index.price',
+                    'final_price' => 'price_index.final_price',
+                    'min_price' => 'price_index.min_price',
+                    'max_price' => 'price_index.max_price'
+                ]
+            );
+
+        return $priceSelect;
     }
 
     /**
@@ -91,12 +105,12 @@ class Price implements DecoratorInterface
     {
         $priceFields = $this->config->getPriceFields($storeId);
         foreach ($priceFields as $field) {
-            $value = (float) $priceData[$field];
+            $value = isset($priceData[$field]) ? (float)$priceData[$field] : 0;
             if ($value > 0.00001) {
                 return $value;
             }
         }
 
-        return 0.0;
+        return 0;
     }
 }
