@@ -105,6 +105,8 @@ class Categories implements WriterInterface
         $storeId = $store->getId();
         $storeRootCategoryId = (int) $store->getRootCategoryId();
         $this->iterator->setStoreId($storeId);
+        // Purge iterator entity ids for the new store
+        $this->iterator->setEntityIds([]);
 
         foreach ($this->iterator as $data) {
             // Skip magento root since we injected our fake root
