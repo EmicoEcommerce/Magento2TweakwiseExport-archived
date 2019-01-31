@@ -42,14 +42,15 @@ class ExportEntityChild extends ExportEntity
     }
 
     /**
+     * @param bool $includeOutOfStock
      * @return bool
      */
-    protected function shouldExportByStock(): bool
+    public function shouldExport($includeOutOfStock = false): bool
     {
         if ($this->config->isOutOfStockChildren($this->storeId)) {
-            return true;
+            $includeOutOfStock = true;
         }
 
-        return parent::shouldExportByStock();
+        return parent::shouldExport($includeOutOfStock);
     }
 }

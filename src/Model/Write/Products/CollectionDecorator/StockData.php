@@ -176,14 +176,15 @@ class StockData implements DecoratorInterface
             return (int) $this->isInStock($entity) * 100;
         }
 
-        $childrenCount = \count($entity->getExportChildren());
+        $children = $entity->getExportChildrenIncludeOutOfStock();
+        $childrenCount = \count($children);
         // Just to be sure we dont divide by 0, we really should not get here
         if ($childrenCount <= 0) {
             return (int) $this->isInStock($entity) * 100;
         }
 
-        $inStockchildrenCount = \count(\array_filter($entity->getExportChildren(), [$this, 'isInStock']));
-        return ($inStockchildrenCount / $childrenCount) * 100;
+        $inStockchildrenCount = \count(\array_filter($children, [$this, 'isInStock']));
+        return round(($inStockchildrenCount / $childrenCount) * 100, 2);
     }
 
     /**
@@ -192,7 +193,17 @@ class StockData implements DecoratorInterface
      */
     private function isInStock(ExportEntity $entity): bool
     {
-        return (bool) $entity->getStockItem()->getIsInStock();
+        $stockItem = $entity->getStockItem();
+
+        if (!$stockItem) {
+            return true;
+        }
+
+        if (!$stockItem->getManageStock()) {
+            return true;
+        }
+
+        return $stockItem->getIsInStock() && $stockItem->getQty() > $stockItem->getMinQty();
     }
 
     /**

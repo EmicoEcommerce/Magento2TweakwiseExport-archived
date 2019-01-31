@@ -245,14 +245,19 @@ class ExportEntity
     /**
      * @return bool
      */
-    public function shouldExport(): bool
+    public function shouldExport($includeOutOfStock = false): bool
     {
-        return $this->shouldExportByStatus() &&
+        $shouldExport = $this->shouldExportByStatus() &&
             $this->shouldExportByWebsite() &&
             $this->shouldExportByVisibility() &&
-            $this->shouldExportByStock() &&
             $this->shouldExportByComposite() &&
             $this->shouldExportByNameAttribute();
+
+        if (!$includeOutOfStock) {
+            $shouldExport = $shouldExport && $this->shouldExportByStock();
+        }
+
+        return $shouldExport;
     }
 
     /**
@@ -378,6 +383,21 @@ class ExportEntity
         }
 
         return $result;
+    }
+
+    /**
+     * @return ExportEntityChild[]
+     */
+    public function getExportChildrenIncludeOutOfStock(): array
+    {
+        $children = [];
+        foreach ($this->children as $child) {
+            if ($child->shouldExport(true)) {
+                $children[] = $child;
+            }
+        }
+
+        return $children;
     }
 
     /**
