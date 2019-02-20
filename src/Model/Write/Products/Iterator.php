@@ -19,11 +19,6 @@ use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 class Iterator extends EavIterator
 {
     /**
-     * Collection size to fetch extra product data.
-     */
-    const BATCH_SIZE = 500;
-
-    /**
      * @var ExportEntityFactory
      */
     private $entityFactory;
@@ -81,7 +76,7 @@ class Iterator extends EavIterator
 
             $batch->add($entity);
 
-            if ($batch->count() === self::BATCH_SIZE) {
+            if ($batch->count() === self::ENTITY_BATCH_SIZE) {
                 // After PHP7+ we can use yield from
                 foreach ($this->processBatch($batch) as $processedEntity) {
                     yield $processedEntity;

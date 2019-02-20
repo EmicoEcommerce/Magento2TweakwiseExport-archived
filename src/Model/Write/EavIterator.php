@@ -26,7 +26,7 @@ use Zend_Db_Select;
 
 class EavIterator implements IteratorAggregate
 {
-    const ENTITY_BATCH_SIZE = 500;
+    public const ENTITY_BATCH_SIZE = 500;
 
     /**
      * @var string
