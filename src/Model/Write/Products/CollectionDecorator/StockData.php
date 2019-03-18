@@ -214,6 +214,9 @@ class StockData implements DecoratorInterface
     private function getCombinedStock(ExportEntity $entity, int $storeId): float
     {
         $stockQuantities = $this->getStockQuantities($entity);
+        if (empty($stockQuantities)) {
+            return 0;
+        }
 
         switch ($this->config->getStockCalculation($storeId)) {
             case StockCalculation::OPTION_MAX:
