@@ -391,9 +391,11 @@ class ExportEntity
     public function getExportChildrenIncludeOutOfStock(): array
     {
         $children = [];
-        foreach ($this->children as $child) {
-            if ($child->shouldExport(true)) {
-                $children[] = $child;
+        if (!empty($this->children)) {
+            foreach ($this->children as $child) {
+                if ($child->shouldExport(true)) {
+                    $children[] = $child;
+                }
             }
         }
 
