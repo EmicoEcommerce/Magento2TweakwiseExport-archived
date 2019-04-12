@@ -419,10 +419,10 @@ class ExportEntity
     }
 
     /**
-     * @return StockItemInterface
+     * @return null|StockItemInterface
      */
-    public function getStockItem(): StockItemInterface
-    {
+    public function getStockItem()    
+    {        
         return $this->stockItem;
     }
 
