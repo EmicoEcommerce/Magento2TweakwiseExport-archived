@@ -19,6 +19,13 @@ use SplFileInfo;
 class Helper
 {
     /**
+     * Apparently some of magento core attributes are marked as static
+     * but their values are not saved in table catalog_product_entity
+     * we cannot export these attributes.
+     */
+    const ATTRIBUTE_BLACKLIST = ['category_ids'];
+
+    /**
      * @var ProductMetadataInterface
      */
     private $productMetadata;
@@ -76,13 +83,29 @@ class Helper
      */
     public function shouldExportAttribute(Attribute $attribute)
     {
-        return
-            $attribute->getUsedInProductListing() ||
-            $attribute->getIsFilterable() ||
-            $attribute->getIsFilterableInSearch() ||
-            $attribute->getIsSearchable() ||
-            $attribute->getIsVisibleInAdvancedSearch() ||
-            $attribute->getUsedForSortBy();
+        $isBlackListed = $this->isAttributeBlacklisted($attribute);
+        return !$isBlackListed &&
+            (
+                $attribute->getUsedInProductListing() ||
+                $attribute->getIsFilterable() ||
+                $attribute->getIsFilterableInSearch() ||
+                $attribute->getIsSearchable() ||
+                $attribute->getIsVisibleInAdvancedSearch() ||
+                $attribute->getUsedForSortBy()
+            );
+    }
+
+    /**
+     * @param Attribute $attribute
+     * @return bool
+     */
+    protected function isAttributeBlacklisted(Attribute $attribute)
+    {
+        return \in_array(
+            $attribute->getAttributeCode(),
+            self::ATTRIBUTE_BLACKLIST,
+            true
+        );
     }
 
     /**
