@@ -67,7 +67,7 @@ class Helper
      */
     public function getStoreId(int $id): int
     {
-        return (int) substr($id, 5);
+        return (int)substr($id, 5);
     }
 
     /**
@@ -76,19 +76,13 @@ class Helper
      */
     public function shouldExportAttribute(Attribute $attribute)
     {
-        if (
-            !$attribute->getUsedInProductListing() &&
-            !$attribute->getIsFilterable() &&
-            !$attribute->getIsFilterableInSearch() &&
-            !$attribute->getIsFilterableInGrid() &&
-            !$attribute->getIsSearchable() &&
-            !$attribute->getIsVisibleInAdvancedSearch() &&
-            !$attribute->getUsedForSortBy()
-        ) {
-            return false;
-        }
-
-        return true;
+        return
+            $attribute->getUsedInProductListing() ||
+            $attribute->getIsFilterable() ||
+            $attribute->getIsFilterableInSearch() ||
+            $attribute->getIsSearchable() ||
+            $attribute->getIsVisibleInAdvancedSearch() ||
+            $attribute->getUsedForSortBy();
     }
 
     /**
@@ -136,12 +130,14 @@ class Helper
     {
         $startDate = $this->getFeedExportStartDate();
         if (!$this->config->isRealTime() && $startDate) {
-            return sprintf(__('Running, started on %s.'), $this->localDate->formatDate($startDate, IntlDateFormatter::MEDIUM, true));
+            return sprintf(__('Running, started on %s.'),
+                $this->localDate->formatDate($startDate, IntlDateFormatter::MEDIUM, true));
         }
 
         $finishedDate = $this->getLastFeedExportDate();
         if ($finishedDate) {
-            return sprintf(__('Finished on %s.'), $this->localDate->formatDate($finishedDate, IntlDateFormatter::MEDIUM, true));
+            return sprintf(__('Finished on %s.'),
+                $this->localDate->formatDate($finishedDate, IntlDateFormatter::MEDIUM, true));
         }
 
         return __('Export never triggered.');
