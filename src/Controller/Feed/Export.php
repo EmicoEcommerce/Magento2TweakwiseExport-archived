@@ -12,12 +12,13 @@ use Emico\TweakwiseExport\App\Response\FeedContent;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Export as ExportModel;
 use Emico\TweakwiseExport\Model\Logger;
-use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\ActionInterface;
 use Magento\Framework\App\Response\Http as HttpResponse;
 use Magento\Framework\Exception\NotFoundException;
+use Magento\MediaStorage\Model\File\Storage\ResponseFactory;
 
-class Export extends Action
+class Export implements ActionInterface
 {
     /**
      * @var Config
@@ -35,19 +36,31 @@ class Export extends Action
     private $log;
 
     /**
+     * @var ResponseFactory
+     */
+    private $responseFactory;
+
+    /**
+     * @var Context
+     */
+    private $context;
+
+    /**
      * Export constructor.
      *
      * @param Context $context
      * @param Config $config
      * @param ExportModel $export
      * @param Logger $log
+     * @param Response $response
      */
-    public function __construct(Context $context, Config $config, ExportModel $export, Logger $log)
+    public function __construct(Context $context, Config $config, ExportModel $export, Logger $log, ResponseFactory $responseFactory)
     {
-        parent::__construct($context);
         $this->config = $config;
         $this->export = $export;
         $this->log = $log;
+        $this->responseFactory = $responseFactory;
+        $this->context = $context;
     }
 
     /**
@@ -55,18 +68,20 @@ class Export extends Action
      */
     public function execute()
     {
-        $requestKey = $this->getRequest()->getParam('key');
+        $requestKey = $this->context->getRequest()->getParam('key');
         $configKey = $this->config->getKey();
-        if ($requestKey != $configKey) {
+        if ($requestKey !== $configKey) {
             throw new NotFoundException(__('Page not found.'));
         }
 
-        $response = $this->getResponse();
+        $response = $this->context->getResponse();
         if (!$response instanceof HttpResponse) {
             throw new NotFoundException(__('Page not found.'));
         }
 
         $response->setHeader('Content-Type', 'text/xml');
         (new FeedContent($this->export, $this->log))->__toString();
+        return $this->responseFactory->create()
+            ->setHeader('Cache-Control', 'no-cache');
     }
 }
