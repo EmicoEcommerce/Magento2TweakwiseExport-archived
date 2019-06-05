@@ -18,12 +18,20 @@ use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 class Iterator extends EavIterator
 {
     /**
+     * @var array
+     */
+    protected $entityBatchOrder = [
+        'level',
+        'path'
+    ];
+
+    /**
      * {@inheritDoc}
      */
     protected $eavSelectOrder = [
         'path',
         'entity_id',
-        'store_id',
+        'store_id'
     ];
 
     /**
