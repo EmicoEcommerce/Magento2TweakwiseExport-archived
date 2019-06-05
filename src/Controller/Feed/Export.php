@@ -14,7 +14,6 @@ use Emico\TweakwiseExport\Model\Export as ExportModel;
 use Emico\TweakwiseExport\Model\Logger;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ActionInterface;
-use Magento\Framework\App\Response\Http as HttpResponse;
 use Magento\Framework\Exception\NotFoundException;
 use Magento\MediaStorage\Model\File\Storage\ResponseFactory;
 
@@ -52,10 +51,15 @@ class Export implements ActionInterface
      * @param Config $config
      * @param ExportModel $export
      * @param Logger $log
-     * @param Response $response
+     * @param ResponseFactory $responseFactory
      */
-    public function __construct(Context $context, Config $config, ExportModel $export, Logger $log, ResponseFactory $responseFactory)
-    {
+    public function __construct(
+        Context $context,
+        Config $config,
+        ExportModel $export,
+        Logger $log,
+        ResponseFactory $responseFactory
+    ) {
         $this->config = $config;
         $this->export = $export;
         $this->log = $log;
@@ -74,13 +78,8 @@ class Export implements ActionInterface
             throw new NotFoundException(__('Page not found.'));
         }
 
-        $response = $this->context->getResponse();
-        if (!$response instanceof HttpResponse) {
-            throw new NotFoundException(__('Page not found.'));
-        }
-
-        $response->setHeader('Content-Type', 'text/xml');
         (new FeedContent($this->export, $this->log))->__toString();
+
         return $this->responseFactory->create()
             ->setHeader('Cache-Control', 'no-cache');
     }
