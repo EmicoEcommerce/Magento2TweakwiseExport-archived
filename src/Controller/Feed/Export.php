@@ -68,7 +68,15 @@ class Export implements ActionInterface
     }
 
     /**
-     * {@inheritdoc}
+     * We return an instance of NotCacheableInterface
+     * to make sure that sendVary does not get triggered
+     * as that would result in a "headers already sent exception"
+     *
+     * @see    \Magento\Framework\App\PageCache\NotCacheableInterface
+     * @see    \Magento\PageCache\Model\App\Response\HttpPlugin
+     * @see    \Magento\MediaStorage\Model\File\Storage\Response
+     * @throws NotFoundException
+     * @return \Magento\MediaStorage\Model\File\Storage\Response
      */
     public function execute()
     {
