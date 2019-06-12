@@ -82,6 +82,11 @@ class EavIterator implements IteratorAggregate
     ];
 
     /**
+     * @var array
+     */
+    protected $entityBatchOrder = [];
+
+    /**
      * EavIterator constructor.
      *
      * @param Helper $helper
@@ -218,9 +223,7 @@ class EavIterator implements IteratorAggregate
             ->select()
             ->union($this->getAttributeSelects());
 
-        foreach ($this->eavSelectOrder as $field) {
-            $select->order($field);
-        }
+        $this->addEavSelectOrder($select);
 
         return $select;
     }
@@ -269,9 +272,12 @@ class EavIterator implements IteratorAggregate
             $select = $this->getConnection()->select();
             $select->from($this->getEntityType()->getEntityTable());
             $select->reset('columns')->columns('entity_id');
+            $this->addEntityBatchOrder($select);
+
             if ($this->getEntityIds()) {
                 $select->where('entity_id IN (?)', $this->getEntityIds());
             }
+
             $result = $select->query()->fetchAll();
             $result = array_column($result, 'entity_id');
             $this->entitySet[$storeId] = new \ArrayIterator(array_chunk($result, self::ENTITY_BATCH_SIZE));
@@ -280,6 +286,27 @@ class EavIterator implements IteratorAggregate
         $return = $this->entitySet[$storeId]->current();
         $this->entitySet[$storeId]->next();
         return $return;
+    }
+
+    /**
+     * Add order fields
+     * @param Zend_Db_Select $select
+     */
+    protected function addEavSelectOrder(\Zend_Db_Select $select)
+    {
+        foreach ($this->eavSelectOrder as $order) {
+            $select->order($order);
+        }
+    }
+
+    /**
+     * @param Zend_Db_Select $select
+     */
+    protected function addEntityBatchOrder(\Zend_Db_Select $select)
+    {
+        foreach ($this->entityBatchOrder as $order) {
+            $select->order($order);
+        }
     }
 
     /**
