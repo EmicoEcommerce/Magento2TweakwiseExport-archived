@@ -6,6 +6,7 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
+use Emico\TweakwiseExport\Exception\InvalidArgumentException;
 use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\EavIteratorFactory;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
@@ -269,7 +270,11 @@ class Children extends AbstractDecorator
             $child = $this->childEntities->get($childId);
         }
 
-        $collection->get($parentId)->addChild($child);
+        try {
+            $collection->get($parentId)->addChild($child);
+        } catch (InvalidArgumentException $exception) {
+            // no implementation, parent was not found
+        }
     }
 
     /**

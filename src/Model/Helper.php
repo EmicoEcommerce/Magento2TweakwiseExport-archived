@@ -34,6 +34,7 @@ class Helper
      * @var Config
      */
     private $config;
+
     /**
      * @var TimezoneInterface
      */
