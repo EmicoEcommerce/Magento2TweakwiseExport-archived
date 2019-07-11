@@ -9,6 +9,7 @@ namespace Emico\TweakwiseExport\Model\Write\Products;
 use ArrayIterator;
 use Countable;
 use Emico\TweakwiseExport\Exception\InvalidArgumentException;
+use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use IteratorAggregate;
 
 class Collection implements IteratorAggregate, Countable
@@ -121,12 +122,29 @@ class Collection implements IteratorAggregate, Countable
     {
         $result = [];
         foreach ($this->getExported() as $entity) {
-            $result[$entity->getId()] = $entity;
+            $result[$entity->getId()] = 1;
 
             foreach ($entity->getExportChildren() as $child) {
-                $result[$child->getId()] = $child;
+                $result[$child->getId()] = 1;
             }
         }
         return array_keys($result);
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllSkus(): array
+    {
+        $skus = [];
+        /** @var ExportEntity $entity */
+        foreach ($this->getExported() as $entity) {
+            $skus[] = $entity->getAttribute('sku', false);
+
+            foreach ($entity->getExportChildren() as $child) {
+                $skus[] = $child->getAttribute('sku', false);
+            }
+        }
+        return array_keys(array_flip($skus));
     }
 }
