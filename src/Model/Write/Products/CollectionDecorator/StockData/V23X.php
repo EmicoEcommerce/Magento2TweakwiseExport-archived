@@ -6,42 +6,29 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData;
 
-
 use Emico\TweakwiseExport\Model\Config;
-use Emico\TweakwiseExport\Model\Config\Source\StockCalculation;
 use Emico\TweakwiseExport\Model\StockItem;
-use Emico\TweakwiseExport\Model\Write\Products\Collection;
-use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\DecoratorInterface;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\InventoryApi\Api\Data\SourceItemInterface;
-use Magento\InventoryApi\Api\SourceItemRepositoryInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
+use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\AbstractDecorator;
+use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
+use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
+use Magento\InventoryApi\Api\Data\SourceInterface;
+use Magento\InventoryApi\Api\Data\SourceItemInterface;
+use Magento\InventoryApi\Api\GetSourcesAssignedToStockOrderedByPriorityInterface;
+use Magento\InventorySalesApi\Api\StockResolverInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
-
-class V23X implements DecoratorInterface
+/**
+ * Class V23X
+ * @package Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData
+ */
+class V23X extends AbstractDecorator
 {
-
-    /**
-     * @var SourceItemRepositoryInterface
-     */
-    private $sourceItemRepository;
-
-    /**
-     * @var SearchCriteriaBuilder
-     */
-    private $criteriaBuilder;
-
     /**
      * @var Config
      */
     private $config;
-
-    /**
-     * @var SourceItemInterfaceFactory
-     */
-    private $sourceItemFactory;
 
     /**
      * @var TweakwiseStockItemFactory
@@ -54,26 +41,39 @@ class V23X implements DecoratorInterface
     private $storeManager;
 
     /**
+     * @var StockResolverInterface
+     */
+    private $stockResolver;
+
+    /**
+     * @var GetSourcesAssignedToStockOrderedByPriorityInterface
+     */
+    private $stockSourceProvider;
+
+    /**
      * StockData constructor.
      *
-     * @param SourceItemRepositoryInterface $sourceItemRepository
-     * @param SearchCriteriaBuilder $criteriaBuilder
-     * @param StockItemInterfaceFactory $stockItemFactory
+     * @param DbContext $dbContext
+     * @param GetSourcesAssignedToStockOrderedByPriorityInterface $stockSourceProvider
+     * @param TweakwiseStockItemFactory $tweakwiseStockItemFactory
+     * @param StoreManagerInterface $storeManager
+     * @param StockResolverInterface $stockResolver
      * @param Config $config
      */
     public function __construct(
-        SourceItemRepositoryInterface $sourceItemRepository,
-        SearchCriteriaBuilder $criteriaBuilder,
+        DbContext $dbContext,
+        GetSourcesAssignedToStockOrderedByPriorityInterface $stockSourceProvider,
         TweakwiseStockItemFactory $tweakwiseStockItemFactory,
         StoreManagerInterface $storeManager,
+        StockResolverInterface $stockResolver,
         Config $config
-    )
-    {
-        $this->sourceItemRepository = $sourceItemRepository;
-        $this->criteriaBuilder = $criteriaBuilder;
-        $this->storeManager = $storeManager;
-        $this->config = $config;
+    ) {
+        parent::__construct($dbContext);
+        $this->stockSourceProvider = $stockSourceProvider;
         $this->tweakwiseStockItemFactory = $tweakwiseStockItemFactory;
+        $this->storeManager = $storeManager;
+        $this->stockResolver = $stockResolver;
+        $this->config = $config;
     }
 
     /**
@@ -88,7 +88,6 @@ class V23X implements DecoratorInterface
 
         $this->addStockItems($storeId, $collection);
         foreach ($toBeCombinedEntities as $item) {
-            $this->combineStock($item, $storeId);
             $this->addStockPercentage($item, $storeId);
         }
     }
@@ -96,14 +95,17 @@ class V23X implements DecoratorInterface
     /**
      * @param int $storeId
      * @param Collection $collection
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Zend_Db_Statement_Exception
      */
     private function addStockItems(int $storeId, Collection $collection)
     {
         if ($collection->count() === 0) {
             return;
         }
-        $storeCode = $this->storeManager->getStore($collection->getStoreId())->getCode();
-        $stockItemMap = $this->getStockItemMap($collection->getAllSkus(), $storeCode);
+
+        $stockItemMap = $this->getStockItemMap($collection->getAllSkus(), $storeId);
         foreach ($collection as $entity) {
             $this->assignStockItem($stockItemMap, $storeId, $entity);
 
@@ -136,41 +138,117 @@ class V23X implements DecoratorInterface
     }
 
     /**
-     * @param array $entityIds
-     * @return SourceItemInterface[]
+     * @param array $skus
+     * @param int $storeId
+     * @return StockItem[]
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Zend_Db_Statement_Exception
      */
-    private function getStockItemMap(array $skus, string $storeCode): array
+    private function getStockItemMap(array $skus, int $storeId): array
     {
         if (\count($skus) === 0) {
             return [];
         }
 
-        $criteria = $this->criteriaBuilder
-            ->addFilter('sku', $skus, 'in')
-            ->addFilter('source_code', $storeCode)
-            ->create();
-        $items = $this->sourceItemRepository->getList($criteria)->getItems();
+        $sourceCodes = $this->getSourceCodesForStore($storeId);
+        $stockId = $this->getStockIdForStoreId($storeId);
+
+        $dbConnection = $this->getConnection();
+
+        $sourceItemTableName = $this->getTableName('inventory_source_item');
+        $reservationTableName = $this->getTableName('inventory_reservation');
+        $productTableName = $this->getTableName('catalog_product_entity');
+        $stockItemTableName = $this->getTableName('cataloginventory_stock_item');
+
+        $select = $dbConnection
+            ->select()
+            ->from($sourceItemTableName)
+            ->where("$sourceItemTableName.sku IN (?)", $skus)
+            ->where("$sourceItemTableName.source_code IN (?)", $sourceCodes)
+            ->reset('columns')
+            ->joinLeft(
+                $reservationTableName,
+                "$reservationTableName.sku = $sourceItemTableName.sku AND $reservationTableName.stock_id = $stockId",
+                []
+            )
+            ->join(
+                $productTableName,
+                "$sourceItemTableName.sku = $productTableName.sku",
+                []
+            )
+            ->join(
+                $stockItemTableName,
+                "$productTableName.entity_id = $stockItemTableName.product_id AND $stockItemTableName.stock_id = $stockId",
+                [
+                    'backorders',
+                    'min_sale_qty'
+                ]
+            )
+            ->columns([
+                "$sourceItemTableName.sku",
+                'qty' => new \Zend_Db_Expr("$sourceItemTableName.quantity + IFNULL(SUM(`$reservationTableName`.`quantity`), 0)"),
+                'is_in_stock' => "$sourceItemTableName.status"
+            ])
+            ->group(new \Zend_Db_Expr("`$sourceItemTableName`.`sku`"));
+        $result = $select->query();
 
         $map = [];
-        /** @var SourceItemInterface $item */
-        foreach ($items as $item) {
-            $sku = $item->getSku();
-            $tweakwiseStockItem = $this->getTweakwiseStockItem($item);
-            $map[$sku] = $tweakwiseStockItem;
+        while ($row = $result->fetch()) {
+            $map[$row['sku']] = $this->getTweakwiseStockItem($row);
         }
         return $map;
+    }
+
+    /**
+     * @param int $storeId
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    protected function getSourceCodesForStore(int $storeId)
+    {
+        $stockId = $this->getStockIdForStoreId($storeId);
+        $sourceModels = $this->stockSourceProvider->execute($stockId);
+
+        $sourceCodeMapper = function (SourceInterface $source) {
+            return $source->getSourceCode();
+        };
+
+        return array_map($sourceCodeMapper, $sourceModels);
+    }
+
+    /**
+     * @param int $storeId
+     * @return int|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    protected function getStockIdForStoreId(int $storeId)
+    {
+        $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
+        $websiteCode = $this->storeManager->getWebsite($websiteId)->getCode();
+        return $this->stockResolver->execute('website', $websiteCode)->getStockId();
     }
 
     /**
      * @param SourceItemInterface $item
      * @return StockItem
      */
-    protected function getTweakwiseStockItem(SourceItemInterface $item)
+    protected function getTweakwiseStockItem(array $item)
     {
         /** @var \Emico\TweakwiseExport\Model\StockItem $tweakwiseStockItem */
         $tweakwiseStockItem = $this->tweakwiseStockItemFactory->create();
-        $tweakwiseStockItem->setQty((int)$item->getQuantity());
-        $tweakwiseStockItem->setIsInStock((int)$item->getStatus());
+        $qty = (int)$item['qty'];
+        $tweakwiseStockItem->setQty($qty);
+        $isInStock = (int) (
+            $item['backorders'] ||
+            (
+                $qty >= (int)$item['min_sale_qty'] &&
+                (int)$item['is_in_stock'] &&
+                $qty > 0
+            )
+        );
+        $tweakwiseStockItem->setIsInStock($isInStock);
 
         return $tweakwiseStockItem;
     }
@@ -178,21 +256,6 @@ class V23X implements DecoratorInterface
     /**
      * @param ExportEntity $entity
      * @param int $storeId
-     */
-    private function combineStock(ExportEntity $entity, int $storeId)
-    {
-        if (!$entity->isComposite()) {
-            return;
-        }
-
-        $combinedStock = $this->getCombinedStock($entity, $storeId);
-        $entity->getStockItem()->setQty($combinedStock);
-    }
-
-    /**
-     * @param ExportEntity $entity
-     * @param int $storeId
-     * @return float
      */
     private function addStockPercentage(ExportEntity $entity, int $storeId)
     {
@@ -220,8 +283,8 @@ class V23X implements DecoratorInterface
             return (int) $this->isInStock($entity) * 100;
         }
 
-        $inStockchildrenCount = \count(\array_filter($children, [$this, 'isInStock']));
-        return round(($inStockchildrenCount / $childrenCount) * 100, 2);
+        $inStockChildrenCount = \count(\array_filter($children, [$this, 'isInStock']));
+        return round(($inStockChildrenCount / $childrenCount) * 100, 2);
     }
 
     /**
@@ -231,48 +294,6 @@ class V23X implements DecoratorInterface
     private function isInStock(ExportEntity $entity): bool
     {
         $stockItem = $entity->getStockItem();
-
-        if (!$stockItem) {
-            return true;
-        }
-
-        return $stockItem->getIsInStock();
-    }
-
-    /**
-     * @param ExportEntity $entity
-     * @param int $storeId
-     * @return float
-     */
-    private function getCombinedStock(ExportEntity $entity, int $storeId): float
-    {
-        $stockQuantities = $this->getStockQuantities($entity);
-        if (empty($stockQuantities)) {
-            return 0;
-        }
-
-        switch ($this->config->getStockCalculation($storeId)) {
-            case StockCalculation::OPTION_MAX:
-                return max($stockQuantities);
-            case StockCalculation::OPTION_MIN:
-                return min($stockQuantities);
-            case StockCalculation::OPTION_SUM:
-            default:
-                return array_sum($stockQuantities);
-        }
-    }
-
-    /**
-     * @param ExportEntity $entity
-     * @return float[]
-     */
-    private function getStockQuantities(ExportEntity $entity): array
-    {
-        $stockQty = [];
-        foreach ($entity->getExportChildren() as $child) {
-            $stockQty[] = $child->getStockQty();
-        }
-
-        return $stockQty;
+        return (int)(!$stockItem || $stockItem->getIsInStock());
     }
 }

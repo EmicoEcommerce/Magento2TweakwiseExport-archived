@@ -50,4 +50,20 @@ class StockItem
     {
         $this->isInStock = $isInStock;
     }
+
+    /**
+     * @param int $qty
+     */
+    public function updateQty(int $qty)
+    {
+        $this->qty += $qty;
+    }
+
+    /**
+     * @param int $isInStock
+     */
+    public function updateIsInStock(int $isInStock)
+    {
+        $this->isInStock = max($this->isInStock, $isInStock);
+    }
 }

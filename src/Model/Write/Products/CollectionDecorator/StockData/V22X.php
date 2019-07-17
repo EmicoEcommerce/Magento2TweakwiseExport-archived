@@ -179,7 +179,6 @@ class V22X implements DecoratorInterface
     /**
      * @param ExportEntity $entity
      * @param int $storeId
-     * @return float
      */
     private function addStockPercentage(ExportEntity $entity, int $storeId)
     {
@@ -207,8 +206,8 @@ class V22X implements DecoratorInterface
             return (int) $this->isInStock($entity) * 100;
         }
 
-        $inStockchildrenCount = \count(\array_filter($children, [$this, 'isInStock']));
-        return round(($inStockchildrenCount / $childrenCount) * 100, 2);
+        $inStockChildrenCount = \count(\array_filter($children, [$this, 'isInStock']));
+        return round(($inStockChildrenCount / $childrenCount) * 100, 2);
     }
 
     /**
@@ -218,12 +217,7 @@ class V22X implements DecoratorInterface
     private function isInStock(ExportEntity $entity): bool
     {
         $stockItem = $entity->getStockItem();
-
-        if (!$stockItem) {
-            return true;
-        }
-
-        return $stockItem->getIsInStock();
+        return !$stockItem || $stockItem->getIsInStock();
     }
 
     /**
