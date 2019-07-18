@@ -44,7 +44,7 @@ class StockData implements DecoratorInterface
         if (version_compare($version, '2.3.0', '<')) {
             $this->stockDecorators['V22X']->decorate($collection);
         } else {
-            $this->stockDecorators['V23X']->decorate($collection);
+            $this->stockDecorators['Default']->decorate($collection);
         }
     }
 }

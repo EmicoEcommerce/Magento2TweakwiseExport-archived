@@ -24,7 +24,7 @@ use Magento\Store\Model\StoreManagerInterface;
  * Class V23X
  * @package Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData
  */
-class V23X extends AbstractDecorator
+class DefaultImplementation extends AbstractDecorator
 {
     /**
      * @var Config

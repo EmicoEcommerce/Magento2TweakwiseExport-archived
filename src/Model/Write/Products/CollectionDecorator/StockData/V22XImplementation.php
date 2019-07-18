@@ -18,7 +18,7 @@ use Magento\CatalogInventory\Api\StockItemCriteriaInterfaceFactory;
 use Magento\CatalogInventory\Api\StockItemRepositoryInterface;
 use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
 
-class V22X implements DecoratorInterface
+class V22XImplementation implements DecoratorInterface
 {
     /**
      * @var StockItemRepositoryInterface
