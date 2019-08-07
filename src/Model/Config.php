@@ -135,11 +135,11 @@ class Config
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getKey(): string
+    public function getKey()
     {
-        return (string) $this->config->getValue(self::PATH_FEED_KEY);
+        return $this->config->getValue(self::PATH_FEED_KEY);
     }
 
     /**
