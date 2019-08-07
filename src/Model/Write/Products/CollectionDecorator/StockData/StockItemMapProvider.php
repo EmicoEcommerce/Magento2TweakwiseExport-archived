@@ -13,7 +13,7 @@ use Magento\CatalogInventory\Api\StockItemCriteriaInterfaceFactory;
 use Magento\CatalogInventory\Api\StockItemRepositoryInterface;
 use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
 
-class V22XStockMapProvider implements StockMapProviderInterface
+class StockItemMapProvider implements StockMapProviderInterface
 {
     /**
      * @var StockItemRepositoryInterface
@@ -41,8 +41,7 @@ class V22XStockMapProvider implements StockMapProviderInterface
         StockItemRepositoryInterface $stockItemRepository,
         StockItemCriteriaInterfaceFactory $criteriaFactory,
         TweakwiseStockItemFactory $tweakwiseStockItemFactory
-    )
-    {
+    ) {
         $this->stockItemRepository = $stockItemRepository;
         $this->criteriaFactory = $criteriaFactory;
         $this->tweakwiseStockItemFactory = $tweakwiseStockItemFactory;

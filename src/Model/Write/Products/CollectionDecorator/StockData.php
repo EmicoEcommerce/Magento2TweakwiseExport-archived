@@ -14,6 +14,8 @@ use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\Sto
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use Magento\Framework\App\ProductMetadataInterface;
 use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
+use Magento\Framework\Module\Manager;
+use Vertex\Tax\Model\ModuleManager;
 
 class StockData implements DecoratorInterface
 {
@@ -38,6 +40,11 @@ class StockData implements DecoratorInterface
     private $config;
 
     /**
+     * @var ModuleManager
+     */
+    private $moduleManager;
+
+    /**
      * StockData constructor.
      *
      * @param ProductMetadataInterface $metaData
@@ -49,12 +56,14 @@ class StockData implements DecoratorInterface
         ProductMetadataInterface $metaData,
         TweakwiseStockItemFactory $stockItemFactory,
         Config $config,
+        ModuleManager $moduleManager,
         array $stockMapProviders
     ) {
         $this->metaData = $metaData;
         $this->stockMapProviders = $stockMapProviders;
         $this->stockItemFactory = $stockItemFactory;
         $this->config = $config;
+        $this->moduleManager = $moduleManager;
     }
 
     /**
@@ -256,9 +265,13 @@ class StockData implements DecoratorInterface
     {
         $version = $this->metaData->getVersion();
         if (version_compare($version, '2.3.0', '<')) {
-            return $this->stockMapProviders['V22X'];
+            return $this->stockMapProviders['stockItemMapProvider'];
         }
 
-        return $this->stockMapProviders['Default'];
+        if (!$this->moduleManager->isEnabled('Magento_Inventory')) {
+            return $this->stockMapProviders['stockItemMapProvider'];
+        }
+
+        return $this->stockMapProviders['sourceItemMapProvider'];
     }
 }

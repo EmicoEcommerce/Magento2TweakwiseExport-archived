@@ -23,7 +23,7 @@ use Zend_Db_Expr;
  * Class DefaultImplementation
  * @package Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData
  */
-class DefaultStockMapProvider implements StockMapProviderInterface
+class SourceItemMapProvider implements StockMapProviderInterface
 {
     /**
      * @var TweakwiseStockItemFactory
