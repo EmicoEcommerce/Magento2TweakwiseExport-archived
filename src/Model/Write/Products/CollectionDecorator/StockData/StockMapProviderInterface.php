@@ -16,6 +16,9 @@ use Emico\TweakwiseExport\Model\Write\Products\Collection;
 interface StockMapProviderInterface
 {
     /**
+     * Should return an array keyed by product entity_id
+     * the values should be StockItem objects
+     *
      * @param Collection $collection
      * @param int $storeId
      * @return StockItem[]
