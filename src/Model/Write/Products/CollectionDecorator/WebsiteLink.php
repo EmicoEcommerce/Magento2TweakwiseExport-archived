@@ -6,13 +6,13 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
+use Emico\TweakwiseExport\Model\DbResourceHelper;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
-use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Magento\Store\Model\StoreManagerInterface;
 use Zend_Db_Statement_Exception;
 
-class WebsiteLink extends AbstractDecorator
+class WebsiteLink implements DecoratorInterface
 {
     /**
      * @var StoreManagerInterface
@@ -20,14 +20,21 @@ class WebsiteLink extends AbstractDecorator
     private $storeManager;
 
     /**
+     * @var DbResourceHelper
+     */
+    private $dbResource;
+
+    /**
      * WebsiteLink constructor.
      *
      * @param StoreManagerInterface $storeManager
-     * @param DbContext $context
+     * @param DbResourceHelper $dbResource
      */
-    public function __construct(StoreManagerInterface $storeManager, DbContext $context)
-    {
-        parent::__construct($context);
+    public function __construct(
+        StoreManagerInterface $storeManager,
+        DbResourceHelper $dbResource
+    ) {
+        $this->dbResource = $dbResource;
         $this->storeManager = $storeManager;
     }
 
@@ -52,7 +59,7 @@ class WebsiteLink extends AbstractDecorator
      */
     private function getProductWebsiteTable(): string
     {
-        return $this->getResources()->getTableName('catalog_product_website');
+        return $this->dbResource->getTableName('catalog_product_website');
     }
 
     /**
@@ -61,7 +68,7 @@ class WebsiteLink extends AbstractDecorator
      */
     private function addLinkedWebsiteIds(Collection $collection)
     {
-        $select = $this->getConnection()->select()
+        $select = $this->dbResource->getConnection()->select()
             ->from($this->getProductWebsiteTable(), ['product_id', 'website_id'])
             ->where('product_id in(' . implode(',', $collection->getIds()) . ')');
         $query = $select->query();

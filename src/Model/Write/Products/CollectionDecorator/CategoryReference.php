@@ -7,17 +7,32 @@
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Emico\TweakwiseExport\Model\DbResourceHelper;
 use Magento\Catalog\Model\Indexer\Category\Product\AbstractAction;
 
-class CategoryReference extends AbstractDecorator
+class CategoryReference implements DecoratorInterface
 {
+    /**
+     * @var DbResourceHelper
+     */
+    private $dbResource;
+
+    /**
+     * CategoryReference constructor.
+     * @param DbResourceHelper $resourceHelper
+     */
+    public function __construct(DbResourceHelper $resourceHelper)
+    {
+        $this->dbResource = $resourceHelper;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function decorate(Collection $collection)
     {
         $storeId = $collection->getStoreId();
-        $select = $this->getConnection()
+        $select = $this->dbResource->getConnection()
             ->select()
             ->from($this->getIndexTableName($storeId), ['category_id', 'product_id'])
             ->where('store_id = ?', $collection->getStoreId())
@@ -46,12 +61,12 @@ class CategoryReference extends AbstractDecorator
             $baseTableName,
             $storeId
         );
-        $categoryProductIndexTable = $this->getTableName($categoryProductIndexTable);
+        $categoryProductIndexTable = $this->dbResource->getTableName($categoryProductIndexTable);
 
-        if ($this->getConnection()->isTableExists($categoryProductIndexTable)) {
+        if ($this->dbResource->getConnection()->isTableExists($categoryProductIndexTable)) {
             return $categoryProductIndexTable;
         }
 
-        return $this->getTableName($baseTableName);
+        return $this->dbResource->getTableName($baseTableName);
     }
 }

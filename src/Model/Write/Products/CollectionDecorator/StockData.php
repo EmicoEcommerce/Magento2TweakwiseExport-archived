@@ -6,8 +6,13 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
+use Emico\TweakwiseExport\Model\Config;
+use Emico\TweakwiseExport\Model\Config\Source\StockCalculation;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockMapProviderInterface;
+use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use Magento\Framework\App\ProductMetadataInterface;
+use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
 
 class StockData implements DecoratorInterface
 {
@@ -19,20 +24,35 @@ class StockData implements DecoratorInterface
     /**
      * @var DecoratorInterface[]
      */
-    private $stockDecorators = [];
+    private $stockMapProviders = [];
+
+    /**
+     * @var TweakwiseStockItemFactory
+     */
+    private $stockItemFactory;
+
+    /**
+     * @var Config
+     */
+    private $config;
 
     /**
      * StockData constructor.
      *
      * @param ProductMetadataInterface $metaData
-     * @param DecoratorInterface[] $stockDecorators
+     * @param TweakwiseStockItemFactory $stockItemFactory
+     * @param StockMapProviderInterface[] $stockMapProviders
      */
     public function __construct(
         ProductMetadataInterface $metaData,
-        array $stockDecorators
+        TweakwiseStockItemFactory $stockItemFactory,
+        Config $config,
+        array $stockMapProviders
     ) {
         $this->metaData = $metaData;
-        $this->stockDecorators = $stockDecorators;
+        $this->stockMapProviders = $stockMapProviders;
+        $this->stockItemFactory = $stockItemFactory;
+        $this->config = $config;
     }
 
     /**
@@ -40,11 +60,194 @@ class StockData implements DecoratorInterface
      */
     public function decorate(Collection $collection)
     {
+        // This has to be called before setting the stock items. This way the composite
+        // products are not filtered since they mostly have 0 stock.
+        $toBeCombinedEntities = $collection->getExported();
+        $storeId = $collection->getStoreId();
+
+        $this->addStockItems($storeId, $collection);
+        foreach ($toBeCombinedEntities as $item) {
+            $this->combineStock($item, $storeId);
+            $this->addStockPercentage($item, $storeId);
+        }
+    }
+
+    /**
+     * @param int $storeId
+     * @param Collection $collection
+     */
+    private function addStockItems(int $storeId, Collection $collection)
+    {
+        if ($collection->count() === 0) {
+            return;
+        }
+
+        $stockMapProvider = $this->resolveStockMapProvider();
+        $stockItemMap = $stockMapProvider->getStockItemMap($collection, $storeId);
+
+        foreach ($collection as $entity) {
+            $this->assignStockItem($stockItemMap, $storeId, $entity);
+
+            foreach ($entity->getExportChildren() as $childEntity) {
+                $this->assignStockItem($stockItemMap, $storeId, $childEntity);
+            }
+        }
+    }
+
+    /**
+     * @param array $stockItemMap
+     * @param int $storeId
+     * @param ExportEntity $entity
+     */
+    private function assignStockItem(array $stockItemMap, int $storeId, ExportEntity $entity)
+    {
+        /** @var string $entityId */
+        $entityId = $entity->getAttribute('entity_id', false);
+        if (isset($stockItemMap[$entityId])) {
+            $stockItem = $stockItemMap[$entityId];
+        } else {
+            $stockItem = $this->stockItemFactory->create();
+        }
+
+        if (method_exists($stockItem, 'setStoreId')) {
+            $stockItem->setStoreId($storeId);
+        }
+
+        $entity->setStockItem($stockItem);
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @param int $storeId
+     */
+    private function combineStock(ExportEntity $entity, int $storeId)
+    {
+        if (!$entity->isComposite()) {
+            return;
+        }
+
+        $combinedStockQty = $this->getCombinedStock($entity, $storeId);
+        $combinedStockStockStatus = $this->getCombinedStockStatus($entity);
+        $entity->getStockItem()->setQty($combinedStockQty);
+        $entity->getStockItem()->setIsInStock($combinedStockStockStatus);
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @param int $storeId
+     * @return float
+     */
+    private function getCombinedStock(ExportEntity $entity, int $storeId): float
+    {
+        $stockQuantities = $this->getStockQuantities($entity);
+        if (empty($stockQuantities)) {
+            return 0;
+        }
+
+        switch ($this->config->getStockCalculation($storeId)) {
+            case StockCalculation::OPTION_MAX:
+                return max($stockQuantities);
+            case StockCalculation::OPTION_MIN:
+                return min($stockQuantities);
+            case StockCalculation::OPTION_SUM:
+            default:
+                return array_sum($stockQuantities);
+        }
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @param int $storeId
+     * @return float
+     */
+    private function getCombinedStockStatus(ExportEntity $entity): float
+    {
+        $stockStatus = $this->getStockStatus($entity);
+        return !empty($stockStatus) ? max($stockStatus) : 0;
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @return float[]
+     */
+    private function getStockQuantities(ExportEntity $entity): array
+    {
+        $stockQty = [];
+        foreach ($entity->getExportChildren() as $child) {
+            $stockQty[] = $child->getStockQty();
+        }
+
+        return $stockQty;
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @return float[]
+     */
+    private function getStockStatus(ExportEntity $entity): array
+    {
+        $stockStatus = [];
+        foreach ($entity->getExportChildren() as $child) {
+            $stockStatus[] = $child->getStockItem()->getIsInStock();
+        }
+
+        return $stockStatus;
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @param int $storeId
+     */
+    private function addStockPercentage(ExportEntity $entity, int $storeId)
+    {
+        if (!$this->config->isStockPercentage($storeId)) {
+            return;
+        }
+
+        $entity->addAttribute('stock_percentage', $this->calculateStockPercentage($entity));
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @return float
+     */
+    private function calculateStockPercentage(ExportEntity $entity): float
+    {
+        if (!$entity->isComposite()) {
+            return (int) $this->isInStock($entity) * 100;
+        }
+
+        $children = $entity->getExportChildrenIncludeOutOfStock();
+        $childrenCount = \count($children);
+        // Just to be sure we dont divide by 0, we really should not get here
+        if ($childrenCount <= 0) {
+            return (int) $this->isInStock($entity) * 100;
+        }
+
+        $inStockChildrenCount = \count(\array_filter($children, [$this, 'isInStock']));
+        return round(($inStockChildrenCount / $childrenCount) * 100, 2);
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @return bool
+     */
+    private function isInStock(ExportEntity $entity): bool
+    {
+        $stockItem = $entity->getStockItem();
+        return (int)(!$stockItem || $stockItem->getIsInStock());
+    }
+
+    /**
+     * @return StockMapProviderInterface
+     */
+    private function resolveStockMapProvider(): StockMapProviderInterface
+    {
         $version = $this->metaData->getVersion();
         if (version_compare($version, '2.3.0', '<')) {
-            $this->stockDecorators['V22X']->decorate($collection);
-        } else {
-            $this->stockDecorators['Default']->decorate($collection);
+            return $this->stockMapProviders['V22X'];
         }
+
+        return $this->stockMapProviders['Default'];
     }
 }

@@ -4,13 +4,13 @@
  * @copyright (c) Emico B.V. 2017
  */
 
-namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
+namespace Emico\TweakwiseExport\Model;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 
-abstract class AbstractDecorator implements DecoratorInterface
+class DbResourceHelper
 {
     /**
      * @var DbContext
@@ -31,7 +31,7 @@ abstract class AbstractDecorator implements DecoratorInterface
      * @param string $modelEntity
      * @return string
      */
-    protected function getTableName($modelEntity): string
+    public function getTableName($modelEntity): string
     {
         return $this->getResources()->getTableName($modelEntity);
     }
@@ -39,7 +39,7 @@ abstract class AbstractDecorator implements DecoratorInterface
     /**
      * @return AdapterInterface
      */
-    protected function getConnection()
+    public function getConnection()
     {
         return $this->getResources()->getConnection();
     }
@@ -47,7 +47,7 @@ abstract class AbstractDecorator implements DecoratorInterface
     /**
      * @return ResourceConnection
      */
-    protected function getResources()
+    public function getResources()
     {
         return $this->dbContext->getResources();
     }

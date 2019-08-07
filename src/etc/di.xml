@@ -58,9 +58,9 @@
     <type name="Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData">
         <arguments>
             <argument name="metaData" xsi:type="object">Magento\Framework\App\ProductMetadataInterface</argument>
-            <argument name="stockDecorators" xsi:type="array">
-                <item name="V22X" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\V22XImplementation\Proxy</item>
-                <item name="Default" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\DefaultImplementation\Proxy</item>
+            <argument name="stockMapProviders" xsi:type="array">
+                <item name="V22X" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\V22XStockMapProvider\Proxy</item>
+                <item name="Default" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\DefaultStockMapProvider\Proxy</item>
             </argument>
         </arguments>
     </type>
