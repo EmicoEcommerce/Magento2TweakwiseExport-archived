@@ -268,7 +268,7 @@ class StockData implements DecoratorInterface
             return $this->stockMapProviders['stockItemMapProvider'];
         }
 
-        if (!$this->moduleManager->isEnabled('Magento_Inventory')) {
+        if (!$this->moduleManager->isEnabled('Magento_Inventory') || !$this->moduleManager->isEnabled('Magento_InventoryApi')) {
             return $this->stockMapProviders['stockItemMapProvider'];
         }
 
