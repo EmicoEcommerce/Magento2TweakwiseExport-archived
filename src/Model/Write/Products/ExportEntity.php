@@ -233,16 +233,6 @@ class ExportEntity
     }
 
     /**
-     * @param float $stockQty
-     * @return $this
-     */
-    public function setStockQty(float $stockQty)
-    {
-        $this->stockQty = $stockQty;
-        return $this;
-    }
-
-    /**
      * @return bool
      */
     public function shouldExport($includeOutOfStock = false): bool
@@ -423,7 +413,7 @@ class ExportEntity
     }
 
     /**
-     * @return null|StockItem
+     * @return StockItem
      */
     public function getStockItem()    
     {        

@@ -8,6 +8,7 @@ namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Config\Source\StockCalculation;
+use Emico\TweakwiseExport\Model\StockItem;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockMapProviderInterface;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
@@ -41,6 +42,7 @@ class StockData implements DecoratorInterface
      *
      * @param ProductMetadataInterface $metaData
      * @param TweakwiseStockItemFactory $stockItemFactory
+     * @param Config $config
      * @param StockMapProviderInterface[] $stockMapProviders
      */
     public function __construct(
@@ -60,8 +62,8 @@ class StockData implements DecoratorInterface
      */
     public function decorate(Collection $collection)
     {
-        // This has to be called before setting the stock items. This way the composite
-        // products are not filtered since they mostly have 0 stock.
+        // This has to be called before setting the stock items.
+        // This way the composite products are not filtered since they mostly have 0 stock.
         $toBeCombinedEntities = $collection->getExported();
         $storeId = $collection->getStoreId();
 
@@ -86,31 +88,25 @@ class StockData implements DecoratorInterface
         $stockItemMap = $stockMapProvider->getStockItemMap($collection, $storeId);
 
         foreach ($collection as $entity) {
-            $this->assignStockItem($stockItemMap, $storeId, $entity);
+            $this->assignStockItem($stockItemMap, $entity);
 
             foreach ($entity->getExportChildren() as $childEntity) {
-                $this->assignStockItem($stockItemMap, $storeId, $childEntity);
+                $this->assignStockItem($stockItemMap, $childEntity);
             }
         }
     }
 
     /**
      * @param array $stockItemMap
-     * @param int $storeId
      * @param ExportEntity $entity
      */
-    private function assignStockItem(array $stockItemMap, int $storeId, ExportEntity $entity)
+    private function assignStockItem(array $stockItemMap, ExportEntity $entity)
     {
-        /** @var string $entityId */
-        $entityId = $entity->getAttribute('entity_id', false);
+        $entityId = $entity->getId();
         if (isset($stockItemMap[$entityId])) {
             $stockItem = $stockItemMap[$entityId];
         } else {
             $stockItem = $this->stockItemFactory->create();
-        }
-
-        if (method_exists($stockItem, 'setStoreId')) {
-            $stockItem->setStoreId($storeId);
         }
 
         $entity->setStockItem($stockItem);
@@ -126,10 +122,25 @@ class StockData implements DecoratorInterface
             return;
         }
 
-        $combinedStockQty = $this->getCombinedStock($entity, $storeId);
-        $combinedStockStockStatus = $this->getCombinedStockStatus($entity);
-        $entity->getStockItem()->setQty($combinedStockQty);
-        $entity->getStockItem()->setIsInStock($combinedStockStockStatus);
+        $combinedStockItem = $this->getCombinedStockItem($entity, $storeId);
+        $entity->setStockItem($combinedStockItem);
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @param int $storeId
+     * @return StockItem
+     */
+    private function getCombinedStockItem(ExportEntity $entity, int $storeId)
+    {
+        $combinedStockQty = $this->getCombinedStockQty($entity, $storeId);
+        $combinedStockStatus = $this->getCombinedStockStatus($entity);
+
+        $stockItem = $this->stockItemFactory->create();
+        $stockItem->setQty($combinedStockQty);
+        $stockItem->setIsInStock($combinedStockStatus);
+
+        return $stockItem;
     }
 
     /**
@@ -137,7 +148,7 @@ class StockData implements DecoratorInterface
      * @param int $storeId
      * @return float
      */
-    private function getCombinedStock(ExportEntity $entity, int $storeId): float
+    private function getCombinedStockQty(ExportEntity $entity, int $storeId): float
     {
         $stockQuantities = $this->getStockQuantities($entity);
         if (empty($stockQuantities)) {
@@ -174,7 +185,7 @@ class StockData implements DecoratorInterface
     {
         $stockQty = [];
         foreach ($entity->getExportChildren() as $child) {
-            $stockQty[] = $child->getStockQty();
+            $stockQty[] = $child->getStockItem()->getQty();
         }
 
         return $stockQty;
