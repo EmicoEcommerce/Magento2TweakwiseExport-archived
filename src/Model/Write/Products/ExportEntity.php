@@ -542,6 +542,6 @@ class ExportEntity
      */
     protected function shouldExportByNameAttribute(): bool
     {
-        return !(empty($this->attributes['name']) || empty($this->getAttribute('name',false)));
+        return !empty($this->getName());
     }
 }
