@@ -13,6 +13,7 @@ use Emico\TweakwiseExport\Exception\WriteException;
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\Profiler;
 use Magento\Store\Model\StoreManager;
+use Magento\Framework\Composer\ComposerInformation;
 
 class Writer
 {
@@ -49,17 +50,28 @@ class Writer
     protected $now;
 
     /**
+     * @var ComposerInformation
+     */
+    private $composerInformation;
+
+    /**
      * Writer constructor.
      *
      * @param StoreManager $storeManager
      * @param AppState $appState
+     * @param ComposerInformation $composerInformation
      * @param WriterInterface[] $writers
      */
-    public function __construct(StoreManager $storeManager, AppState $appState, $writers)
-    {
+    public function __construct(
+        StoreManager $storeManager,
+        AppState $appState,
+        ComposerInformation $composerInformation,
+        $writers
+    ) {
         $this->storeManager = $storeManager;
         $this->appState = $appState;
         $this->writers = $writers;
+        $this->composerInformation = $composerInformation;
     }
 
     /**
@@ -191,8 +203,25 @@ class Writer
         $xml->startElement('tweakwise'); // Start root
         $xml->writeElement('shop', $this->storeManager->getDefaultStoreView()->getName());
         $xml->writeElement('timestamp', $this->getNow()->format('Y-m-d\TH:i:s.uP'));
+        $xml->writeElement('generatedby', $this->getModuleVersion());
         $this->flush();
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getModuleVersion(): string
+    {
+        $installedPackages = $this->composerInformation
+            ->getInstalledMagentoPackages();
+        if (!isset($installedPackages['emico/tweakwise-export']['version'])) {
+            // This should never be the case
+            return '';
+        }
+        $version = $installedPackages['emico/tweakwise-export']['version'];
+
+        return sprintf('Magento2TweakwiseExport %s', $version);
     }
 
     /**
