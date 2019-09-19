@@ -15,7 +15,6 @@ use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use Magento\Framework\App\ProductMetadataInterface;
 use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
 use Magento\Framework\Module\Manager;
-use Vertex\Tax\Model\ModuleManager;
 
 class StockData implements DecoratorInterface
 {
@@ -40,7 +39,7 @@ class StockData implements DecoratorInterface
     private $config;
 
     /**
-     * @var ModuleManager
+     * @var Manager
      */
     private $moduleManager;
 
@@ -50,13 +49,14 @@ class StockData implements DecoratorInterface
      * @param ProductMetadataInterface $metaData
      * @param TweakwiseStockItemFactory $stockItemFactory
      * @param Config $config
+     * @param Manager $moduleManager
      * @param StockMapProviderInterface[] $stockMapProviders
      */
     public function __construct(
         ProductMetadataInterface $metaData,
         TweakwiseStockItemFactory $stockItemFactory,
         Config $config,
-        ModuleManager $moduleManager,
+        Manager $moduleManager,
         array $stockMapProviders
     ) {
         $this->metaData = $metaData;
