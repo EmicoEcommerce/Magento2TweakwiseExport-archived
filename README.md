@@ -68,17 +68,17 @@ If you find such an issue with data retrieval please create an issue on github.
 
 
 ## Export Settings
-- Enabled: If products of that store should be exported to tweakwise, note that if this is false for some store then navigation and search should also be disabled for that store
+- Enabled: If products of that store should be exported to tweakwise, note that if this is false for some store then navigation and search should also be disabled for that store.
 - Schedule: Cron schedule for generating the feed.
-- Schedule export: Generate the feed on the next cron run
+- Schedule export: Generate the feed on the next cron run.
 - Key: This will be validated by the export module when the ExportController is asked for feed content. If the request does not have a key parameter that matches the feed will not be served.
 - Export realtime: When the ExportController is asked for a feed it will generate a new one on the fly. Note that this is not recommended!
-- Tweakwise import API url: Tasks in the navigator can be executed via API use the import task API url here to automatically tell tweakwise to import the feed after it has been generated
+- Tweakwise import API url: Tasks in the navigator can be executed via API. Use the import task API url here to automatically tell tweakwise to import the feed after it has been generated.
 - Combined product stock calculation: this will determine stock the quantity of combined products (configurable, bundle, etc) SUM: add all quantities of child products, MAX: Use the max quantity of all child products, MIN: use the minimum quantity. This setting might be removed as each product type should have its own stock calculation method.
-- Export percentage of child products that are in stock: If set to yes then for each combined product the percentage of child products that are in stock will be exported. Example: A T-shirt with sized XS, S, M, L, XL, only S and XL are in stock then the percentage is exported as 40 (as 2/5 of the products are in stock).
+- Export percentage of child products that are in stock: If set to yes then for each combined product the percentage of child products that are in stock will be exported. Example: A t-shirt (configurable) with sizes XS, S, M, L and XL (the associated simples) if only S and XL are in stock then the percentage is exported as 40 (as 2/5 of the products are in stock).
 - Export out of stock Combined product children: Tweakwise export aggregates child data on parent products, this setting determines if data from out of child products should be included in this aggregation.
 - Exclude child attributes: These values of these attributes will be excluded from product data.
-- Which price value will be exported as "price" to tweakwise
+- Which price value will be exported as "price" to tweakwise.
 
 ### Visibility settings
 Magento has multiple visibility settings, tweakwise only knows visible products meaning that if a product is in the feed then it will be visible while navigating.
