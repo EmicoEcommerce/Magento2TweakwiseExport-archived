@@ -64,7 +64,7 @@ The feed contains only attributes which have bearing on search or navigation, ch
 ## A note on the feed implementation
 Magento's native interfaces and handlers for data retrieval were deemed to slow for a large catalogue.
 Since performance is essential we decided on our own queries for data retrieval. The consequence is that we need to keep track of the inner workings of magento and are subject to its changes.
-If you find such an issue with data retrieval please create an issue on github.
+If you find an issue with data retrieval please create an issue on github.
 
 
 ## Export Settings
