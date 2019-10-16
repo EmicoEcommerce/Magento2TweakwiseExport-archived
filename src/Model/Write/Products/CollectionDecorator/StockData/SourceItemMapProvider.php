@@ -120,7 +120,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
             )
             ->join(
                 $stockItemTableName,
-                "$productTableName.entity_id = $stockItemTableName.product_id AND $stockItemTableName.stock_id = $stockId",
+                "$productTableName.entity_id = $stockItemTableName.product_id",
                 [
                     'backorders',
                     'min_sale_qty'
