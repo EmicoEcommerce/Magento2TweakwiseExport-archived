@@ -100,38 +100,68 @@ class SourceItemMapProvider implements StockMapProviderInterface
         $sourceItemTableName = $this->dbResource->getTableName('inventory_source_item');
         $reservationTableName = $this->dbResource->getTableName('inventory_reservation');
         $productTableName = $this->dbResource->getTableName('catalog_product_entity');
-        $stockItemTableName = $this->dbResource->getTableName('cataloginventory_stock_item');
+        $stockItemTable = $this->dbResource->getTableName('cataloginventory_stock_item');
+
+        $reservationSelect = $dbConnection
+            ->select()
+            ->from($reservationTableName)
+            ->where('stock_id = ?', $stockId)
+            ->reset('columns')
+            ->columns(
+                [
+                    'sku',
+                    'stock_id',
+                    'r_quantity' => "SUM(`$reservationTableName`.`quantity`)"
+                ]
+            )
+            ->group("$reservationTableName.sku");
+
+        $sourceItemSelect = $dbConnection
+            ->select()
+            ->from($sourceItemTableName)
+            ->reset('columns')
+            ->where("$sourceItemTableName.source_code IN (?)", $sourceCodes)
+            ->columns(
+                [
+                    'sku',
+                    's_quantity' => "SUM($sourceItemTableName.quantity)",
+                    's_status' => "MAX($sourceItemTableName.status)"
+                ]
+            )
+            ->group("$sourceItemTableName.sku");
+
 
         $select = $dbConnection
             ->select()
-            ->from($sourceItemTableName)
-            ->where("$sourceItemTableName.sku IN (?)", $skus)
-            ->where("$sourceItemTableName.source_code IN (?)", $sourceCodes)
+            ->from($productTableName)
             ->reset('columns')
             ->joinLeft(
-                $reservationTableName,
-                "$reservationTableName.sku = $sourceItemTableName.sku AND $reservationTableName.stock_id = $stockId",
+                ['s' => $sourceItemSelect],
+                "s.sku = $productTableName.sku",
                 []
             )
-            ->join(
-                $productTableName,
-                "$sourceItemTableName.sku = $productTableName.sku",
-                ['product_entity_id' => "$productTableName.entity_id"]
-            )
-            ->join(
-                $stockItemTableName,
-                "$productTableName.entity_id = $stockItemTableName.product_id",
+            ->joinLeft(
+                ['r' => $reservationSelect],
+                "r.sku = $productTableName.sku AND r.stock_id = $stockId",
+                []
+            )->join(
+                $stockItemTable,
+                "$stockItemTable.product_id = $productTableName.entity_id",
                 [
                     'backorders',
                     'min_sale_qty'
                 ]
             )
-            ->columns([
-                "$sourceItemTableName.sku",
-                'qty' => new Zend_Db_Expr("$sourceItemTableName.quantity + IFNULL(SUM(`$reservationTableName`.`quantity`), 0)"),
-                'is_in_stock' => "$sourceItemTableName.status"
-            ])
-            ->group(new Zend_Db_Expr("`$sourceItemTableName`.`sku`"));
+            ->where("$productTableName.sku IN (?)", $skus)
+            ->columns(
+                [
+                    'product_entity_id' => "$productTableName.entity_id",
+                    'qty' => new Zend_Db_Expr('COALESCE(s.s_quantity,0) + COALESCE(r.r_quantity,0)'),
+                    'is_in_stock' => 'COALESCE(s.s_status,0)'
+                ]
+            );
+
+
 
         $result = $select->query();
         $map = [];
