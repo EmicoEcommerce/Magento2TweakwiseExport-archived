@@ -47,8 +47,11 @@ class Helper
      * @param Config $config
      * @param TimezoneInterface $localDate
      */
-    public function __construct(ProductMetadataInterface $productMetadata, Config $config, TimezoneInterface $localDate)
-    {
+    public function __construct(
+        ProductMetadataInterface $productMetadata,
+        Config $config,
+        TimezoneInterface $localDate
+    ) {
         $this->productMetadata = $productMetadata;
         $this->config = $config;
         $this->localDate = $localDate;
