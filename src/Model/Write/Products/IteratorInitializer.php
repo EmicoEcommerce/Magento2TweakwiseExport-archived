@@ -6,20 +6,11 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products;
 
-
 use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\EavIterator;
-use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
-use Magento\Eav\Model\Config;
 
 class IteratorInitializer
 {
-    /**
-     * @var Config
-     */
-    private $config;
-
     /**
      * @var Helper
      */
@@ -27,12 +18,11 @@ class IteratorInitializer
 
     /**
      * IteratorInitializer constructor.
-     * @param Config $config
+     *
      * @param Helper $helper
      */
-    public function __construct(Config $config, Helper $helper)
+    public function __construct(Helper $helper)
     {
-        $this->config = $config;
         $this->helper = $helper;
     }
 
@@ -40,9 +30,8 @@ class IteratorInitializer
      * Select all attributes who should be exported
      *
      * @param EavIterator $iterator
-     * @return $this
      */
-    public function initializeAttributes(EavIterator $iterator): self
+    public function initializeAttributes(EavIterator $iterator)
     {
         // Add default attributes
         $iterator->selectAttribute('name');
@@ -52,17 +41,8 @@ class IteratorInitializer
         $iterator->selectAttribute('visibility');
         $iterator->selectAttribute('type_id');
 
-        // Add configured attributes
-        $type = $this->config->getEntityType(Product::ENTITY);
-
-        /** @var Attribute $attribute */
-        foreach ($type->getAttributeCollection() as $attribute) {
-            if (!$this->helper->shouldExportAttribute($attribute)) {
-                continue;
-            }
-
+        foreach ($this->helper->getAttributesToExport() as $attribute) {
             $iterator->selectAttribute($attribute->getAttributeCode());
         }
-        return $this;
     }
 }
