@@ -63,8 +63,7 @@ class ExportCommand extends Command
             ->addOption(
                 'validate',
                 'c',
-                InputOption::VALUE_REQUIRED, 'Validate feed and rollback if fails [y/n].',
-                $this->config->isValidate() ? 'y' : 'n'
+                InputOption::VALUE_OPTIONAL, 'Validate feed and rollback if fails [y/n].'
             )
             ->addOption('debug', 'd', InputOption::VALUE_NONE, 'Debugging enables profiler.')
             ->setDescription('Export tweakwise feed');
@@ -84,11 +83,12 @@ class ExportCommand extends Command
 
             $feedFile = (string) $input->getArgument('file');
             $validate = (string) $input->getOption('validate');
-            if ($validate !== 'y' && $validate !== 'n') {
+            if ($validate !== 'y' && $validate !== 'n' && $validate !== "") {
                 $output->writeln('Validate option can only contain y or n');
                 return;
             }
-            $validate = $validate === 'y';
+            
+            $validate = $validate === "" ? $this->config->isValidate() : $validate === 'y';
 
             $startTime = microtime(true);
             $this->export->generateToFile($feedFile, $validate);
