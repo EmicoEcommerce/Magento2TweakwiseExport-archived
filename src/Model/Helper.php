@@ -10,24 +10,13 @@ namespace Emico\TweakwiseExport\Model;
 
 use DateTime;
 use IntlDateFormatter;
-use Magento\Framework\Exception\LocalizedException;
 use SplFileInfo;
-use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Framework\App\ProductMetadata as CommunityProductMetadata;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
-use Magento\Eav\Model\Config as EavConfig;
 
 class Helper
 {
-    /**
-     * Apparently some of magento core attributes are marked as static
-     * but their values are not saved in table catalog_product_entity
-     * we cannot export these attributes.
-     */
-    const ATTRIBUTE_BLACKLIST = ['category_ids'];
-
     /**
      * @var ProductMetadataInterface
      */
@@ -44,28 +33,20 @@ class Helper
     private $localDate;
 
     /**
-     * @var EavConfig
-     */
-    private $eavConfig;
-
-    /**
      * Helper constructor.
      *
      * @param ProductMetadataInterface $productMetadata
      * @param Config $config
-     * @param EavConfig $eavConfig
      * @param TimezoneInterface $localDate
      */
     public function __construct(
         ProductMetadataInterface $productMetadata,
         Config $config,
-        EavConfig $eavConfig,
         TimezoneInterface $localDate
     ) {
         $this->productMetadata = $productMetadata;
         $this->config = $config;
         $this->localDate = $localDate;
-        $this->eavConfig = $eavConfig;
     }
 
     /**
@@ -90,60 +71,6 @@ class Helper
     public function getStoreId(int $id): int
     {
         return (int)substr($id, 5);
-    }
-
-    /**
-     * @return Attribute[]
-     */
-    public function getAttributesToExport(): array
-    {
-        try {
-            $type = $this->eavConfig->getEntityType(Product::ENTITY);
-        } catch (LocalizedException $e) {
-            return [];
-        }
-
-        $attributesForExport = [];
-        foreach ($type->getAttributeCollection() as $attribute) {
-            if (!$this->shouldExportAttribute($attribute)) {
-                continue;
-            }
-
-            $attributesForExport[] = $attribute;
-        }
-
-        return $attributesForExport;
-    }
-
-    /**
-     * @param Attribute $attribute
-     * @return bool
-     */
-    public function shouldExportAttribute(Attribute $attribute): bool
-    {
-        $isBlackListed = $this->isAttributeBlacklisted($attribute);
-        return !$isBlackListed &&
-            (
-                $attribute->getUsedInProductListing() ||
-                $attribute->getIsFilterable() ||
-                $attribute->getIsFilterableInSearch() ||
-                $attribute->getIsSearchable() ||
-                $attribute->getIsVisibleInAdvancedSearch() ||
-                $attribute->getUsedForSortBy()
-            );
-    }
-
-    /**
-     * @param Attribute $attribute
-     * @return bool
-     */
-    protected function isAttributeBlacklisted(Attribute $attribute): bool
-    {
-        return \in_array(
-            $attribute->getAttributeCode(),
-            self::ATTRIBUTE_BLACKLIST,
-            true
-        );
     }
 
     /**

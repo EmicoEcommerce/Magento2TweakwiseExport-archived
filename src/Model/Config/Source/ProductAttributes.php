@@ -8,7 +8,7 @@
 
 namespace Emico\TweakwiseExport\Model\Config\Source;
 
-use Emico\TweakwiseExport\Model\Helper;
+use Emico\TweakwiseExport\Model\ProductAttributes as ProductAttributesHelper;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\Data\OptionSourceInterface;
 
@@ -24,20 +24,22 @@ class ProductAttributes implements OptionSourceInterface
     protected $eavConfig;
 
     /**
-     * @var Helper
+     * @var ProductAttributesHelper
      */
-    protected $helper;
+    protected $productAttributesHelper;
 
     /**
      * ProductAttributes constructor.
      *
      * @param EavConfig $eavConfig
-     * @param Helper $helper
+     * @param ProductAttributesHelper $productAttributesHelper
      */
-    public function __construct(EavConfig $eavConfig, Helper $helper)
-    {
+    public function __construct(
+        EavConfig $eavConfig,
+        ProductAttributesHelper $productAttributesHelper
+    ) {
         $this->eavConfig = $eavConfig;
-        $this->helper = $helper;
+        $this->productAttributesHelper = $productAttributesHelper;
     }
 
     /**
@@ -46,7 +48,7 @@ class ProductAttributes implements OptionSourceInterface
     public function toOptionArray()
     {
         $result = [];
-        foreach ($this->helper->getAttributesToExport() as $attribute) {
+        foreach ($this->productAttributesHelper->getAttributesToExport() as $attribute) {
 
             $attributeCode = $attribute->getAttributeCode();
             $result[] = [

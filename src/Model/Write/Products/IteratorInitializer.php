@@ -6,24 +6,28 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products;
 
-use Emico\TweakwiseExport\Model\Helper;
+use Emico\TweakwiseExport\Model\ProductAttributes;
 use Emico\TweakwiseExport\Model\Write\EavIterator;
 
+/**
+ * Class IteratorInitializer
+ * @package Emico\TweakwiseExport\Model\Write\Products
+ */
 class IteratorInitializer
 {
     /**
-     * @var Helper
+     * @var ProductAttributes
      */
-    private $helper;
+    private $productAttributes;
 
     /**
      * IteratorInitializer constructor.
      *
-     * @param Helper $helper
+     * @param ProductAttributes $productAttributes
      */
-    public function __construct(Helper $helper)
+    public function __construct(ProductAttributes $productAttributes)
     {
-        $this->helper = $helper;
+        $this->productAttributes = $productAttributes;
     }
 
     /**
@@ -41,7 +45,7 @@ class IteratorInitializer
         $iterator->selectAttribute('visibility');
         $iterator->selectAttribute('type_id');
 
-        foreach ($this->helper->getAttributesToExport() as $attribute) {
+        foreach ($this->productAttributes->getAttributesToExport() as $attribute) {
             $iterator->selectAttribute($attribute->getAttributeCode());
         }
     }
