@@ -6,43 +6,36 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products;
 
-
-use Emico\TweakwiseExport\Model\Helper;
+use Emico\TweakwiseExport\Model\ProductAttributes;
 use Emico\TweakwiseExport\Model\Write\EavIterator;
-use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
-use Magento\Eav\Model\Config;
 
+/**
+ * Class IteratorInitializer
+ * @package Emico\TweakwiseExport\Model\Write\Products
+ */
 class IteratorInitializer
 {
     /**
-     * @var Config
+     * @var ProductAttributes
      */
-    private $config;
-
-    /**
-     * @var Helper
-     */
-    private $helper;
+    private $productAttributes;
 
     /**
      * IteratorInitializer constructor.
-     * @param Config $config
-     * @param Helper $helper
+     *
+     * @param ProductAttributes $productAttributes
      */
-    public function __construct(Config $config, Helper $helper)
+    public function __construct(ProductAttributes $productAttributes)
     {
-        $this->config = $config;
-        $this->helper = $helper;
+        $this->productAttributes = $productAttributes;
     }
 
     /**
      * Select all attributes who should be exported
      *
      * @param EavIterator $iterator
-     * @return $this
      */
-    public function initializeAttributes(EavIterator $iterator): self
+    public function initializeAttributes(EavIterator $iterator)
     {
         // Add default attributes
         $iterator->selectAttribute('name');
@@ -52,17 +45,8 @@ class IteratorInitializer
         $iterator->selectAttribute('visibility');
         $iterator->selectAttribute('type_id');
 
-        // Add configured attributes
-        $type = $this->config->getEntityType(Product::ENTITY);
-
-        /** @var Attribute $attribute */
-        foreach ($type->getAttributeCollection() as $attribute) {
-            if (!$this->helper->shouldExportAttribute($attribute)) {
-                continue;
-            }
-
+        foreach ($this->productAttributes->getAttributesToExport() as $attribute) {
             $iterator->selectAttribute($attribute->getAttributeCode());
         }
-        return $this;
     }
 }

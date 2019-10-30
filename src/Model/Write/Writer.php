@@ -175,7 +175,7 @@ class Writer
     /**
      * Close XML writer
      */
-    function __destruct()
+    public function __destruct()
     {
         $this->close();
     }

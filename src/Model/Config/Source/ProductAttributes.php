@@ -8,13 +8,15 @@
 
 namespace Emico\TweakwiseExport\Model\Config\Source;
 
-use Emico\TweakwiseExport\Model\Helper;
-use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Emico\TweakwiseExport\Model\ProductAttributes as ProductAttributesHelper;
 use Magento\Eav\Model\Config as EavConfig;
-use Magento\Framework\Option\ArrayInterface;
+use Magento\Framework\Data\OptionSourceInterface;
 
-class ProductAttributes implements ArrayInterface
+/**
+ * Class ProductAttributes
+ * @package Emico\TweakwiseExport\Model\Config\Source
+ */
+class ProductAttributes implements OptionSourceInterface
 {
     /**
      * @var EavConfig
@@ -22,20 +24,22 @@ class ProductAttributes implements ArrayInterface
     protected $eavConfig;
 
     /**
-     * @var Helper
+     * @var ProductAttributesHelper
      */
-    protected $helper;
+    protected $productAttributesHelper;
 
     /**
      * ProductAttributes constructor.
      *
      * @param EavConfig $eavConfig
-     * @param Helper $helper
+     * @param ProductAttributesHelper $productAttributesHelper
      */
-    public function __construct(EavConfig $eavConfig, Helper $helper)
-    {
+    public function __construct(
+        EavConfig $eavConfig,
+        ProductAttributesHelper $productAttributesHelper
+    ) {
         $this->eavConfig = $eavConfig;
-        $this->helper = $helper;
+        $this->productAttributesHelper = $productAttributesHelper;
     }
 
     /**
@@ -43,28 +47,26 @@ class ProductAttributes implements ArrayInterface
      */
     public function toOptionArray()
     {
-        $config = $this->eavConfig;
         $result = [];
-        foreach ($config->getEntityAttributeCodes(Product::ENTITY) as $attributeCode) {
-            /** @var Attribute $attribute */
-            $attribute = $config->getAttribute(Product::ENTITY, $attributeCode);
-            if (!$attribute->getData('is_visible')) {
-                continue;
-            }
+        foreach ($this->productAttributesHelper->getAttributesToExport() as $attribute) {
 
-            if (!$this->helper->shouldExportAttribute($attribute)) {
-                continue;
-            }
-
+            $attributeCode = $attribute->getAttributeCode();
             $result[] = [
                 'value' => $attributeCode,
-                'label' => sprintf('%s [%s]', $attribute->getDefaultFrontendLabel(), $attributeCode),
+                'label' => sprintf(
+                    '%s [%s]',
+                    $attribute->getDefaultFrontendLabel(),
+                    $attributeCode
+                )
             ];
         }
 
-        usort($result, function(array $a, array $b) {
-            return strnatcasecmp($a['label'], $b['label']);
-        });
+        usort(
+            $result,
+            function (array $a, array $b) {
+                return strnatcasecmp($a['label'], $b['label']);
+            }
+        );
 
         return $result;
     }

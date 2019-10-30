@@ -10,21 +10,13 @@ namespace Emico\TweakwiseExport\Model;
 
 use DateTime;
 use IntlDateFormatter;
-use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use SplFileInfo;
 use Magento\Framework\App\ProductMetadata as CommunityProductMetadata;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
-use SplFileInfo;
 
 class Helper
 {
-    /**
-     * Apparently some of magento core attributes are marked as static
-     * but their values are not saved in table catalog_product_entity
-     * we cannot export these attributes.
-     */
-    const ATTRIBUTE_BLACKLIST = ['category_ids'];
-
     /**
      * @var ProductMetadataInterface
      */
@@ -47,8 +39,11 @@ class Helper
      * @param Config $config
      * @param TimezoneInterface $localDate
      */
-    public function __construct(ProductMetadataInterface $productMetadata, Config $config, TimezoneInterface $localDate)
-    {
+    public function __construct(
+        ProductMetadataInterface $productMetadata,
+        Config $config,
+        TimezoneInterface $localDate
+    ) {
         $this->productMetadata = $productMetadata;
         $this->config = $config;
         $this->localDate = $localDate;
@@ -79,42 +74,12 @@ class Helper
     }
 
     /**
-     * @param Attribute $attribute
      * @return bool
      */
-    public function shouldExportAttribute(Attribute $attribute)
+    public function isEnterprise(): bool
     {
-        $isBlackListed = $this->isAttributeBlacklisted($attribute);
-        return !$isBlackListed &&
-            (
-                $attribute->getUsedInProductListing() ||
-                $attribute->getIsFilterable() ||
-                $attribute->getIsFilterableInSearch() ||
-                $attribute->getIsSearchable() ||
-                $attribute->getIsVisibleInAdvancedSearch() ||
-                $attribute->getUsedForSortBy()
-            );
-    }
-
-    /**
-     * @param Attribute $attribute
-     * @return bool
-     */
-    protected function isAttributeBlacklisted(Attribute $attribute)
-    {
-        return \in_array(
-            $attribute->getAttributeCode(),
-            self::ATTRIBUTE_BLACKLIST,
-            true
-        );
-    }
-
-    /**
-     * @return bool
-     */
-    public function isEnterprise()
-    {
-        return $this->productMetadata->getEdition() !== CommunityProductMetadata::EDITION_NAME;
+        return $this->productMetadata->getEdition()
+            !== CommunityProductMetadata::EDITION_NAME;
     }
 
     /**
@@ -154,14 +119,26 @@ class Helper
     {
         $startDate = $this->getFeedExportStartDate();
         if (!$this->config->isRealTime() && $startDate) {
-            return sprintf(__('Running, started on %s.'),
-                $this->localDate->formatDate($startDate, IntlDateFormatter::MEDIUM, true));
+            return sprintf(
+                __('Running, started on %s.'),
+                $this->localDate->formatDate(
+                    $startDate,
+                    IntlDateFormatter::MEDIUM,
+                    true
+                )
+            );
         }
 
         $finishedDate = $this->getLastFeedExportDate();
         if ($finishedDate) {
-            return sprintf(__('Finished on %s.'),
-                $this->localDate->formatDate($finishedDate, IntlDateFormatter::MEDIUM, true));
+            return sprintf(
+                __('Finished on %s.'),
+                $this->localDate->formatDate(
+                    $finishedDate,
+                    IntlDateFormatter::MEDIUM,
+                    true
+                )
+            );
         }
 
         return __('Export never triggered.');
