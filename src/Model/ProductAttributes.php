@@ -39,9 +39,10 @@ class ProductAttributes
     }
 
     /**
+     * @param string[]|null $attributeCodes
      * @return Attribute[]
      */
-    public function getAttributesToExport(): array
+    public function getAttributesToExport(array $attributeCodes = null): array
     {
         try {
             $type = $this->eavConfig->getEntityType(Product::ENTITY);
@@ -49,8 +50,16 @@ class ProductAttributes
             return [];
         }
 
+        $attributeCollection = $type->getAttributeCollection();
+        if (!empty($attributeCodes)) {
+            $attributeCollection->addFieldToFilter(
+                'attribute_code',
+                ['in' => $attributeCodes]
+            );
+        }
+
         $attributesForExport = [];
-        foreach ($type->getAttributeCollection() as $attribute) {
+        foreach ($attributeCollection as $attribute) {
             if (!$this->shouldExportAttribute($attribute)) {
                 continue;
             }
@@ -65,7 +74,7 @@ class ProductAttributes
      * @param Attribute $attribute
      * @return bool
      */
-    public function shouldExportAttribute(Attribute $attribute): bool
+    protected function shouldExportAttribute(Attribute $attribute): bool
     {
         $isBlackListed = $this->isAttributeBlacklisted($attribute);
         return !$isBlackListed &&
