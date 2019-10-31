@@ -48,10 +48,6 @@ class Price implements DecoratorInterface
     }
 
     /**
-     * We split this according to version number. In 2.3.0 and beyond catalog rule prices are incorporated in the
-     * catalog_product_price_index table hence we do not need to join the rule table for this data. Alas this is not
-     * the case in < 2.3.0. At some point (when we drop support for old magento2 releases) we will remove this split.
-     *
      * @param Collection $collection
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Zend_Db_Statement_Exception

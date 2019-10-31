@@ -259,19 +259,25 @@ class StockData implements DecoratorInterface
     }
 
     /**
+     * This method determines which inventory implementation is used
+     * the options are the old magento stock items
+     * or the new magento MSI with source items and reservations
+     *
      * @return StockMapProviderInterface
      */
     private function resolveStockMapProvider(): StockMapProviderInterface
     {
         $version = $this->metaData->getVersion();
+        // In case of magento 2.2.X use magento stock items
         if (version_compare($version, '2.3.0', '<')) {
             return $this->stockMapProviders['stockItemMapProvider'];
         }
-
+        // If 2.3.X but MSI is disabled also use stock items
         if (!$this->moduleManager->isEnabled('Magento_Inventory') || !$this->moduleManager->isEnabled('Magento_InventoryApi')) {
             return $this->stockMapProviders['stockItemMapProvider'];
         }
 
+        // Use sourceItems to determine stock
         return $this->stockMapProviders['sourceItemMapProvider'];
     }
 }

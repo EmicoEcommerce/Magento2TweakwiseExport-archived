@@ -122,13 +122,14 @@ class Collection implements IteratorAggregate, Countable
     {
         $result = [];
         foreach ($this->getExported() as $entity) {
-            $result[$entity->getId()] = 1;
+            $result[] = $entity->getId();
 
             foreach ($entity->getExportChildren() as $child) {
-                $result[$child->getId()] = 1;
+                $result[] = $child->getId();
             }
         }
-        return array_keys($result);
+
+        return array_keys(array_flip($result));
     }
 
     /**
@@ -145,6 +146,7 @@ class Collection implements IteratorAggregate, Countable
                 $skus[] = $child->getAttribute('sku', false);
             }
         }
+
         return array_keys(array_flip($skus));
     }
 }
