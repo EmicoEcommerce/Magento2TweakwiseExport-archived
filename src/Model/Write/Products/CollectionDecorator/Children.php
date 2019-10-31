@@ -7,6 +7,7 @@
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Exception\InvalidArgumentException;
+use Emico\TweakwiseExport\Model\DbResourceHelper;
 use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\EavIteratorFactory;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
@@ -18,13 +19,11 @@ use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Type as ProductType;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
-use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\DataObject;
-use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Magento\GroupedProduct\Model\Product\Type\Grouped;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link;
 
-class Children extends AbstractDecorator
+class Children implements DecoratorInterface
 {
     /**
      * @var ProductType
@@ -62,33 +61,38 @@ class Children extends AbstractDecorator
     private $helper;
 
     /**
+     * @var DbResourceHelper
+     */
+    private $dbResource;
+
+    /**
      * ChildId constructor.
      *
-     * @param DbContext $dbContext
      * @param ProductType $productType
      * @param EavIteratorFactory $eavIteratorFactory
      * @param IteratorInitializer $iteratorInitializer
      * @param ExportEntityChildFactory $entityChildFactory
      * @param CollectionFactory $collectionFactory
      * @param Helper $helper
+     * @param DbResourceHelper $dbResource
      */
     public function __construct(
-        DbContext $dbContext,
         ProductType $productType,
         EavIteratorFactory $eavIteratorFactory,
         IteratorInitializer $iteratorInitializer,
         ExportEntityChildFactory $entityChildFactory,
         CollectionFactory $collectionFactory,
-        Helper $helper
+        Helper $helper,
+        DbResourceHelper $dbResource
     )
     {
-        parent::__construct($dbContext);
         $this->productType = $productType;
         $this->eavIteratorFactory = $eavIteratorFactory;
         $this->entityChildFactory = $entityChildFactory;
         $this->iteratorInitializer = $iteratorInitializer;
         $this->collectionFactory = $collectionFactory;
         $this->helper = $helper;
+        $this->dbResource = $dbResource;
     }
 
     /**
@@ -158,23 +162,23 @@ class Children extends AbstractDecorator
      */
     private function addBundleChildren(Collection $collection, array $parentIds)
     {
-        $connection = $this->getConnection();
+        $connection = $this->dbResource->getConnection();
         $select = $connection->select();
 
         if ($this->helper->isEnterprise()) {
             $select
-                ->from(['product_table' => $this->getTableName('catalog_product_entity')])
+                ->from(['product_table' => $this->dbResource->getTableName('catalog_product_entity')])
                 ->reset('columns')
                 ->columns(['parent_product_id' => 'product_table.entity_id'])
                 ->join(
-                    ['bundle_selection' => $this->getTableName('catalog_product_bundle_selection')],
+                    ['bundle_selection' => $this->dbResource->getTableName('catalog_product_bundle_selection')],
                     'bundle_selection.parent_product_id = product_table.row_id',
                     ['product_id']
                 )
                 ->where('product_table.row_id IN (?)', $parentIds);
         } else {
             $select
-                ->from(['bundle_selection' => $this->getTableName('catalog_product_bundle_selection')])
+                ->from(['bundle_selection' => $this->dbResource->getTableName('catalog_product_bundle_selection')])
                 ->columns(['product_id', 'parent_product_id'])
                 ->where('parent_product_id IN (?)', $parentIds);
         }
@@ -192,16 +196,16 @@ class Children extends AbstractDecorator
      */
     private function addLinkChildren(Collection $collection, array $parentIds, $typeId)
     {
-        $connection = $this->getConnection();
+        $connection = $this->dbResource->getConnection();
         $select = $connection->select();
 
         if ($this->helper->isEnterprise()) {
             $select
-                ->from(['product_table' => $this->getTableName('catalog_product_entity')])
+                ->from(['product_table' => $this->dbResource->getTableName('catalog_product_entity')])
                 ->reset('columns')
                 ->columns(['product_id' => 'product_table.entity_id'])
                 ->join(
-                    ['link_table' => $this->getTableName('catalog_product_link')],
+                    ['link_table' => $this->dbResource->getTableName('catalog_product_link')],
                     'link_table.product_id = product_table.row_id',
                     ['linked_product_id']
                 )
@@ -209,7 +213,7 @@ class Children extends AbstractDecorator
                 ->where('link_table.link_type_id = ?', $typeId);
         } else {
             $select
-                ->from(['link_table' => $this->getTableName('catalog_product_link')])
+                ->from(['link_table' => $this->dbResource->getTableName('catalog_product_link')])
                 ->where('link_type_id = ?', $typeId)
                 ->where('product_id IN (?)', $parentIds);
         }
@@ -227,24 +231,24 @@ class Children extends AbstractDecorator
      */
     private function addConfigurableChildren(Collection $collection, array $parentIds)
     {
-        $connection = $this->getConnection();
+        $connection = $this->dbResource->getConnection();
         $select = $connection->select();
 
 
         if ($this->helper->isEnterprise()) {
             $select
-                ->from(['product_table' => $this->getTableName('catalog_product_entity')])
+                ->from(['product_table' => $this->dbResource->getTableName('catalog_product_entity')])
                 ->reset('columns')
                 ->columns(['parent_id' => 'product_table.entity_id'])
                 ->join(
-                    ['link_table' => $this->getTableName('catalog_product_super_link')],
+                    ['link_table' => $this->dbResource->getTableName('catalog_product_super_link')],
                     'link_table.parent_id = product_table.row_id',
                     ['product_id']
                 )
                 ->where('product_table.entity_id IN (?)', $parentIds);
         } else {
             $select
-                ->from(['link_table' => $this->getTableName('catalog_product_super_link')])
+                ->from(['link_table' => $this->dbResource->getTableName('catalog_product_super_link')])
                 ->columns(['product_id', 'parent_id'])
                 ->where('parent_id IN (?)', $parentIds);
         }

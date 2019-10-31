@@ -7,9 +7,9 @@
 namespace Emico\TweakwiseExport\Model\Write\Products;
 
 use Emico\TweakwiseExport\Exception\InvalidArgumentException;
+use Emico\TweakwiseExport\Model\StockItem;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
-use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockConfigurationInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -71,7 +71,7 @@ class ExportEntity
     private $isComposite;
 
     /**
-     * @var StockItemInterface
+     * @var StockItem
      */
     private $stockItem;
 
@@ -230,16 +230,6 @@ class ExportEntity
     public function getStockQty(): float
     {
         return (float) $this->stockItem->getQty();
-    }
-
-    /**
-     * @param float $stockQty
-     * @return $this
-     */
-    public function setStockQty(float $stockQty)
-    {
-        $this->stockQty = $stockQty;
-        return $this;
     }
 
     /**
@@ -423,7 +413,7 @@ class ExportEntity
     }
 
     /**
-     * @return null|StockItemInterface
+     * @return StockItem
      */
     public function getStockItem()    
     {        
@@ -431,10 +421,10 @@ class ExportEntity
     }
 
     /**
-     * @param StockItemInterface $stockItem
+     * @param StockItem $stockItem
      * @return $this
      */
-    public function setStockItem(StockItemInterface $stockItem)
+    public function setStockItem($stockItem)
     {
         $this->stockItem = $stockItem;
         return $this;
@@ -530,11 +520,7 @@ class ExportEntity
             return true;
         }
 
-        if (!$this->stockItem->getManageStock()) {
-            return true;
-        }
-
-        return $this->stockItem->getIsInStock() && $this->stockItem->getQty() > $this->stockItem->getMinQty();
+        return $this->stockItem->getIsInStock();
     }
 
     /**

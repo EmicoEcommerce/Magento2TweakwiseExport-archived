@@ -8,24 +8,30 @@ namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Config\Source\StockCalculation;
+use Emico\TweakwiseExport\Model\StockItem;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockMapProviderInterface;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
-use Magento\CatalogInventory\Api\Data\StockItemInterface;
-use Magento\CatalogInventory\Api\Data\StockItemInterfaceFactory;
-use Magento\CatalogInventory\Api\StockItemCriteriaInterfaceFactory;
-use Magento\CatalogInventory\Api\StockItemRepositoryInterface;
+use Magento\Framework\App\ProductMetadataInterface;
+use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
+use Magento\Framework\Module\Manager;
 
 class StockData implements DecoratorInterface
 {
     /**
-     * @var StockItemRepositoryInterface
+     * @var ProductMetadataInterface
      */
-    private $stockItemRepository;
+    private $metaData;
 
     /**
-     * @var StockItemCriteriaInterfaceFactory
+     * @var DecoratorInterface[]
      */
-    private $criteriaFactory;
+    private $stockMapProviders = [];
+
+    /**
+     * @var TweakwiseStockItemFactory
+     */
+    private $stockItemFactory;
 
     /**
      * @var Config
@@ -33,29 +39,31 @@ class StockData implements DecoratorInterface
     private $config;
 
     /**
-     * @var StockItemInterfaceFactory
+     * @var Manager
      */
-    private $stockItemFactory;
+    private $moduleManager;
 
     /**
      * StockData constructor.
      *
-     * @param StockItemRepositoryInterface $stockItemRepository
-     * @param StockItemCriteriaInterfaceFactory $criteriaFactory
-     * @param StockItemInterfaceFactory $stockItemFactory
+     * @param ProductMetadataInterface $metaData
+     * @param TweakwiseStockItemFactory $stockItemFactory
      * @param Config $config
+     * @param Manager $moduleManager
+     * @param StockMapProviderInterface[] $stockMapProviders
      */
     public function __construct(
-        StockItemRepositoryInterface $stockItemRepository,
-        StockItemCriteriaInterfaceFactory $criteriaFactory,
-        StockItemInterfaceFactory $stockItemFactory,
-        Config $config
-    )
-    {
-        $this->stockItemRepository = $stockItemRepository;
-        $this->criteriaFactory = $criteriaFactory;
-        $this->config = $config;
+        ProductMetadataInterface $metaData,
+        TweakwiseStockItemFactory $stockItemFactory,
+        Config $config,
+        Manager $moduleManager,
+        array $stockMapProviders
+    ) {
+        $this->metaData = $metaData;
+        $this->stockMapProviders = $stockMapProviders;
         $this->stockItemFactory = $stockItemFactory;
+        $this->config = $config;
+        $this->moduleManager = $moduleManager;
     }
 
     /**
@@ -63,8 +71,8 @@ class StockData implements DecoratorInterface
      */
     public function decorate(Collection $collection)
     {
-        // This has to be called before setting the stock items. This way the composite
-        // products are not filtered since they mostly have 0 stock.
+        // This has to be called before setting the stock items.
+        // This way the composite products are not filtered since they mostly have 0 stock.
         $toBeCombinedEntities = $collection->getExported();
         $storeId = $collection->getStoreId();
 
@@ -85,22 +93,23 @@ class StockData implements DecoratorInterface
             return;
         }
 
-        $stockItemMap = $this->getStockItemMap($collection->getAllIds());
+        $stockMapProvider = $this->resolveStockMapProvider();
+        $stockItemMap = $stockMapProvider->getStockItemMap($collection, $storeId);
+
         foreach ($collection as $entity) {
-            $this->assignStockItem($stockItemMap, $storeId, $entity);
+            $this->assignStockItem($stockItemMap, $entity);
 
             foreach ($entity->getExportChildren() as $childEntity) {
-                $this->assignStockItem($stockItemMap, $storeId, $childEntity);
+                $this->assignStockItem($stockItemMap, $childEntity);
             }
         }
     }
 
     /**
      * @param array $stockItemMap
-     * @param int $storeId
      * @param ExportEntity $entity
      */
-    private function assignStockItem(array $stockItemMap, int $storeId, ExportEntity $entity)
+    private function assignStockItem(array $stockItemMap, ExportEntity $entity)
     {
         $entityId = $entity->getId();
         if (isset($stockItemMap[$entityId])) {
@@ -109,33 +118,7 @@ class StockData implements DecoratorInterface
             $stockItem = $this->stockItemFactory->create();
         }
 
-        if (method_exists($stockItem, 'setStoreId')) {
-            $stockItem->setStoreId($storeId);
-        }
-
         $entity->setStockItem($stockItem);
-    }
-
-    /**
-     * @param array $entityIds
-     * @return StockItemInterface[]
-     */
-    private function getStockItemMap(array $entityIds): array
-    {
-        if (\count($entityIds) === 0) {
-            return [];
-        }
-
-        $criteria = $this->criteriaFactory->create();
-        $criteria->setProductsFilter([$entityIds]);
-        $items = $this->stockItemRepository->getList($criteria)->getItems();
-
-        $map = [];
-        foreach ($items as $item) {
-            $productId = (int) $item->getProductId();
-            $map[$productId] = $item;
-        }
-        return $map;
     }
 
     /**
@@ -148,14 +131,92 @@ class StockData implements DecoratorInterface
             return;
         }
 
-        $combinedStock = $this->getCombinedStock($entity, $storeId);
-        $entity->getStockItem()->setQty($combinedStock);
+        $combinedStockItem = $this->getCombinedStockItem($entity, $storeId);
+        $entity->setStockItem($combinedStockItem);
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @param int $storeId
+     * @return StockItem
+     */
+    private function getCombinedStockItem(ExportEntity $entity, int $storeId)
+    {
+        $combinedStockQty = $this->getCombinedStockQty($entity, $storeId);
+        $combinedStockStatus = $this->getCombinedStockStatus($entity);
+
+        $stockItem = $this->stockItemFactory->create();
+        $stockItem->setQty($combinedStockQty);
+        $stockItem->setIsInStock($combinedStockStatus);
+
+        return $stockItem;
     }
 
     /**
      * @param ExportEntity $entity
      * @param int $storeId
      * @return float
+     */
+    private function getCombinedStockQty(ExportEntity $entity, int $storeId): float
+    {
+        $stockQuantities = $this->getStockQuantities($entity);
+        if (empty($stockQuantities)) {
+            return 0;
+        }
+
+        switch ($this->config->getStockCalculation($storeId)) {
+            case StockCalculation::OPTION_MAX:
+                return max($stockQuantities);
+            case StockCalculation::OPTION_MIN:
+                return min($stockQuantities);
+            case StockCalculation::OPTION_SUM:
+            default:
+                return array_sum($stockQuantities);
+        }
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @param int $storeId
+     * @return float
+     */
+    private function getCombinedStockStatus(ExportEntity $entity): float
+    {
+        $stockStatus = $this->getStockStatus($entity);
+        return !empty($stockStatus) ? max($stockStatus) : 0;
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @return float[]
+     */
+    private function getStockQuantities(ExportEntity $entity): array
+    {
+        $stockQty = [];
+        foreach ($entity->getExportChildren() as $child) {
+            $stockQty[] = $child->getStockItem()->getQty();
+        }
+
+        return $stockQty;
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @return float[]
+     */
+    private function getStockStatus(ExportEntity $entity): array
+    {
+        $stockStatus = [];
+        foreach ($entity->getExportChildren() as $child) {
+            $stockStatus[] = $child->getStockItem()->getIsInStock();
+        }
+
+        return $stockStatus;
+    }
+
+    /**
+     * @param ExportEntity $entity
+     * @param int $storeId
      */
     private function addStockPercentage(ExportEntity $entity, int $storeId)
     {
@@ -183,8 +244,8 @@ class StockData implements DecoratorInterface
             return (int) $this->isInStock($entity) * 100;
         }
 
-        $inStockchildrenCount = \count(\array_filter($children, [$this, 'isInStock']));
-        return round(($inStockchildrenCount / $childrenCount) * 100, 2);
+        $inStockChildrenCount = \count(\array_filter($children, [$this, 'isInStock']));
+        return round(($inStockChildrenCount / $childrenCount) * 100, 2);
     }
 
     /**
@@ -194,52 +255,29 @@ class StockData implements DecoratorInterface
     private function isInStock(ExportEntity $entity): bool
     {
         $stockItem = $entity->getStockItem();
-
-        if (!$stockItem) {
-            return true;
-        }
-
-        if (!$stockItem->getManageStock()) {
-            return true;
-        }
-
-        return $stockItem->getIsInStock() && $stockItem->getQty() > $stockItem->getMinQty();
+        return (int)(!$stockItem || $stockItem->getIsInStock());
     }
 
     /**
-     * @param ExportEntity $entity
-     * @param int $storeId
-     * @return float
+     * This method determines which inventory implementation is used
+     * the options are the old magento stock items
+     * or the new magento MSI with source items and reservations
+     *
+     * @return StockMapProviderInterface
      */
-    private function getCombinedStock(ExportEntity $entity, int $storeId): float
+    private function resolveStockMapProvider(): StockMapProviderInterface
     {
-        $stockQuantities = $this->getStockQuantities($entity);
-        if (empty($stockQuantities)) {
-            return 0;
+        $version = $this->metaData->getVersion();
+        // In case of magento 2.2.X use magento stock items
+        if (version_compare($version, '2.3.0', '<')) {
+            return $this->stockMapProviders['stockItemMapProvider'];
+        }
+        // If 2.3.X but MSI is disabled also use stock items
+        if (!$this->moduleManager->isEnabled('Magento_Inventory') || !$this->moduleManager->isEnabled('Magento_InventoryApi')) {
+            return $this->stockMapProviders['stockItemMapProvider'];
         }
 
-        switch ($this->config->getStockCalculation($storeId)) {
-            case StockCalculation::OPTION_MAX:
-                return max($stockQuantities);
-            case StockCalculation::OPTION_MIN:
-                return min($stockQuantities);
-            case StockCalculation::OPTION_SUM:
-            default:
-                return array_sum($stockQuantities);
-        }
-    }
-
-    /**
-     * @param ExportEntity $entity
-     * @return float[]
-     */
-    private function getStockQuantities(ExportEntity $entity): array
-    {
-        $stockQty = [];
-        foreach ($entity->getExportChildren() as $child) {
-            $stockQty[] = $child->getStockQty();
-        }
-
-        return $stockQty;
+        // Use sourceItems to determine stock
+        return $this->stockMapProviders['sourceItemMapProvider'];
     }
 }
