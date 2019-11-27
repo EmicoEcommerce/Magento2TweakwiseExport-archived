@@ -49,6 +49,14 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
+                <field id="allow_cache_flush" translate="label,comment" type="select" sortOrder="14" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Allow cache flush</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Allows for automated cache flush, this task can be configured in navigator and should run after the publish task. Cache flush url will be: www.example.com/tweakwise/cache/flush/key/XXXX as defined above</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
                 <field id="validate" translate="label,comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Validate</label>
                     <comment>Validate export on product, category and product -> category link count. If validate fails export will be rollback.</comment>

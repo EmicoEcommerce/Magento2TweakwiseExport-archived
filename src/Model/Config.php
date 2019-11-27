@@ -28,6 +28,7 @@ class Config
     const PATH_STOCK_PERCENTAGE = 'tweakwise/export/stock_percentage';
     const PATH_OUT_OF_STOCK_CHILDREN = 'tweakwise/export/out_of_stock_children';
     const PATH_FEED_KEY = 'tweakwise/export/feed_key';
+    const PATH_ALLOW_CACHE_FLUSH = 'tweakwise/export/allow_cache_flush';
     const PATH_PRICE_FIELD = 'tweakwise/export/price_field';
     const PATH_EXCLUDE_CHILD_ATTRIBUTES = 'tweakwise/export/exclude_child_attributes';
 
@@ -140,6 +141,14 @@ class Config
     public function getKey()
     {
         return $this->config->getValue(self::PATH_FEED_KEY);
+    }
+
+    /**
+     * @return bool Allow cache flush or not
+     */
+    public function isAllowCacheFlush(): bool
+    {
+        return (bool) $this->config->getValue(self::PATH_ALLOW_CACHE_FLUSH);
     }
 
     /**
