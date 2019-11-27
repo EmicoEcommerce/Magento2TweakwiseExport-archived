@@ -28,7 +28,7 @@ class Trigger extends Action
      * @param Action\Context $context
      * @param Scheduler $scheduler
      */
-    public function     __construct(Action\Context $context, Scheduler $scheduler)
+    public function __construct(Action\Context $context, Scheduler $scheduler)
     {
         parent::__construct($context);
         $this->scheduler = $scheduler;
