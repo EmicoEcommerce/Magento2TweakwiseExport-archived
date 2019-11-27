@@ -16,37 +16,25 @@ use Magento\Framework\App\Cache\Manager;
 class CacheHandler
 {
     /**
-     * Cache types to be flushed
-     */
-    const CACHE_TYPES = [
-        'block_html',
-        'collections',
-        'full_page'
-    ];
-
-    /**
      * @var Manager Magento native cache handler
      */
     protected $manager;
 
     /**
+     * @var array
+     */
+    protected $cacheTypes = [];
+
+    /**
      * CacheHandler constructor.
      *
      * @param Manager $manager Cache manager
+     * @param array $cacheTypes Cache types to flush
      */
-    public function __construct(Manager $manager)
+    public function __construct(Manager $manager, array $cacheTypes = [])
     {
         $this->manager = $manager;
-    }
-
-    /**
-     * Cache types to flush, mostly here so that it is available for interception
-     *
-     * @return string[]
-     */
-    public function getCacheTypes(): array
-    {
-        return self::CACHE_TYPES;
+        $this->cacheTypes = $cacheTypes;
     }
 
     /**
@@ -56,6 +44,6 @@ class CacheHandler
      */
     public function clear()
     {
-        $this->manager->flush($this->getCacheTypes());
+        $this->manager->flush($this->cacheTypes);
     }
 }

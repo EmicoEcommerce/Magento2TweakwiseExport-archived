@@ -64,7 +64,6 @@ class Flush implements ActionInterface
         ResponseFactory $responseFactory,
         CacheHandler $cacheHandler
     ) {
-
         $this->context = $context;
         $this->requestValidator = $requestValidator;
         $this->config = $config;
