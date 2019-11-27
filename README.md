@@ -52,12 +52,12 @@ Options:
 
 ## Feed structure
 The feed contains some header information followed by categories and then products. Tweakwise does not natively support multiple stores, in order to circumvent this all categories and products are prefixed with 1000{store_id}.
-If a product (with id 1178) is active and visible in multiple stores (say: 1, 5 and 8) then it will appear three times in the feed with ids: 100011178, 100051178 and 100081178.
-The data on that product depends on the attribute values of the specific store. In short an entity with id is available in the feed as ``1000{store_id}{entity_id}``
+If a product (with id 1178) is active and visible in multiple stores (say 1, 5 and 8) then it will appear three times in the feed with ids: 100011178, 100051178 and 100081178.
+The data on that product depends on the attribute values of the specific store. In short an entity is available in the feed as ``1000{store_id}{entity_id}``
 
-The feed only contains products that are salable and visible under your catalog configuration. If a product has children (say it is configurable) then the feed will also contain all the data from those children.
-In other words child data is aggregated onto the "main" product. 
-The reason for this is that when a user searches for a t-shirt with size M then the configurable must show up in the result, therefor the configurable should be exported with all sizes available among its children. 
+The feed only contains products that are visible under your catalog configuration. If a product has children (say it is configurable) then the feed will also contain all the data from those children.
+Child data is aggregated onto the "parent" product. 
+The reason for this is that when a user searches for a t-shirt with size M then the configurable must show up in the results, therefor the configurable should be exported with all sizes available among its children. 
 
 The feed contains only attributes which have bearing on search or navigation, check ``src/Model/Helper.php:85`` to see the criteria an attribute must meet in order to be exported.
 
@@ -69,7 +69,7 @@ If you find an issue with data retrieval please create an issue on github.
 
 ## Export Settings
 - Enabled: If products of that store should be exported to tweakwise, note that if this is false for some store then navigation and search should also be disabled for that store.
-- Schedule: Cron schedule for generating the feed.
+- Schedule: Cron schedule for generating the feed. We strongly encourage you to register the export task on the server crontab instead of using the Magento cron.
 - Schedule export: Generate the feed on the next cron run.
 - Key: This will be validated by the export module when the ExportController is asked for feed content. If the request does not have a key parameter that matches the feed will not be served.
 - Export realtime: When the ExportController is asked for a feed it will generate a new one on the fly. Note that this is not recommended!
@@ -77,11 +77,11 @@ If you find an issue with data retrieval please create an issue on github.
 - Combined product stock calculation: this will determine stock the quantity of combined products (configurable, bundle, etc) SUM: add all quantities of child products, MAX: Use the max quantity of all child products, MIN: use the minimum quantity. This setting might be removed as each product type should have its own stock calculation method.
 - Export percentage of child products that are in stock: If set to yes then for each combined product the percentage of child products that are in stock will be exported. Example: A t-shirt (configurable) with sizes XS, S, M, L and XL (the associated simples) if only S and XL are in stock then the percentage is exported as 40 (as 2/5 of the products are in stock).
 - Export out of stock Combined product children: Tweakwise export aggregates child data on parent products, this setting determines if data from out of child products should be included in this aggregation.
-- Exclude child attributes: These values of these attributes will be excluded from product data.
+- Exclude child attributes: These values of these attributes will be excluded from product data when aggregating onto the parent product.
 - Which price value will be exported as "price" to tweakwise.
 
 ### Visibility settings
-Magento has multiple visibility settings, tweakwise only knows visible products meaning that if a product is in the feed then it will be visible while navigating.
+Magento has multiple visibility settings, tweakwise only knows visible products meaning that if a product is in the feed then it will be visible while navigating and searching.
 The magento visibility setting is exported in the feed so you can add a hidden filter to your tweakwise template to artificially use the correct settings.
 If you do this then exclude the visibility attribute from child products (see "Export Settings").
 
