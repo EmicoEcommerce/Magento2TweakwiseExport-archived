@@ -91,9 +91,9 @@
 
     <type name="Emico\TweakwiseExport\Model\ProductAttributes">
         <arguments>
-            <argument name="attributeBlacklist">
+            <argument name="attributeBlacklist" xsi:type="array">
                 <!-- Add your own attributes if needed-->
-                <item name="category_ids">category_ids</item>
+                <item name="category_ids" xsi:type="string">category_ids</item>
             </argument>
         </arguments>
     </type>
