@@ -8,6 +8,11 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Implement your own review provider if you want reviews from a different source -->
+    <preference for="Emico\TweakwiseExport\Model\Review\ReviewProviderInterface"
+                type="Emico\TweakwiseExport\Model\Review\MagentoReviewProvider"
+    />
+
     <type name="Magento\Framework\Console\CommandListInterface">
         <arguments>
             <argument name="commands" xsi:type="array">
@@ -79,6 +84,7 @@
                 <item name="category_reference" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\CategoryReference</item>
                 <item name="price" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Price</item>
                 <item name="website_link" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\WebsiteLink</item>
+                <item name="review" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Review</item>
             </argument>
         </arguments>
     </type>
