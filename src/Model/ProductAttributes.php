@@ -18,24 +18,30 @@ use Magento\Framework\Exception\LocalizedException;
 class ProductAttributes
 {
     /**
+     * @var EavConfig
+     */
+    protected $eavConfig;
+
+    /**
      * Apparently some of magento core attributes are marked as static
      * but their values are not saved in table catalog_product_entity
      * we cannot export these attributes.
+     *
+     * @var array
      */
-    const ATTRIBUTE_BLACKLIST = ['category_ids'];
-
-    /**
-     * @var EavConfig
-     */
-    private $eavConfig;
+    protected $attributeBlacklist;
 
     /**
      * ProductAttributes constructor.
      * @param EavConfig $eavConfig
+     * @param array $attributeBlacklist
      */
-    public function __construct(EavConfig $eavConfig)
-    {
+    public function __construct(
+        EavConfig $eavConfig,
+        array $attributeBlacklist
+    ) {
         $this->eavConfig = $eavConfig;
+        $this->attributeBlacklist = $attributeBlacklist;
     }
 
     /**
@@ -96,7 +102,7 @@ class ProductAttributes
     {
         return \in_array(
             $attribute->getAttributeCode(),
-            self::ATTRIBUTE_BLACKLIST,
+            $this->attributeBlacklist,
             true
         );
     }
