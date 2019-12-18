@@ -15,6 +15,7 @@ use Emico\TweakwiseExport\Model\RequestValidator;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ActionInterface;
 use Magento\Framework\Exception\NotFoundException;
+use Magento\MediaStorage\Model\File\Storage\Response;
 use Magento\MediaStorage\Model\File\Storage\ResponseFactory;
 
 class Export implements ActionInterface
@@ -76,9 +77,9 @@ class Export implements ActionInterface
      * @see    \Magento\PageCache\Model\App\Response\HttpPlugin
      * @see    \Magento\MediaStorage\Model\File\Storage\Response
      * @throws NotFoundException
-     * @return \Magento\MediaStorage\Model\File\Storage\Response
+     * @return Response
      */
-    public function execute()
+    public function execute(): Response
     {
         if (!$this->requestValidator->validateRequestKey($this->context->getRequest())) {
             throw new NotFoundException(__('Page not found.'));

@@ -79,7 +79,7 @@ class Flush implements ActionInterface
      * @return ResponseInterface
      * @throws NotFoundException
      */
-    public function execute()
+    public function execute(): ResponseInterface
     {
         if (!$this->requestValidator->validateRequestKey($this->context->getRequest())) {
             throw new NotFoundException(__('Page not found.'));
