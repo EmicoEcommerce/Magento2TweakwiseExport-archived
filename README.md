@@ -59,7 +59,7 @@ The feed only contains products that are visible under your catalog configuratio
 Child data is aggregated onto the "parent" product. 
 The reason for this is that when a user searches for a t-shirt with size M then the configurable must show up in the results, therefor the configurable should be exported with all sizes available among its children. 
 
-The feed contains only attributes which have bearing on search or navigation, check ``src/Model/Helper.php:85`` to see the criteria an attribute must meet in order to be exported.
+The feed contains only attributes which have bearing on search or navigation, check ``src/Model/ProductAttributes.php:45`` to see the criteria an attribute must meet in order to be exported.
 
 ## A note on the feed implementation
 Magento's native interfaces and handlers for data retrieval were deemed to slow for a large catalogue.
