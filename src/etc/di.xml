@@ -28,6 +28,16 @@
         </arguments>
     </type>
 
+    <type name="Emico\TweakwiseExport\Model\CacheHandler">
+        <arguments>
+            <argument name="cacheTypes" xsi:type="array">
+                <item name="block_html" xsi:type="string">block_html</item>
+                <item name="collections" xsi:type="string">collections</item>
+                <item name="full_page" xsi:type="string">full_page</item>
+            </argument>
+        </arguments>
+    </type>
+
     <type name="Emico\TweakwiseExport\Console\Command\ExportCommand">
         <arguments>
             <argument name="validator" xsi:type="object">Emico\TweakwiseExport\Model\Validate\Validator\Proxy</argument>

@@ -9,21 +9,17 @@
 namespace Emico\TweakwiseExport\Controller\Feed;
 
 use Emico\TweakwiseExport\App\Response\FeedContent;
-use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Export as ExportModel;
 use Emico\TweakwiseExport\Model\Logger;
+use Emico\TweakwiseExport\Model\RequestValidator;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ActionInterface;
 use Magento\Framework\Exception\NotFoundException;
+use Magento\MediaStorage\Model\File\Storage\Response;
 use Magento\MediaStorage\Model\File\Storage\ResponseFactory;
 
 class Export implements ActionInterface
 {
-    /**
-     * @var Config
-     */
-    private $config;
-
     /**
      * @var Export
      */
@@ -45,26 +41,31 @@ class Export implements ActionInterface
     private $context;
 
     /**
+     * @var RequestValidator
+     */
+    private $requestValidator;
+
+    /**
      * Export constructor.
      *
      * @param Context $context
-     * @param Config $config
      * @param ExportModel $export
      * @param Logger $log
+     * @param RequestValidator $requestValidator
      * @param ResponseFactory $responseFactory
      */
     public function __construct(
         Context $context,
-        Config $config,
         ExportModel $export,
         Logger $log,
+        RequestValidator $requestValidator,
         ResponseFactory $responseFactory
     ) {
-        $this->config = $config;
+        $this->context = $context;
         $this->export = $export;
         $this->log = $log;
+        $this->requestValidator = $requestValidator;
         $this->responseFactory = $responseFactory;
-        $this->context = $context;
     }
 
     /**
@@ -76,13 +77,11 @@ class Export implements ActionInterface
      * @see    \Magento\PageCache\Model\App\Response\HttpPlugin
      * @see    \Magento\MediaStorage\Model\File\Storage\Response
      * @throws NotFoundException
-     * @return \Magento\MediaStorage\Model\File\Storage\Response
+     * @return Response
      */
-    public function execute()
+    public function execute(): Response
     {
-        $requestKey = $this->context->getRequest()->getParam('key');
-        $configKey = $this->config->getKey();
-        if ($requestKey !== $configKey) {
+        if (!$this->requestValidator->validateRequestKey($this->context->getRequest())) {
             throw new NotFoundException(__('Page not found.'));
         }
 

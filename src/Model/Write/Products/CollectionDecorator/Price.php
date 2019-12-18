@@ -40,8 +40,7 @@ class Price implements DecoratorInterface
         CollectionFactory $collectionFactory,
         StoreManagerInterface $storeManager,
         Config $config
-    )
-    {
+    ) {
         $this->collectionFactory = $collectionFactory;
         $this->storeManager = $storeManager;
         $this->config = $config;
