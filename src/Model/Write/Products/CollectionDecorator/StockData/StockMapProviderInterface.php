@@ -23,5 +23,5 @@ interface StockMapProviderInterface
      * @param int $storeId
      * @return StockItem[]
      */
-    public function getStockItemMap(Collection $collection, int $storeId): array;
+    public function getStockItemMap(Collection $collection, int $storeId);
 }

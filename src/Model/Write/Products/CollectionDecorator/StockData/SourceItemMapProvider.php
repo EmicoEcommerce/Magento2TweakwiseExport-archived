@@ -84,7 +84,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
      * @throws NoSuchEntityException
      * @throws \Zend_Db_Statement_Exception
      */
-    public function getStockItemMap(Collection $collection, int $storeId): array
+    public function getStockItemMap(Collection $collection, int $storeId)
     {
         if ($collection->count() === 0) {
             return [];
