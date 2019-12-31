@@ -43,19 +43,13 @@ class Review implements DecoratorInterface
         /** @var ProductReviewSummary $review */
         foreach ($reviews as $review) {
             $productId = $review->getProductId();
-
-            $exportEntity = false;
-
             try {
                 $exportEntity = $collection->get($productId);
-            } catch (InvalidArgumentException $e) {}
-
-            if (!$exportEntity) {
+                $exportEntity->addAttribute('review_rating', $review->getAverageRating());
+                $exportEntity->addAttribute('review_count', $review->getReviewCount());
+            } catch (InvalidArgumentException $e) {
                 continue;
             }
-
-            $exportEntity->addAttribute('review_rating', $review->getAverageRating());
-            $exportEntity->addAttribute('review_count', $review->getReviewCount());
         }
     }
 }
