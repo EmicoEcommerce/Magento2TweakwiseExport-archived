@@ -6,6 +6,7 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
+use Emico\TweakwiseExport\Exception\InvalidArgumentException;
 use Emico\TweakwiseExport\Model\Review\ProductReviewSummary;
 use Emico\TweakwiseExport\Model\Review\ReviewProviderInterface;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
@@ -42,7 +43,14 @@ class Review implements DecoratorInterface
         /** @var ProductReviewSummary $review */
         foreach ($reviews as $review) {
             $productId = $review->getProductId();
-            if (!$exportEntity = $collection->get($productId)) {
+
+            $exportEntity = false;
+
+            try {
+                $exportEntity = $collection->get($productId);
+            } catch (InvalidArgumentException $e) {}
+
+            if (!$exportEntity) {
                 continue;
             }
 
