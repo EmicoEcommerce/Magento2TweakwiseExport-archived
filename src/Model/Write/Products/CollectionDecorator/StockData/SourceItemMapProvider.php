@@ -14,9 +14,11 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\InventoryApi\Api\Data\SourceInterface;
 use Magento\InventoryApi\Api\Data\SourceItemInterface;
-use Magento\InventoryApi\Api\GetSourcesAssignedToStockOrderedByPriorityInterface;
+use Emico\TweakwiseExport\Model\StockSourceProviderFactory;
+use Emico\TweakwiseExport\Model\StockResolverFactory;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\InventoryApi\Api\GetSourcesAssignedToStockOrderedByPriorityInterface;
 use Zend_Db_Expr;
 
 /**
@@ -46,6 +48,16 @@ class SourceItemMapProvider implements StockMapProviderInterface
     private $stockSourceProvider;
 
     /**
+     * @var StockSourceProviderFactory
+     */
+    private $stockSourceProviderFactory;
+
+    /**
+     * @var StockResolverFactory
+     */
+    private $stockResolverFactory;
+
+    /**
      * @var DbResourceHelper
      */
     private $dbResource;
@@ -54,25 +66,25 @@ class SourceItemMapProvider implements StockMapProviderInterface
      * StockData constructor.
      *
      * @param DbResourceHelper $dbResource
-     * @param GetSourcesAssignedToStockOrderedByPriorityInterface $stockSourceProvider
+     * @param StockSourceProviderFactory $stockSourceProviderFactory
      * @param TweakwiseStockItemFactory $tweakwiseStockItemFactory
      * @param StoreManagerInterface $storeManager
-     * @param StockResolverInterface $stockResolver
+     * @param StockResolverFactory $stockResolverFactory
      * @param DbResourceHelper $resourceHelper
      */
     public function __construct(
         DbResourceHelper $dbResource,
-        GetSourcesAssignedToStockOrderedByPriorityInterface $stockSourceProvider,
+        StockSourceProviderFactory $stockSourceProviderFactory,
         TweakwiseStockItemFactory $tweakwiseStockItemFactory,
         StoreManagerInterface $storeManager,
-        StockResolverInterface $stockResolver,
+        StockResolverFactory $stockResolverFactory,
         DbResourceHelper $resourceHelper
     ) {
         $this->dbResource = $dbResource;
-        $this->stockSourceProvider = $stockSourceProvider;
+        $this->stockSourceProviderFactory = $stockSourceProviderFactory;
         $this->tweakwiseStockItemFactory = $tweakwiseStockItemFactory;
         $this->storeManager = $storeManager;
-        $this->stockResolver = $stockResolver;
+        $this->stockResolverFactory = $stockResolverFactory;
         $this->dbResource = $resourceHelper;
     }
 
@@ -181,13 +193,25 @@ class SourceItemMapProvider implements StockMapProviderInterface
     protected function getSourceCodesForStore(int $storeId)
     {
         $stockId = $this->getStockIdForStoreId($storeId);
-        $sourceModels = $this->stockSourceProvider->execute($stockId);
+        $sourceModels = $this->getStockSourceProvider()->execute($stockId);
 
         $sourceCodeMapper = static function (SourceInterface $source) {
             return $source->getSourceCode();
         };
 
         return array_map($sourceCodeMapper, $sourceModels);
+    }
+
+    /**
+     * @return GetSourcesAssignedToStockOrderedByPriorityInterface
+     */
+    protected function getStockSourceProvider()
+    {
+        if (!$this->stockSourceProvider) {
+            $this->stockSourceProvider = $this->stockSourceProviderFactory->create();
+        }
+
+        return $this->stockSourceProvider;
     }
 
     /**
@@ -200,7 +224,19 @@ class SourceItemMapProvider implements StockMapProviderInterface
     {
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
         $websiteCode = $this->storeManager->getWebsite($websiteId)->getCode();
-        return $this->stockResolver->execute('website', $websiteCode)->getStockId();
+        return $this->getStockResolver()->execute('website', $websiteCode)->getStockId();
+    }
+
+    /**
+     * @return StockResolverInterface
+     */
+    protected function getStockResolver()
+    {
+        if (!$this->stockResolver) {
+            $this->stockResolver = $this->stockResolverFactory->create();
+        }
+
+        return $this->stockResolver;
     }
 
     /**
