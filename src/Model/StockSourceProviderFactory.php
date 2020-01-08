@@ -9,11 +9,17 @@ declare(strict_types=1);
 
 namespace Emico\TweakwiseExport\Model;
 
-
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Simplexml\Element;
 use Magento\InventoryApi\Api\GetSourcesAssignedToStockOrderedByPriorityInterface;
 
+/**
+ * This is necessary to remain compatible with Magento 2.2.X
+ * setup:di:compile fails when there is a reference to a non existing Interface or Class in the constructor
+ *
+ * Class StockSourceProviderFactory
+ * @package Emico\TweakwiseExport\Model
+ */
 class StockSourceProviderFactory
 {
     /**

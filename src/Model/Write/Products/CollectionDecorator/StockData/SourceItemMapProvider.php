@@ -203,6 +203,9 @@ class SourceItemMapProvider implements StockMapProviderInterface
     }
 
     /**
+     * This is necessary to remain compatible with Magento 2.2.X
+     * setup:di:compile fails when there is a reference to a non existing Interface or Class in the constructor
+     *
      * @return GetSourcesAssignedToStockOrderedByPriorityInterface
      */
     protected function getStockSourceProvider()
@@ -228,6 +231,9 @@ class SourceItemMapProvider implements StockMapProviderInterface
     }
 
     /**
+     * This is necessary to remain compatible with Magento 2.2.X
+     * setup:di:compile fails when there is a reference to a non existing Interface or Class in the constructor
+     *
      * @return StockResolverInterface
      */
     protected function getStockResolver()

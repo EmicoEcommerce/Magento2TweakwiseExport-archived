@@ -9,11 +9,17 @@ declare(strict_types=1);
 
 namespace Emico\TweakwiseExport\Model;
 
-
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Simplexml\Element;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
 
+/**
+ * This is necessary to remain compatible with Magento 2.2.X
+ * setup:di:compile fails when there is a reference to a non existing Interface or Class in the constructor
+ *
+ * Class StockResolverFactory
+ * @package Emico\TweakwiseExport\Model
+ */
 class StockResolverFactory
 {
     /**
