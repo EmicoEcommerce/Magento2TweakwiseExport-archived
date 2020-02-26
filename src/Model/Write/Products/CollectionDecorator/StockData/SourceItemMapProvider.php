@@ -161,7 +161,6 @@ class SourceItemMapProvider implements StockMapProviderInterface
                 "$stockItemTable.product_id = $productTableName.entity_id",
                 [
                     'backorders',
-                    'min_sale_qty'
                 ]
             )
             ->where("$productTableName.sku IN (?)", $skus)
@@ -255,14 +254,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
         $tweakwiseStockItem = $this->tweakwiseStockItemFactory->create();
 
         $qty = (int)$item['qty'];
-        $isInStock = (int) (
-            $item['backorders'] ||
-            (
-                $qty >= (int)$item['min_sale_qty'] &&
-                (int)$item['is_in_stock'] &&
-                $qty > 0
-            )
-        );
+        $isInStock = max((int)$item['backorders'], (int)$item['is_in_stock']);
 
         $tweakwiseStockItem->setQty($qty);
         $tweakwiseStockItem->setIsInStock($isInStock);

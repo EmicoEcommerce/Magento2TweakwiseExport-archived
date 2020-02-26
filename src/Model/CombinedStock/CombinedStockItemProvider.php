@@ -27,7 +27,7 @@ class CombinedStockItemProvider implements CombinedStockItemInterface
      * @param Simple $simpleInstance
      * @param CombinedStockItemInterface[] $productTypes
      */
-    protected function __construct(Simple $simpleInstance, array $productTypes)
+    public function __construct(Simple $simpleInstance, array $productTypes)
     {
         $this->simpleInstance = $simpleInstance;
         $this->productTypes = $productTypes;

@@ -22,6 +22,7 @@ use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\DataObject;
 use Magento\GroupedProduct\Model\Product\Type\Grouped;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link;
+use Emico\TweakwiseExport\Model\ChildOptions;
 
 class Children implements DecoratorInterface
 {
@@ -187,16 +188,20 @@ class Children implements DecoratorInterface
         $select->join(
             ['bundle_option' => $this->dbResource->getTableName('catalog_product_bundle_option')],
             'bundle_selection.option_id = bundle_option.option_id',
-            ['required' => 'bundle_option.required']
+            ['required' => 'bundle_option.required', 'option_id' => 'bundle_option.option_id']
         );
 
         $query = $select->query();
         while ($row = $query->fetch()) {
+            $bundleOption = new ChildOptions(
+                (int)$row['option_id'],
+                (bool)$row['required']
+            );
             $this->addChild(
                 $collection,
                 (int) $row['parent_product_id'],
                 (int) $row['product_id'],
-                (bool) $row['required']
+                $bundleOption
             );
         }
     }
@@ -276,13 +281,13 @@ class Children implements DecoratorInterface
      * @param Collection $collection
      * @param int $parentId
      * @param int $childId
-     * @param bool $required
+     * @param ChildOptions|null $childOptions
      */
     private function addChild(
         Collection $collection,
         int $parentId,
         int $childId,
-        bool $required = false
+        ChildOptions $childOptions = null
     ) {
         if (!$this->childEntities->has($childId)) {
             $child = $this->entityChildFactory->create(
@@ -296,7 +301,9 @@ class Children implements DecoratorInterface
             $child = $this->childEntities->get($childId);
         }
 
-        $child->setRequired($required);
+        if ($childOptions) {
+            $child->setChildOptions($childOptions);
+        }
 
         try {
             $collection->get($parentId)->addChild($child);

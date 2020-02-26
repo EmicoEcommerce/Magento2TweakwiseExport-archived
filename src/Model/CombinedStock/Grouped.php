@@ -36,9 +36,11 @@ class Grouped implements CombinedStockItemInterface
         $childStatus = $this->stockHelper->getChildStockStatus($exportEntity);
 
         $qty = max($childQuantities);
-        $isInStock = max($childStatus);
+        $isInStock = min(max($childStatus), $exportEntity->getStockItem()->getIsInStock());
         $stockItem = new StockItem();
         $stockItem->setQty($qty);
         $stockItem->setIsInStock($isInStock);
+
+        return $stockItem;
     }
 }

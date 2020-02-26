@@ -6,6 +6,7 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products;
 
+use Emico\TweakwiseExport\Model\ChildOptions;
 use Emico\TweakwiseExport\Model\Config;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogInventory\Api\StockConfigurationInterface;
@@ -19,24 +20,24 @@ class ExportEntityChild extends ExportEntity
     private $config;
 
     /**
-     * @var bool
+     * @var ChildOptions
      */
-    protected $isRequired = false;
+    protected $childOptions;
 
     /**
-     * @return bool
+     * @return ChildOptions
      */
-    public function isRequired()
+    public function getChildOptions()
     {
-        return $this->isRequired;
+        return $this->childOptions;
     }
 
     /**
-     * @param bool $required
+     * @param ChildOptions $childOptions
      */
-    public function setRequired(bool $required)
+    public function setChildOptions(ChildOptions $childOptions): void
     {
-        $this->isRequired = $required;
+        $this->childOptions = $childOptions;
     }
 
     /**

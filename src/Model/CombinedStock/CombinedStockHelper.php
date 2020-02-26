@@ -21,7 +21,8 @@ class CombinedStockHelper
     {
         $stockStatus = [];
         foreach ($exportEntity->getExportChildren() as $child) {
-            if ($requiredOnly && !$child->isRequired()) {
+            $childOptions = $child->getChildOptions();
+            if ($requiredOnly && $childOptions && !$childOptions->isRequired()) {
                 continue;
             }
             $stockStatus[$child->getId()] = $child->getStockItem()->getIsInStock();
@@ -39,7 +40,8 @@ class CombinedStockHelper
     {
         $stockQuantities = [];
         foreach ($exportEntity->getExportChildren() as $child) {
-            if ($requiredOnly && !$child->isRequired()) {
+            $childOptions = $child->getChildOptions();
+            if ($requiredOnly && $childOptions && !$childOptions->isRequired()) {
                 continue;
             }
             $stockQuantities[$child->getId()] = $child->getStockQty();
