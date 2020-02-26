@@ -83,13 +83,6 @@
                         <field id="real_time">0</field>
                     </depends>
                 </field>
-                <field id="stock_calculation" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Combined product stock calculation mode</label>
-                    <source_model>Emico\TweakwiseExport\Model\Config\Source\StockCalculation</source_model>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
-                </field>
                 <field id="stock_percentage" translate="label,comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Export percentage of child products that are in stock</label>
                     <comment>Would you like to have the percentage of child products in stock? Note that this value is 100 or 0 for simple products (as they dont have children)</comment>

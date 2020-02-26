@@ -118,6 +118,7 @@ class Children implements DecoratorInterface
             $isComposite = $type->isComposite($fakeProduct);
             foreach ($group as $entity) {
                 $entity->setIsComposite($isComposite);
+                $entity->setTypeId($typeId);
                 $entity->setChildren([]);
             }
 
@@ -182,10 +183,21 @@ class Children implements DecoratorInterface
                 ->columns(['product_id', 'parent_product_id'])
                 ->where('parent_product_id IN (?)', $parentIds);
         }
+        // Add Required bundle option data
+        $select->join(
+            ['bundle_option' => $this->dbResource->getTableName('catalog_product_bundle_option')],
+            'bundle_selection.option_id = bundle_option.option_id',
+            ['required' => 'bundle_option.required']
+        );
 
         $query = $select->query();
         while ($row = $query->fetch()) {
-            $this->addChild($collection, (int) $row['parent_product_id'], (int) $row['product_id']);
+            $this->addChild(
+                $collection,
+                (int) $row['parent_product_id'],
+                (int) $row['product_id'],
+                (bool) $row['required']
+            );
         }
     }
 
@@ -264,15 +276,27 @@ class Children implements DecoratorInterface
      * @param Collection $collection
      * @param int $parentId
      * @param int $childId
+     * @param bool $required
      */
-    private function addChild(Collection $collection, int $parentId, int $childId)
-    {
+    private function addChild(
+        Collection $collection,
+        int $parentId,
+        int $childId,
+        bool $required = false
+    ) {
         if (!$this->childEntities->has($childId)) {
-            $child = $this->entityChildFactory->create(['storeId' => $collection->getStoreId(), 'data' => ['entity_id' => $childId]]);
+            $child = $this->entityChildFactory->create(
+                [
+                    'storeId' => $collection->getStoreId(),
+                    'data' => ['entity_id' => $childId],
+                ]
+            );
             $this->childEntities->add($child);
         } else {
             $child = $this->childEntities->get($childId);
         }
+
+        $child->setRequired($required);
 
         try {
             $collection->get($parentId)->addChild($child);

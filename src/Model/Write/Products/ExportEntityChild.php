@@ -19,6 +19,27 @@ class ExportEntityChild extends ExportEntity
     private $config;
 
     /**
+     * @var bool
+     */
+    protected $isRequired = false;
+
+    /**
+     * @return bool
+     */
+    public function isRequired()
+    {
+        return $this->isRequired;
+    }
+
+    /**
+     * @param bool $required
+     */
+    public function setRequired(bool $required)
+    {
+        $this->isRequired = $required;
+    }
+
+    /**
      * ExportEntityChild constructor.
      * @param int $storeId
      * @param StoreManagerInterface $storeManager
@@ -27,8 +48,14 @@ class ExportEntityChild extends ExportEntity
      * @param Visibility $visibility
      * @param array $data
      */
-    public function __construct(int $storeId, StoreManagerInterface $storeManager, StockConfigurationInterface $stockConfiguration, Config $config, Visibility $visibility, array $data = [])
-    {
+    public function __construct(
+        int $storeId,
+        StoreManagerInterface $storeManager,
+        StockConfigurationInterface $stockConfiguration,
+        Config $config,
+        Visibility $visibility,
+        array $data = []
+    ) {
         parent::__construct($storeId, $storeManager, $stockConfiguration, $visibility, $data);
         $this->config = $config;
     }

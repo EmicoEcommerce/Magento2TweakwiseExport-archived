@@ -6,9 +6,8 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
+use Emico\TweakwiseExport\Model\CombinedStock\CombinedStockItemInterface;
 use Emico\TweakwiseExport\Model\Config;
-use Emico\TweakwiseExport\Model\Config\Source\StockCalculation;
-use Emico\TweakwiseExport\Model\StockItem;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockMapProviderInterface;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
@@ -42,6 +41,10 @@ class StockData implements DecoratorInterface
      * @var Manager
      */
     private $moduleManager;
+    /**
+     * @var CombinedStockItemInterface
+     */
+    private $combinedStockItemProvider;
 
     /**
      * StockData constructor.
@@ -50,6 +53,7 @@ class StockData implements DecoratorInterface
      * @param TweakwiseStockItemFactory $stockItemFactory
      * @param Config $config
      * @param Manager $moduleManager
+     * @param CombinedStockItemInterface $combinedStockItemProvider
      * @param StockMapProviderInterface[] $stockMapProviders
      */
     public function __construct(
@@ -57,6 +61,7 @@ class StockData implements DecoratorInterface
         TweakwiseStockItemFactory $stockItemFactory,
         Config $config,
         Manager $moduleManager,
+        CombinedStockItemInterface $combinedStockItemProvider,
         array $stockMapProviders
     ) {
         $this->metaData = $metaData;
@@ -64,6 +69,7 @@ class StockData implements DecoratorInterface
         $this->stockItemFactory = $stockItemFactory;
         $this->config = $config;
         $this->moduleManager = $moduleManager;
+        $this->combinedStockItemProvider = $combinedStockItemProvider;
     }
 
     /**
@@ -78,7 +84,7 @@ class StockData implements DecoratorInterface
 
         $this->addStockItems($storeId, $collection);
         foreach ($toBeCombinedEntities as $item) {
-            $this->combineStock($item, $storeId);
+            $this->combineStock($item);
             $this->addStockPercentage($item, $storeId);
         }
     }
@@ -125,93 +131,10 @@ class StockData implements DecoratorInterface
      * @param ExportEntity $entity
      * @param int $storeId
      */
-    private function combineStock(ExportEntity $entity, int $storeId)
+    private function combineStock(ExportEntity $entity)
     {
-        if (!$entity->isComposite()) {
-            return;
-        }
-
-        $combinedStockItem = $this->getCombinedStockItem($entity, $storeId);
+        $combinedStockItem = $this->combinedStockItemProvider->getCombinedStockItem($entity);
         $entity->setStockItem($combinedStockItem);
-    }
-
-    /**
-     * @param ExportEntity $entity
-     * @param int $storeId
-     * @return StockItem
-     */
-    private function getCombinedStockItem(ExportEntity $entity, int $storeId)
-    {
-        $combinedStockQty = $this->getCombinedStockQty($entity, $storeId);
-        $combinedStockStatus = $this->getCombinedStockStatus($entity);
-
-        $stockItem = $this->stockItemFactory->create();
-        $stockItem->setQty($combinedStockQty);
-        $stockItem->setIsInStock($combinedStockStatus);
-
-        return $stockItem;
-    }
-
-    /**
-     * @param ExportEntity $entity
-     * @param int $storeId
-     * @return float
-     */
-    private function getCombinedStockQty(ExportEntity $entity, int $storeId): float
-    {
-        $stockQuantities = $this->getStockQuantities($entity);
-        if (empty($stockQuantities)) {
-            return 0;
-        }
-
-        switch ($this->config->getStockCalculation($storeId)) {
-            case StockCalculation::OPTION_MAX:
-                return max($stockQuantities);
-            case StockCalculation::OPTION_MIN:
-                return min($stockQuantities);
-            case StockCalculation::OPTION_SUM:
-            default:
-                return array_sum($stockQuantities);
-        }
-    }
-
-    /**
-     * @param ExportEntity $entity
-     * @param int $storeId
-     * @return float
-     */
-    private function getCombinedStockStatus(ExportEntity $entity): float
-    {
-        $stockStatus = $this->getStockStatus($entity);
-        return !empty($stockStatus) ? max($stockStatus) : 0;
-    }
-
-    /**
-     * @param ExportEntity $entity
-     * @return float[]
-     */
-    private function getStockQuantities(ExportEntity $entity): array
-    {
-        $stockQty = [];
-        foreach ($entity->getExportChildren() as $child) {
-            $stockQty[] = $child->getStockItem()->getQty();
-        }
-
-        return $stockQty;
-    }
-
-    /**
-     * @param ExportEntity $entity
-     * @return float[]
-     */
-    private function getStockStatus(ExportEntity $entity): array
-    {
-        $stockStatus = [];
-        foreach ($entity->getExportChildren() as $child) {
-            $stockStatus[] = $child->getStockItem()->getIsInStock();
-        }
-
-        return $stockStatus;
     }
 
     /**
