@@ -25,7 +25,7 @@ All export settings can be found under Stores -> Configuration -> Catalog -> Twe
 
 Generating feeds can be done using the command line.
 ```sh
-php bin/magento tweakwise::export
+php bin/magento tweakwise:export
 ```
 
 ## Debugging
