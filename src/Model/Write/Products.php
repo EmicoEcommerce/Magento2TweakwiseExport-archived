@@ -140,9 +140,9 @@ class Products implements WriterInterface
         // Write product base data
         $tweakwiseId = $this->helper->getTweakwiseId($storeId, $data['entity_id']);
         $xml->writeElement('id', $tweakwiseId);
-        $xml->writeElement('price', $data['price']);
         $xml->writeElement('name', $this->scalarValue($data['name']));
-        $xml->writeElement('stock', $data['stock']);
+        $xml->writeElement('price', $this->scalarValue($data['price']));
+        $xml->writeElement('stock', $this->scalarValue($data['stock']));
 
         // Write product categories
         $xml->startElement('categories');
@@ -174,12 +174,12 @@ class Products implements WriterInterface
      * @param XmlWriter $xml
      * @param int $storeId
      * @param string $name
-     * @param string|string[]|int|int[]|float|float[] $value
+     * @param string|string[]|int|int[]|float|float[] $attributeValue
      * @return $this
      */
-    public function writeAttribute(XmlWriter $xml, $storeId, $name, $value)
+    public function writeAttribute(XmlWriter $xml, $storeId, $name, $attributeValue)
     {
-        $values = $this->normalizeAttributeValue($storeId, $name, $value);
+        $values = $this->normalizeAttributeValue($storeId, $name, $attributeValue);
         $values = array_unique($values);
 
         foreach ($values as $value) {
@@ -231,13 +231,15 @@ class Products implements WriterInterface
     protected function scalarValue($value)
     {
         if (is_array($value)) {
-            $data = array();
+            $data = [];
             foreach ($value as $key => $childValue) {
                 $data[$key] = $this->scalarValue($childValue);
             }
 
             return $data;
-        } else if (is_object($value)) {
+        }
+
+        if (is_object($value)) {
             if (method_exists($value, 'toString')) {
                 $value = $value->toString();
             } else if (method_exists($value, '__toString')) {
@@ -247,7 +249,31 @@ class Products implements WriterInterface
             }
         }
 
+        if (is_numeric($value)) {
+            $value = $this->normalizeExponent($value);
+        }
+
         return html_entity_decode($value, ENT_NOQUOTES | ENT_HTML5);
+    }
+
+    /**
+     * @param float|int $value
+     * @return float|string
+     */
+    protected function normalizeExponent($value)
+    {
+        if (stripos($value, 'E+') !== false) {
+            // Assume integer value
+            $decimals = 0;
+            if (is_float($value)) {
+                // Update decimals if not int
+                $decimals = 5;
+            }
+
+            return number_format($value, $decimals, '.', '');
+        }
+
+        return $value;
     }
 
     /**
