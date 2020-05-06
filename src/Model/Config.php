@@ -117,14 +117,6 @@ class Config
         return (string) $this->config->getValue(self::PATH_STOCK_CALCULATION, ScopeInterface::SCOPE_STORE, $store);
     }
 
-    /**
-     * @param Store|int|string|null $store $store
-     * @return bool
-     */
-    public function isStockPercentage($store = null): bool
-    {
-        return (bool) $this->config->getValue(self::PATH_STOCK_PERCENTAGE, ScopeInterface::SCOPE_STORE, $store);
-    }
 
     /**
      * @param Store|int|string|null $store

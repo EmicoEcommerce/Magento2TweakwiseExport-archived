@@ -90,14 +90,6 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
-                <field id="stock_percentage" translate="label,comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Export percentage of child products that are in stock</label>
-                    <comment>Would you like to have the percentage of child products in stock? Note that this value is 100 or 0 for simple products (as they dont have children)</comment>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <depends>
-                        <field id="enabled">1</field>
-                    </depends>
-                </field>
                 <field id="out_of_stock_children" translate="label,comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Export out of stock combined product children</label>
                     <comment>Would you like to export out of stock children attributes in parent products?</comment>
