@@ -41,6 +41,7 @@ class StockData implements DecoratorInterface
      * @var Manager
      */
     private $moduleManager;
+
     /**
      * @var CombinedStockItemInterface
      */
@@ -90,6 +91,9 @@ class StockData implements DecoratorInterface
     }
 
     /**
+     * This registers stock items to export entities, they will be combined later for "final"
+     * stock items
+     *
      * @param int $storeId
      * @param Collection $collection
      */
