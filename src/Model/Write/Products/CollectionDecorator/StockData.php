@@ -20,27 +20,27 @@ class StockData implements DecoratorInterface
     /**
      * @var ProductMetadataInterface
      */
-    private $metaData;
+    protected $metaData;
 
     /**
      * @var DecoratorInterface[]
      */
-    private $stockMapProviders = [];
+    protected $stockMapProviders = [];
 
     /**
      * @var TweakwiseStockItemFactory
      */
-    private $stockItemFactory;
+    protected $stockItemFactory;
 
     /**
      * @var Config
      */
-    private $config;
+    protected $config;
 
     /**
      * @var Manager
      */
-    private $moduleManager;
+    protected $moduleManager;
 
     /**
      * @var CombinedStockItemInterface
@@ -86,7 +86,7 @@ class StockData implements DecoratorInterface
         $this->addStockItems($storeId, $collection);
         foreach ($toBeCombinedEntities as $item) {
             $this->combineStock($item);
-            $this->addStockPercentage($item, $storeId);
+            $this->addStockPercentage($item);
         }
     }
 
@@ -97,7 +97,7 @@ class StockData implements DecoratorInterface
      * @param int $storeId
      * @param Collection $collection
      */
-    private function addStockItems(int $storeId, Collection $collection)
+    protected function addStockItems(int $storeId, Collection $collection)
     {
         if ($collection->count() === 0) {
             return;
@@ -119,7 +119,7 @@ class StockData implements DecoratorInterface
      * @param array $stockItemMap
      * @param ExportEntity $entity
      */
-    private function assignStockItem(array $stockItemMap, ExportEntity $entity)
+    protected function assignStockItem(array $stockItemMap, ExportEntity $entity)
     {
         $entityId = $entity->getId();
         if (isset($stockItemMap[$entityId])) {
@@ -143,14 +143,9 @@ class StockData implements DecoratorInterface
 
     /**
      * @param ExportEntity $entity
-     * @param int $storeId
      */
-    private function addStockPercentage(ExportEntity $entity, int $storeId)
+    protected function addStockPercentage(ExportEntity $entity)
     {
-        if (!$this->config->isStockPercentage($storeId)) {
-            return;
-        }
-
         $entity->addAttribute('stock_percentage', $this->calculateStockPercentage($entity));
     }
 
@@ -158,7 +153,7 @@ class StockData implements DecoratorInterface
      * @param ExportEntity $entity
      * @return float
      */
-    private function calculateStockPercentage(ExportEntity $entity): float
+    protected function calculateStockPercentage(ExportEntity $entity): float
     {
         if (!$entity->isComposite()) {
             return (int) $this->isInStock($entity) * 100;
@@ -179,7 +174,7 @@ class StockData implements DecoratorInterface
      * @param ExportEntity $entity
      * @return bool
      */
-    private function isInStock(ExportEntity $entity): bool
+    protected function isInStock(ExportEntity $entity): bool
     {
         $stockItem = $entity->getStockItem();
         return (int)(!$stockItem || $stockItem->getIsInStock());
@@ -192,7 +187,7 @@ class StockData implements DecoratorInterface
      *
      * @return StockMapProviderInterface
      */
-    private function resolveStockMapProvider(): StockMapProviderInterface
+    protected function resolveStockMapProvider(): StockMapProviderInterface
     {
         $version = $this->metaData->getVersion();
         // In case of magento 2.2.X use magento stock items

@@ -59,6 +59,10 @@ class StockItemMapProvider implements StockMapProviderInterface
         }
 
         $entityIds = $collection->getAllIds();
+        
+        if (count($entityIds) === 0) {
+            return [];
+        }
 
         $criteria = $this->criteriaFactory->create();
         $criteria->setProductsFilter([$entityIds]);
