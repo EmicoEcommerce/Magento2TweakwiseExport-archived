@@ -9,16 +9,9 @@ namespace Emico\TweakwiseExport\Model;
 
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Simplexml\Element;
-use Magento\InventorySalesApi\Api\StockResolverInterface;
+use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
 
-/**
- * This is necessary to remain compatible with Magento 2.2.X
- * setup:di:compile fails when there is a reference to a non existing Interface or Class in the constructor
- *
- * Class StockResolverFactory
- * @package Emico\TweakwiseExport\Model
- */
-class StockResolverFactory
+class DefaultStockProviderInterfaceFactory
 {
     /**
      * @var ObjectManagerInterface
@@ -36,10 +29,10 @@ class StockResolverFactory
     /**
      * Create config model
      * @param string|Element $sourceData
-     * @return StockResolverInterface
+     * @return DefaultStockProviderInterface
      */
     public function create($sourceData = null)
     {
-        return $this->_objectManager->create(StockResolverInterface::class, ['sourceData' => $sourceData]);
+        return $this->_objectManager->create(DefaultStockProviderInterface::class, ['sourceData' => $sourceData]);
     }
 }

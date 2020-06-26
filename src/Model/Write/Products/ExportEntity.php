@@ -91,6 +91,11 @@ class ExportEntity
     private $storeManager;
 
     /**
+     * @var string
+     */
+    private $typeId;
+
+    /**
      * ExportEntity constructor.
      *
      * @param int $storeId
@@ -100,8 +105,13 @@ class ExportEntity
      * @param array $data
      * @internal param int $storeId
      */
-    public function __construct(int $storeId, StoreManagerInterface $storeManager, StockConfigurationInterface $stockConfiguration, Visibility $visibility, array $data = [])
-    {
+    public function __construct(
+        int $storeId,
+        StoreManagerInterface $storeManager,
+        StockConfigurationInterface $stockConfiguration,
+        Visibility $visibility,
+        array $data = []
+    ) {
         $this->setFromArray($data);
         $this->visibilityObject = $visibility;
         $this->storeId = $storeId;
@@ -395,6 +405,22 @@ class ExportEntity
     }
 
     /**
+     * @param string $typeId
+     */
+    public function setTypeId(string $typeId)
+    {
+        $this->typeId = $typeId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTypeId()
+    {
+        return $this->typeId;
+    }
+
+    /**
      * @param bool $isComposite
      * @return $this
      */
@@ -415,8 +441,8 @@ class ExportEntity
     /**
      * @return StockItem
      */
-    public function getStockItem()    
-    {        
+    public function getStockItem()
+    {
         return $this->stockItem;
     }
 

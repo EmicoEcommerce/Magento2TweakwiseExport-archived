@@ -85,7 +85,8 @@ class StockItemMapProvider implements StockMapProviderInterface
     {
         $tweakwiseStockItem = $this->tweakwiseStockItemFactory->create();
         $tweakwiseStockItem->setQty((int)$item->getQty());
-        $tweakwiseStockItem->setIsInStock((int)$item->getIsInStock() || !$item->getManageStock());
+        $stockStatus = (int) ($item->getIsInStock() || !$item->getManageStock());
+        $tweakwiseStockItem->setIsInStock($stockStatus);
 
         return $tweakwiseStockItem;
     }

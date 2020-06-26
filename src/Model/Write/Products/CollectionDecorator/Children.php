@@ -22,6 +22,7 @@ use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\DataObject;
 use Magento\GroupedProduct\Model\Product\Type\Grouped;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link;
+use Emico\TweakwiseExport\Model\ChildOptions;
 
 class Children implements DecoratorInterface
 {
@@ -118,6 +119,7 @@ class Children implements DecoratorInterface
             $isComposite = $type->isComposite($fakeProduct);
             foreach ($group as $entity) {
                 $entity->setIsComposite($isComposite);
+                $entity->setTypeId($typeId);
                 $entity->setChildren([]);
             }
 
@@ -182,10 +184,25 @@ class Children implements DecoratorInterface
                 ->columns(['product_id', 'parent_product_id'])
                 ->where('parent_product_id IN (?)', $parentIds);
         }
+        // Add Required bundle option data
+        $select->join(
+            ['bundle_option' => $this->dbResource->getTableName('catalog_product_bundle_option')],
+            'bundle_selection.option_id = bundle_option.option_id',
+            ['required' => 'bundle_option.required', 'option_id' => 'bundle_option.option_id']
+        );
 
         $query = $select->query();
         while ($row = $query->fetch()) {
-            $this->addChild($collection, (int) $row['parent_product_id'], (int) $row['product_id']);
+            $bundleOption = new ChildOptions(
+                (int)$row['option_id'],
+                (bool)$row['required']
+            );
+            $this->addChild(
+                $collection,
+                (int) $row['parent_product_id'],
+                (int) $row['product_id'],
+                $bundleOption
+            );
         }
     }
 
@@ -264,14 +281,28 @@ class Children implements DecoratorInterface
      * @param Collection $collection
      * @param int $parentId
      * @param int $childId
+     * @param ChildOptions|null $childOptions
      */
-    private function addChild(Collection $collection, int $parentId, int $childId)
-    {
+    private function addChild(
+        Collection $collection,
+        int $parentId,
+        int $childId,
+        ChildOptions $childOptions = null
+    ) {
         if (!$this->childEntities->has($childId)) {
-            $child = $this->entityChildFactory->create(['storeId' => $collection->getStoreId(), 'data' => ['entity_id' => $childId]]);
+            $child = $this->entityChildFactory->create(
+                [
+                    'storeId' => $collection->getStoreId(),
+                    'data' => ['entity_id' => $childId],
+                ]
+            );
             $this->childEntities->add($child);
         } else {
             $child = $this->childEntities->get($childId);
+        }
+
+        if ($childOptions) {
+            $child->setChildOptions($childOptions);
         }
 
         try {
