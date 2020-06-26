@@ -107,17 +107,7 @@ class Config
     {
         return (string) $this->config->getValue(self::PATH_API_IMPORT_URL);
     }
-
-    /**
-     * @param Store|int|string|null $store
-     * @return string
-     */
-    public function getStockCalculation($store = null): string
-    {
-        return (string) $this->config->getValue(self::PATH_STOCK_CALCULATION, ScopeInterface::SCOPE_STORE, $store);
-    }
-
-
+    
     /**
      * @param Store|int|string|null $store
      * @return bool
