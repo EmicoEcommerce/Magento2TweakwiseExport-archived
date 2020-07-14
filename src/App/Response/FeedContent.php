@@ -19,7 +19,8 @@ use Exception;
  *
  * @package Emico\TweakwiseExport\App\Response
  */
-class FeedContent {
+class FeedContent
+{
     /**
      * @var Export
      */

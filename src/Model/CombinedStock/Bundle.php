@@ -43,7 +43,7 @@ class Bundle implements CombinedStockItemInterface
             return $exportEntityStockItem;
         }
 
-        $qty = min(...array_column($optionGroups, 'qty'));
+        $qty = min(array_column($optionGroups, 'qty'));
         $isInStock = min($exportEntityStockItem->getIsInStock(), ...array_column($optionGroups, 'is_in_stock'));
         $stockItem = new StockItem();
         $stockItem->setQty($qty);
