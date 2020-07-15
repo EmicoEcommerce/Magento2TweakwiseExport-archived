@@ -36,6 +36,10 @@ class Configurable implements CombinedStockItemInterface
     {
         $childQuantities = $this->stockHelper->getChildStockQuantities($exportEntity);
         $childStatus = $this->stockHelper->getChildStockStatus($exportEntity);
+        // This can happen when there are no children configured
+        if (empty($childStatus) || empty($childQuantities)) {
+            return $exportEntity->getStockItem();
+        }
 
         $qty = array_sum($childQuantities);
         $isInStock = min(max($childStatus), $exportEntity->getStockItem()->getIsInStock());
