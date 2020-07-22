@@ -18,17 +18,17 @@ class Price implements DecoratorInterface
     /**
      * @var CollectionFactory
      */
-    private $collectionFactory;
+    protected $collectionFactory;
 
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    protected $storeManager;
 
     /**
      * @var Config
      */
-    private $config;
+    protected $config;
 
     /**
      * Price constructor.

@@ -22,42 +22,42 @@ class FeedData
     /**
      * @var Helper
      */
-    private $helper;
+    protected $helper;
 
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    protected $storeManager;
 
     /**
      * @var string
      */
-    private $feed;
+    protected $feed;
 
     /**
      * @var TestCase
      */
-    private $test;
+    protected $test;
 
     /**
      * @var CategoryData[]
      */
-    private $categories;
+    protected $categories;
 
     /**
      * @var ProductData[]
      */
-    private $products;
+    protected $products;
 
     /**
      * @var ProductDataFactory
      */
-    private $productDataFactory;
+    protected $productDataFactory;
 
     /**
      * @var CategoryDataFactory
      */
-    private $categoryDataFactory;
+    protected $categoryDataFactory;
 
     /**
      * FeedData constructor.
@@ -157,7 +157,7 @@ class FeedData
     /**
      * Parse category data
      */
-    private function parseCategories()
+    protected function parseCategories()
     {
         if ($this->categories === null) {
             return;
@@ -176,7 +176,7 @@ class FeedData
     /**
      * Parse product data
      */
-    private function parseProducts()
+    protected function parseProducts()
     {
         if ($this->products !== null) {
             return;
@@ -195,7 +195,7 @@ class FeedData
      * @param string|null $storeCode
      * @return StoreInterface
      */
-    private function getStore(string $storeCode = null): StoreInterface
+    protected function getStore(string $storeCode = null): StoreInterface
     {
         if ($storeCode === null) {
             $store = $this->storeManager->getDefaultStoreView();

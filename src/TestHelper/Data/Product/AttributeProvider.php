@@ -23,27 +23,27 @@ class AttributeProvider
     /**
      * @var EavConfig
      */
-    private $eavConfig;
+    protected $eavConfig;
 
     /**
      * @var CategorySetup
      */
-    private $categorySetup;
+    protected $categorySetup;
 
     /**
      * @var EavSetup
      */
-    private $eavSetup;
+    protected $eavSetup;
 
     /**
      * @var CollectionFactory
      */
-    private $attributeOptionCollectionFactory;
+    protected $attributeOptionCollectionFactory;
 
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    protected $storeManager;
 
     /**
      * AttributeProvider constructor.

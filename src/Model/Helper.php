@@ -20,17 +20,17 @@ class Helper
     /**
      * @var ProductMetadataInterface
      */
-    private $productMetadata;
+    protected $productMetadata;
 
     /**
      * @var Config
      */
-    private $config;
+    protected $config;
 
     /**
      * @var TimezoneInterface
      */
-    private $localDate;
+    protected $localDate;
 
     /**
      * Helper constructor.

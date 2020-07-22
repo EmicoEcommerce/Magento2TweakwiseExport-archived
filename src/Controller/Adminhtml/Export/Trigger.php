@@ -21,7 +21,7 @@ class Trigger extends Action
     /**
      * @var Scheduler
      */
-    private $scheduler;
+    protected $scheduler;
 
     /**
      * Trigger constructor.
@@ -56,7 +56,7 @@ class Trigger extends Action
      * @return ResultInterface
      * @throws InvalidArgumentException
      */
-    private function createRefererRedirect()
+    protected function createRefererRedirect()
     {
         /** @var Redirect $resultRedirect */
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);

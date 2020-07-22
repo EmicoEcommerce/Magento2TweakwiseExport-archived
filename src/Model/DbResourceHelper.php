@@ -15,7 +15,7 @@ class DbResourceHelper
     /**
      * @var DbContext
      */
-    private $dbContext;
+    protected $dbContext;
 
     /**
      * AbstractDecorator constructor.

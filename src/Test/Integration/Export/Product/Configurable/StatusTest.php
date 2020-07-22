@@ -20,7 +20,7 @@ class StatusTest extends ExportTest
     /**
      * @var ConfigurableProvider
      */
-    private $configurableProvider;
+    protected $configurableProvider;
 
     /**
      * {@inheritdoc}

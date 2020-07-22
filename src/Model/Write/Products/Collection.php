@@ -17,12 +17,12 @@ class Collection implements IteratorAggregate, Countable
     /**
      * @var array
      */
-    private $entities = [];
+    protected $entities = [];
 
     /**
      * @var int
      */
-    private $storeId;
+    protected $storeId;
 
     /**
      * Collection constructor.

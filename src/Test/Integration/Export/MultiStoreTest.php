@@ -26,7 +26,7 @@ abstract class MultiStoreTest extends ExportTest
     /**
      * @var Helper
      */
-    private $helper;
+    protected $helper;
 
     /**
      * @var StoreProvider

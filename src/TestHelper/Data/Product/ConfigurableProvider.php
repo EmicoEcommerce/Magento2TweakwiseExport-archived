@@ -27,21 +27,21 @@ class ConfigurableProvider
     /**
      * @var ProductProvider
      */
-    private $productProvider;
+    protected $productProvider;
 
     /**
      * @var AttributeProvider
      */
-    private $attributeProvider;
+    protected $attributeProvider;
 
     /**
      * @var OptionsFactory
      */
-    private $optionsFactory;
+    protected $optionsFactory;
     /**
      * @var ProductRepository
      */
-    private $productRepository;
+    protected $productRepository;
 
     /**
      * ConfigurableProvider constructor.
@@ -111,7 +111,7 @@ class ConfigurableProvider
      * @param array $configurableAttributes
      * @return array
      */
-    private function createSimpleProducts(array $simplesData, array $configurableAttributes): array
+    protected function createSimpleProducts(array $simplesData, array $configurableAttributes): array
     {
         $result = [];
         foreach ($simplesData as $data) {
@@ -128,7 +128,7 @@ class ConfigurableProvider
      * @param array $configurableAttributes
      * @return ProductInterface
      */
-    private function createSimpleProduct(array $data, array $configurableAttributes): ProductInterface
+    protected function createSimpleProduct(array $data, array $configurableAttributes): ProductInterface
     {
         // Rewrite configurable data to option values
         foreach ($configurableAttributes as $attributeCode) {
@@ -156,7 +156,7 @@ class ConfigurableProvider
      * @param array $configurableAttributes
      * @return array
      */
-    private function createConfigurableOptions(array $configurableAttributes): array
+    protected function createConfigurableOptions(array $configurableAttributes): array
     {
         // Create configurable attributes data
         $configurableAttributesData = [];

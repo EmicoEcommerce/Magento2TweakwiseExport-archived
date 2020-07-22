@@ -19,17 +19,17 @@ class EntityHydrator
     /**
      * @var string[]
      */
-    private $methodCache;
+    protected $methodCache;
 
     /**
      * @var ReflectionClass
      */
-    private $reflectionCache;
+    protected $reflectionCache;
 
     /**
      * @var FilterInterface
      */
-    private $fieldToMethodFilter;
+    protected $fieldToMethodFilter;
 
     /**
      * @param array $data
@@ -60,7 +60,7 @@ class EntityHydrator
      * @return FilterInterface
      * @throws InvalidArgumentException
      */
-    private function getFieldToMethodFilter(): FilterInterface
+    protected function getFieldToMethodFilter(): FilterInterface
     {
         if ($this->fieldToMethodFilter === null) {
             $filter = new FilterChain();
@@ -76,7 +76,7 @@ class EntityHydrator
      * @return ReflectionClass
      * @throws ReflectionException
      */
-    private function getReflectionClass(string $class): ReflectionClass
+    protected function getReflectionClass(string $class): ReflectionClass
     {
         if (!isset($this->reflectionCache[$class])) {
             $this->reflectionCache[$class] = new ReflectionClass($class);
@@ -92,7 +92,7 @@ class EntityHydrator
      * @throws InvalidArgumentException
      * @throws RuntimeException
      */
-    private function getSetMethod(string $class, string $field)
+    protected function getSetMethod(string $class, string $field)
     {
         $key = $class . $field;
         if (!isset($this->methodCache[$key])) {

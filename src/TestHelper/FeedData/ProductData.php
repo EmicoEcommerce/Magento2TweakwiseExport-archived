@@ -15,32 +15,32 @@ class ProductData
     /**
      * @var SimpleXMLElement
      */
-    private $element;
+    protected $element;
 
     /**
      * @var TestCase
      */
-    private $test;
+    protected $test;
 
     /**
      * @var string
      */
-    private $name;
+    protected $name;
 
     /**
      * @var float
      */
-    private $price;
+    protected $price;
 
     /**
      * @var array
      */
-    private $attributes;
+    protected $attributes;
 
     /**
      * @var array
      */
-    private $categories;
+    protected $categories;
 
     /**
      * CategoryData constructor.
@@ -129,7 +129,7 @@ class ProductData
     /**
      * Parse price data from feed
      */
-    private function parsePrice()
+    protected function parsePrice()
     {
         if ($this->price !== null) {
             return;
@@ -140,7 +140,7 @@ class ProductData
     /**
      * Parse name data from feed
      */
-    private function parseName()
+    protected function parseName()
     {
         if ($this->name !== null) {
             return;
@@ -152,7 +152,7 @@ class ProductData
     /**
      * Parse categories data from feed
      */
-    private function parseCategories()
+    protected function parseCategories()
     {
         if ($this->categories !== null) {
             return;
@@ -167,7 +167,7 @@ class ProductData
     /**
      * Parse attributes data from feed
      */
-    private function parseAttributes()
+    protected function parseAttributes()
     {
         if ($this->attributes !== null) {
             return;

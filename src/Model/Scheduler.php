@@ -28,22 +28,22 @@ class Scheduler
     /**
      * @var Collection
      */
-    private $scheduleCollection;
+    protected $scheduleCollection;
 
     /**
      * @var ProductMetadataInterface
      */
-    private $productMetadata;
+    protected $productMetadata;
 
     /**
      * @var DateTime
      */
-    private $dateTime;
+    protected $dateTime;
 
     /**
      * @var TimezoneInterface
      */
-    private $timezone;
+    protected $timezone;
 
     /**
      * @param Collection $scheduleCollection
@@ -91,7 +91,7 @@ class Scheduler
      *
      * @return int
      */
-    private function getCronTimestamp()
+    protected function getCronTimestamp()
     {
         /* @var $version string e.g. "2.1.7" */
         $version = $this->productMetadata->getVersion();
