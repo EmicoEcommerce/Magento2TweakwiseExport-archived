@@ -67,6 +67,11 @@ class Children implements DecoratorInterface
     protected $dbResource;
 
     /**
+     * @var int
+     */
+    protected $batchSize;
+
+    /**
      * ChildId constructor.
      *
      * @param ProductType $productType
@@ -76,6 +81,7 @@ class Children implements DecoratorInterface
      * @param CollectionFactory $collectionFactory
      * @param Helper $helper
      * @param DbResourceHelper $dbResource
+     * @param int $batchSize
      */
     public function __construct(
         ProductType $productType,
@@ -84,9 +90,9 @@ class Children implements DecoratorInterface
         ExportEntityChildFactory $entityChildFactory,
         CollectionFactory $collectionFactory,
         Helper $helper,
-        DbResourceHelper $dbResource
-    )
-    {
+        DbResourceHelper $dbResource,
+        int $batchSize = 5000
+    ) {
         $this->productType = $productType;
         $this->eavIteratorFactory = $eavIteratorFactory;
         $this->entityChildFactory = $entityChildFactory;
@@ -94,6 +100,7 @@ class Children implements DecoratorInterface
         $this->collectionFactory = $collectionFactory;
         $this->helper = $helper;
         $this->dbResource = $dbResource;
+        $this->batchSize = $batchSize;
     }
 
     /**
@@ -321,7 +328,13 @@ class Children implements DecoratorInterface
             return;
         }
 
-        $iterator = $this->eavIteratorFactory->create(['entityCode' => Product::ENTITY, 'attributes' => []]);
+        $iterator = $this->eavIteratorFactory->create(
+            [
+                'entityCode' => Product::ENTITY,
+                'attributes' => [],
+                'batchSize' => $this->batchSize
+            ]
+        );
         $iterator->setEntityIds($this->childEntities->getIds());
         $iterator->setStoreId($storeId);
         $this->iteratorInitializer->initializeAttributes($iterator);

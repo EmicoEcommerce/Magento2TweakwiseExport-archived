@@ -102,6 +102,12 @@
         </arguments>
     </type>
 
+    <type name="Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Children">
+        <arguments>
+            <argument name="batchSize" xsi:type="number">5000</argument>
+        </arguments>
+    </type>
+
     <type name="Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData">
         <arguments>
             <argument name="metaData" xsi:type="object">Magento\Framework\App\ProductMetadataInterface</argument>
