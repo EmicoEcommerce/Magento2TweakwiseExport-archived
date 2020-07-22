@@ -476,6 +476,14 @@ class ExportEntity
     }
 
     /**
+     * @return int[]|null
+     */
+    public function getLinkedWebsiteIds()
+    {
+        return $this->linkedWebsiteIds;
+    }
+
+    /**
      * @return bool
      */
     protected function shouldExportByStatus(): bool
