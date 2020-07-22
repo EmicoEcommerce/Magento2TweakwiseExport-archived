@@ -40,22 +40,22 @@ class Config
     /**
      * @var ScopeConfigInterface
      */
-    private $config;
+    protected $config;
 
     /**
      * @var DirectoryList
      */
-    private $directoryList;
+    protected $directoryList;
 
     /**
      * @var array
      */
-    private $skipAttributes;
+    protected $skipAttributes;
 
     /**
      * @var DeploymentConfig
      */
-    private $deployConfig;
+    protected $deployConfig;
 
     /**
      * Export constructor.
@@ -107,7 +107,7 @@ class Config
     {
         return (string) $this->config->getValue(self::PATH_API_IMPORT_URL);
     }
-    
+
     /**
      * @param Store|int|string|null $store
      * @return bool

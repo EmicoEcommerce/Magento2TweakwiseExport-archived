@@ -25,12 +25,12 @@ class ExcludeAttributesTest extends ExportTest
     /**
      * @var AttributeProvider
      */
-    private $attributeProvider;
+    protected $attributeProvider;
 
     /**
      * @var ConfigurableProvider
      */
-    private $configurableProvider;
+    protected $configurableProvider;
 
     /**
      * {@inheritdoc}

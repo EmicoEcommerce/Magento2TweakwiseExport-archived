@@ -38,65 +38,65 @@ class ProductProvider
     /**
      * @var Generator
      */
-    private $faker;
+    protected $faker;
 
     /**
      * @var ProductRepositoryInterface
      */
-    private $productRepository;
+    protected $productRepository;
 
     /**
      * @var ProductInterfaceFactory
      */
-    private $productFactory;
+    protected $productFactory;
 
     /**
      * @var StockRegistryInterface
      */
-    private $stockRegistry;
+    protected $stockRegistry;
 
     /**
      * @var CategoryLinkManagementInterface
      */
-    private $categoryLinkManagement;
+    protected $categoryLinkManagement;
 
     /**
      * @var EntityHydrator
      */
-    private $hydrator;
+    protected $hydrator;
 
     /**
      * @var CategoryProvider
      */
-    private $categoryProvider;
+    protected $categoryProvider;
     /**
      * @var AttributeProvider
      */
-    private $attributeProvider;
+    protected $attributeProvider;
 
     /**
      * @var Emulation
      */
-    private $emulation;
+    protected $emulation;
 
     /**
      * @var ProductAction
      */
-    private $productAction;
+    protected $productAction;
 
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    protected $storeManager;
     /**
      * @var EavConfig
      */
-    private $eavConfig;
+    protected $eavConfig;
 
     /**
      * @var WebsiteLink
      */
-    private $websiteLink;
+    protected $websiteLink;
 
     /**
      * CategoryDataProvider constructor.

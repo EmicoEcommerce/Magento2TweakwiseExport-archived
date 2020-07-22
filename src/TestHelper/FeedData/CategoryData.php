@@ -13,7 +13,7 @@ class CategoryData
     /**
      * @var SimpleXMLElement
      */
-    private $element;
+    protected $element;
 
     /**
      * CategoryData constructor.

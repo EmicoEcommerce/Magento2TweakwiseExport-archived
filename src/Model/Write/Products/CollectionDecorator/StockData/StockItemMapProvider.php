@@ -18,17 +18,17 @@ class StockItemMapProvider implements StockMapProviderInterface
     /**
      * @var StockItemRepositoryInterface
      */
-    private $stockItemRepository;
+    protected $stockItemRepository;
 
     /**
      * @var StockItemCriteriaInterfaceFactory
      */
-    private $criteriaFactory;
+    protected $criteriaFactory;
 
     /**
      * @var TweakwiseStockItemFactory
      */
-    private $tweakwiseStockItemFactory;
+    protected $tweakwiseStockItemFactory;
 
     /**
      * StockData constructor.
@@ -59,7 +59,7 @@ class StockItemMapProvider implements StockMapProviderInterface
         }
 
         $entityIds = $collection->getAllIds();
-        
+
         if (count($entityIds) === 0) {
             return [];
         }

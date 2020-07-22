@@ -21,21 +21,22 @@ class Iterator extends EavIterator
     /**
      * @var ExportEntityFactory
      */
-    private $entityFactory;
+    protected $entityFactory;
 
     /**
      * @var CollectionFactory
      */
-    private $collectionFactory;
+    protected $collectionFactory;
 
     /**
      * @var DecoratorInterface[]
      */
-    private $collectionDecorators;
+    protected $collectionDecorators;
 
     /**
      * Iterator constructor.
      *
+     * @param int $batchSize
      * @param Helper $helper
      * @param EavConfig $eavConfig
      * @param DbContext $dbContext
@@ -51,9 +52,17 @@ class Iterator extends EavIterator
         ExportEntityFactory $entityFactory,
         CollectionFactory $collectionFactory,
         IteratorInitializer $iteratorInitializer,
-        array $collectionDecorators
+        array $collectionDecorators,
+        int $batchSize = 5000
     ) {
-        parent::__construct($helper, $eavConfig, $dbContext, Product::ENTITY, []);
+        parent::__construct(
+            $helper,
+            $eavConfig,
+            $dbContext,
+            Product::ENTITY,
+            [],
+            $batchSize
+        );
 
         $this->entityFactory = $entityFactory;
         $this->collectionFactory = $collectionFactory;
@@ -76,7 +85,7 @@ class Iterator extends EavIterator
 
             $batch->add($entity);
 
-            if ($batch->count() === self::ENTITY_BATCH_SIZE) {
+            if ($batch->count() === $this->batchSize) {
                 // After PHP7+ we can use yield from
                 foreach ($this->processBatch($batch) as $processedEntity) {
                     yield $processedEntity;

@@ -26,42 +26,42 @@ class StoreProvider
     /**
      * @var Generator
      */
-    private $faker;
+    protected $faker;
 
     /**
      * @var EntityHydrator
      */
-    private $hydrator;
+    protected $hydrator;
 
     /**
      * @var WebsiteFactory
      */
-    private $websiteFactory;
+    protected $websiteFactory;
 
     /**
      * @var GroupFactory
      */
-    private $groupFactory;
+    protected $groupFactory;
 
     /**
      * @var StoreFactory
      */
-    private $storeFactory;
+    protected $storeFactory;
 
     /**
      * @var CategoryProvider
      */
-    private $categoryProvider;
+    protected $categoryProvider;
 
     /**
      * @var IndexerInterfaceFactory
      */
-    private $indexerFactory;
+    protected $indexerFactory;
 
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    protected $storeManager;
 
     /**
      * StoreProvider constructor.

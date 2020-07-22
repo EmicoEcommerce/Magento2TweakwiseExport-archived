@@ -21,7 +21,7 @@ class StockTest extends ExportTest
     /**
      * @var ConfigurableProvider
      */
-    private $configurableProvider;
+    protected $configurableProvider;
 
     /**
      * {@inheritdoc}

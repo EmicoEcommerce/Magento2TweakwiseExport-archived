@@ -26,7 +26,15 @@ use Zend_Db_Select;
 
 class EavIterator implements IteratorAggregate
 {
+    /**
+     * @deprecated use property $batchSize instead
+     */
     public const ENTITY_BATCH_SIZE = 500;
+
+    /**
+     * @var int
+     */
+    protected $batchSize;
 
     /**
      * @var string
@@ -89,19 +97,27 @@ class EavIterator implements IteratorAggregate
     /**
      * EavIterator constructor.
      *
+     * @param int $batchSize
      * @param Helper $helper
      * @param EavConfig $eavConfig
      * @param DbContext $dbContext
      * @param string $entityCode
      * @param string[] $attributes
      */
-    public function __construct(Helper $helper, EavConfig $eavConfig, DbContext $dbContext, string $entityCode, array $attributes)
-    {
+    public function __construct(
+        Helper $helper,
+        EavConfig $eavConfig,
+        DbContext $dbContext,
+        string $entityCode,
+        array $attributes,
+        int $batchSize = 5000
+    ) {
         $this->eavConfig = $eavConfig;
         $this->entityCode = $entityCode;
         $this->helper = $helper;
         $this->dbContext = $dbContext;
         $this->attributes = [];
+        $this->batchSize = $batchSize;
         foreach ($attributes as $attribute) {
             $this->selectAttribute($attribute);
         }
@@ -280,7 +296,7 @@ class EavIterator implements IteratorAggregate
 
             $result = $select->query()->fetchAll();
             $result = array_column($result, 'entity_id');
-            $this->entitySet[$storeId] = new \ArrayIterator(array_chunk($result, self::ENTITY_BATCH_SIZE));
+            $this->entitySet[$storeId] = new \ArrayIterator(array_chunk($result, $this->batchSize));
         }
 
         $return = $this->entitySet[$storeId]->current();

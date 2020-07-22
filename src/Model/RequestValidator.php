@@ -14,7 +14,7 @@ class RequestValidator
     /**
      * @var Config
      */
-    private $config;
+    protected $config;
 
     /**
      * RequestValidator constructor.

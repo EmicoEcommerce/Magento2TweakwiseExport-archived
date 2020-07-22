@@ -32,47 +32,47 @@ class SourceItemMapProvider implements StockMapProviderInterface
     /**
      * @var TweakwiseStockItemFactory
      */
-    private $tweakwiseStockItemFactory;
+    protected $tweakwiseStockItemFactory;
 
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    protected $storeManager;
 
     /**
      * @var StockResolverInterface
      */
-    private $stockResolver;
+    protected $stockResolver;
 
     /**
      * @var GetSourcesAssignedToStockOrderedByPriorityInterface
      */
-    private $stockSourceProvider;
+    protected $stockSourceProvider;
 
     /**
      * @var StockSourceProviderFactory
      */
-    private $stockSourceProviderFactory;
+    protected $stockSourceProviderFactory;
 
     /**
      * @var StockResolverFactory
      */
-    private $stockResolverFactory;
+    protected $stockResolverFactory;
 
     /**
      * @var DbResourceHelper
      */
-    private $dbResource;
+    protected $dbResource;
 
     /**
      * @var DefaultStockProviderInterfaceFactory
      */
-    private $defaultStockProviderFactory;
+    protected $defaultStockProviderFactory;
 
     /**
      * @var DefaultStockProviderInterface
      */
-    private $defaultStockProvider;
+    protected $defaultStockProvider;
 
     /**
      * StockData constructor.

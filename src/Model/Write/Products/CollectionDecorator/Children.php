@@ -29,17 +29,17 @@ class Children implements DecoratorInterface
     /**
      * @var ProductType
      */
-    private $productType;
+    protected $productType;
 
     /**
      * @var EavIteratorFactory
      */
-    private $eavIteratorFactory;
+    protected $eavIteratorFactory;
 
     /**
      * @var ExportEntityChildFactory
      */
-    private $entityChildFactory;
+    protected $entityChildFactory;
 
     /**
      * @var Collection
@@ -49,22 +49,27 @@ class Children implements DecoratorInterface
     /**
      * @var IteratorInitializer
      */
-    private $iteratorInitializer;
+    protected $iteratorInitializer;
 
     /**
      * @var CollectionFactory
      */
-    private $collectionFactory;
+    protected $collectionFactory;
 
     /**
      * @var Helper
      */
-    private $helper;
+    protected $helper;
 
     /**
      * @var DbResourceHelper
      */
-    private $dbResource;
+    protected $dbResource;
+
+    /**
+     * @var int
+     */
+    protected $batchSize;
 
     /**
      * ChildId constructor.
@@ -76,6 +81,7 @@ class Children implements DecoratorInterface
      * @param CollectionFactory $collectionFactory
      * @param Helper $helper
      * @param DbResourceHelper $dbResource
+     * @param int $batchSize
      */
     public function __construct(
         ProductType $productType,
@@ -84,9 +90,9 @@ class Children implements DecoratorInterface
         ExportEntityChildFactory $entityChildFactory,
         CollectionFactory $collectionFactory,
         Helper $helper,
-        DbResourceHelper $dbResource
-    )
-    {
+        DbResourceHelper $dbResource,
+        int $batchSize = 5000
+    ) {
         $this->productType = $productType;
         $this->eavIteratorFactory = $eavIteratorFactory;
         $this->entityChildFactory = $entityChildFactory;
@@ -94,6 +100,7 @@ class Children implements DecoratorInterface
         $this->collectionFactory = $collectionFactory;
         $this->helper = $helper;
         $this->dbResource = $dbResource;
+        $this->batchSize = $batchSize;
     }
 
     /**
@@ -109,7 +116,7 @@ class Children implements DecoratorInterface
     /**
      * @param Collection $collection
      */
-    private function createChildEntities(Collection $collection)
+    protected function createChildEntities(Collection $collection)
     {
         foreach ($this->getGroupedEntities($collection) as $typeId => $group) {
             // Create fake product type to trick type factory to use getTypeId
@@ -144,7 +151,7 @@ class Children implements DecoratorInterface
      * @param Collection $collection
      * @return ExportEntity[][]
      */
-    private function getGroupedEntities(Collection $collection): array
+    protected function getGroupedEntities(Collection $collection): array
     {
         $groups = [];
         foreach ($collection as $entity) {
@@ -162,7 +169,7 @@ class Children implements DecoratorInterface
      * @param Collection $collection
      * @param int[] $parentIds
      */
-    private function addBundleChildren(Collection $collection, array $parentIds)
+    protected function addBundleChildren(Collection $collection, array $parentIds)
     {
         $connection = $this->dbResource->getConnection();
         $select = $connection->select();
@@ -211,7 +218,7 @@ class Children implements DecoratorInterface
      * @param int[] $parentIds
      * @param int $typeId
      */
-    private function addLinkChildren(Collection $collection, array $parentIds, $typeId)
+    protected function addLinkChildren(Collection $collection, array $parentIds, $typeId)
     {
         $connection = $this->dbResource->getConnection();
         $select = $connection->select();
@@ -246,7 +253,7 @@ class Children implements DecoratorInterface
      * @param Collection $collection
      * @param int[] $parentIds
      */
-    private function addConfigurableChildren(Collection $collection, array $parentIds)
+    protected function addConfigurableChildren(Collection $collection, array $parentIds)
     {
         $connection = $this->dbResource->getConnection();
         $select = $connection->select();
@@ -283,7 +290,7 @@ class Children implements DecoratorInterface
      * @param int $childId
      * @param ChildOptions|null $childOptions
      */
-    private function addChild(
+    protected function addChild(
         Collection $collection,
         int $parentId,
         int $childId,
@@ -315,13 +322,19 @@ class Children implements DecoratorInterface
     /**
      * Load child attribute data
      */
-    private function loadChildAttributes(int $storeId)
+    protected function loadChildAttributes(int $storeId)
     {
         if ($this->childEntities->count() === 0) {
             return;
         }
 
-        $iterator = $this->eavIteratorFactory->create(['entityCode' => Product::ENTITY, 'attributes' => []]);
+        $iterator = $this->eavIteratorFactory->create(
+            [
+                'entityCode' => Product::ENTITY,
+                'attributes' => [],
+                'batchSize' => $this->batchSize
+            ]
+        );
         $iterator->setEntityIds($this->childEntities->getIds());
         $iterator->setStoreId($storeId);
         $this->iteratorInitializer->initializeAttributes($iterator);

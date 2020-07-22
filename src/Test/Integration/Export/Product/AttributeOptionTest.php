@@ -17,12 +17,12 @@ class AttributeOptionTest extends ExportTest
     /**
      * @var ConfigurableProvider
      */
-    private $configurableProvider;
+    protected $configurableProvider;
 
     /**
      * @var AttributeProvider
      */
-    private $attributeProvider;
+    protected $attributeProvider;
 
     /**
      * Make sure export is enabled and set some much used objects

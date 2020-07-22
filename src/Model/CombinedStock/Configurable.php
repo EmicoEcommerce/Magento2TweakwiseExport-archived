@@ -17,7 +17,7 @@ class Configurable implements CombinedStockItemInterface
     /**
      * @var CombinedStockHelper
      */
-    private $stockHelper;
+    protected $stockHelper;
 
     /**
      * Configurable constructor.

@@ -17,12 +17,12 @@ class WebsiteLink implements DecoratorInterface
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    protected $storeManager;
 
     /**
      * @var DbResourceHelper
      */
-    private $dbResource;
+    protected $dbResource;
 
     /**
      * WebsiteLink constructor.
@@ -57,7 +57,7 @@ class WebsiteLink implements DecoratorInterface
     /**
      * @return string
      */
-    private function getProductWebsiteTable(): string
+    protected function getProductWebsiteTable(): string
     {
         return $this->dbResource->getTableName('catalog_product_website');
     }
@@ -66,7 +66,7 @@ class WebsiteLink implements DecoratorInterface
      * @param Collection $collection
      * @throws Zend_Db_Statement_Exception
      */
-    private function addLinkedWebsiteIds(Collection $collection)
+    protected function addLinkedWebsiteIds(Collection $collection)
     {
         $select = $this->dbResource->getConnection()->select()
             ->from($this->getProductWebsiteTable(), ['product_id', 'website_id'])
@@ -82,7 +82,7 @@ class WebsiteLink implements DecoratorInterface
     /**
      * @param Collection $collection
      */
-    private function ensureWebsiteLinkedSet(Collection $collection)
+    protected function ensureWebsiteLinkedSet(Collection $collection)
     {
         /** @var ExportEntity $entity */
         foreach ($collection as $entity) {

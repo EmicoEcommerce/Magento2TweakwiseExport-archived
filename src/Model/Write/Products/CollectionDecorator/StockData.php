@@ -45,7 +45,7 @@ class StockData implements DecoratorInterface
     /**
      * @var CombinedStockItemInterface
      */
-    private $combinedStockItemProvider;
+    protected $combinedStockItemProvider;
 
     /**
      * StockData constructor.
@@ -135,7 +135,7 @@ class StockData implements DecoratorInterface
      * @param ExportEntity $entity
      * @param int $storeId
      */
-    private function combineStock(ExportEntity $entity)
+    protected function combineStock(ExportEntity $entity)
     {
         $combinedStockItem = $this->combinedStockItemProvider->getCombinedStockItem($entity);
         $entity->setStockItem($combinedStockItem);

@@ -28,7 +28,7 @@ class ConfiguragbleTest extends MultiStoreTest
     /**
      * @var ConfigurableProvider
      */
-    private $configurableProvider;
+    protected $configurableProvider;
 
     /**
      * {@inheritdoc}

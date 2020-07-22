@@ -37,14 +37,27 @@ class Iterator extends EavIterator
     /**
      * Iterator constructor.
      *
+     * @param int $batchSize
      * @param Helper $helper
      * @param EavConfig $eavConfig
      * @param DbContext $dbContext
      * @param array|string[] $attributes
      */
-    public function __construct(Helper $helper, EavConfig $eavConfig, DbContext $dbContext, $attributes)
-    {
-        parent::__construct($helper, $eavConfig, $dbContext, 'catalog_category', $attributes);
+    public function __construct(
+        Helper $helper,
+        EavConfig $eavConfig,
+        DbContext $dbContext,
+        $attributes,
+        int $batchSize = 5000
+    ) {
+        parent::__construct(
+            $helper,
+            $eavConfig,
+            $dbContext,
+            'catalog_category',
+            $attributes,
+            $batchSize
+        );
     }
 
     /**
@@ -83,7 +96,7 @@ class Iterator extends EavIterator
                 ['path']
             );
         }
-        
+
         return $select;
     }
 }

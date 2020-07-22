@@ -23,77 +23,77 @@ class ExportEntity
     /**
      * @var Visibility
      */
-    private $visibilityObject;
+    protected $visibilityObject;
 
     /**
      * @var int[]
      */
-    private $categories = [];
+    protected $categories = [];
 
     /**
      * @var array[]
      */
-    private $attributes = [];
+    protected $attributes = [];
 
     /**
      * @var ExportEntityChild[]|null
      */
-    private $children;
+    protected $children;
 
     /**
      * @var int
      */
-    private $id;
+    protected $id;
 
     /**
      * @var int
      */
-    private $status;
+    protected $status;
 
     /**
      * @var int
      */
-    private $visibility;
+    protected $visibility;
 
     /**
      * @var string
      */
-    private $name = '';
+    protected $name = '';
 
     /**
      * @var float
      */
-    private $price = 0.0;
+    protected $price = 0.0;
 
     /**
      * @var bool|null
      */
-    private $isComposite;
+    protected $isComposite;
 
     /**
      * @var StockItem
      */
-    private $stockItem;
+    protected $stockItem;
 
     /**
      * @var StockConfigurationInterface
      */
-    private $stockConfiguration;
+    protected $stockConfiguration;
 
     /**
      * @var int[]|null
      */
-    private $linkedWebsiteIds;
+    protected $linkedWebsiteIds;
 
     /**
      * @var StoreManagerInterface
      */
-    private $storeManager;
+    protected $storeManager;
 
     /**
      * @var string
      */
-    private $typeId;
+    protected $typeId;
 
     /**
      * ExportEntity constructor.

@@ -52,7 +52,7 @@ class Writer
     /**
      * @var ComposerInformation
      */
-    private $composerInformation;
+    protected $composerInformation;
 
     /**
      * Writer constructor.
