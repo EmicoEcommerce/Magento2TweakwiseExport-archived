@@ -73,7 +73,8 @@
 
     <type name="Emico\TweakwiseExport\Model\Write\Categories\Iterator">
         <arguments>
-            <argument name="eavConfig" xsi:type="object">Magento\Eav\Model\Config</argument>
+            <!-- update batchSize if memory is less important then speed -->
+            <argument name="batchSize" xsi:type="number">5000</argument>
             <argument name="attributes" xsi:type="array">
                 <item name="parent_id" xsi:type="string">parent_id</item>
                 <item name="name" xsi:type="string">name</item>
@@ -85,23 +86,10 @@
         </arguments>
     </type>
 
-    <type name="Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData">
-        <arguments>
-            <argument name="metaData" xsi:type="object">Magento\Framework\App\ProductMetadataInterface</argument>
-            <argument name="stockMapProviders" xsi:type="array">
-                <item name="stockItemMapProvider" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockItemMapProvider\Proxy</item>
-                <item name="sourceItemMapProvider" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\SourceItemMapProvider\Proxy</item>
-            </argument>
-        </arguments>
-    </type>
-
     <type name="Emico\TweakwiseExport\Model\Write\Products\Iterator">
         <arguments>
-            <argument name="helper" xsi:type="object">Emico\TweakwiseExport\Model\Helper</argument>
-            <argument name="eavConfig" xsi:type="object">Magento\Eav\Model\Config</argument>
-            <argument name="dbContext" xsi:type="object">Magento\Framework\Model\ResourceModel\Db\Context</argument>
-            <argument name="entityFactory" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\ExportEntityFactory</argument>
-            <argument name="collectionFactory" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionFactory</argument>
+            <!-- update batchSize if memory is less important then speed -->
+            <argument name="batchSize" xsi:type="number">5000</argument>
             <argument name="collectionDecorators" xsi:type="array">
                 <item name="children" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Children</item>
                 <item name="stock_data" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData</item>
@@ -110,6 +98,16 @@
                 <item name="price" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Price</item>
                 <item name="website_link" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\WebsiteLink</item>
                 <item name="review" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Review</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData">
+        <arguments>
+            <argument name="metaData" xsi:type="object">Magento\Framework\App\ProductMetadataInterface</argument>
+            <argument name="stockMapProviders" xsi:type="array">
+                <item name="stockItemMapProvider" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockItemMapProvider\Proxy</item>
+                <item name="sourceItemMapProvider" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\SourceItemMapProvider\Proxy</item>
             </argument>
         </arguments>
     </type>
