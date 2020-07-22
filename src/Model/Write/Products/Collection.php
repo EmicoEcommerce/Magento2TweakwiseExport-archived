@@ -149,4 +149,24 @@ class Collection implements IteratorAggregate, Countable
 
         return array_keys(array_flip($skus));
     }
+
+    /**
+     * Allow for removal of export entities
+     *
+     * @param int $id
+     */
+    public function remove(int $id)
+    {
+        unset($this->entities[$id]);
+    }
+
+    /**
+     * Allow for removal of export entities
+     *
+     * @param \Emico\TweakwiseExport\Model\Write\Products\ExportEntity $exportEntity
+     */
+    public function removeExportEntity(ExportEntity $exportEntity)
+    {
+        $this->remove($exportEntity->getId());
+    }
 }
