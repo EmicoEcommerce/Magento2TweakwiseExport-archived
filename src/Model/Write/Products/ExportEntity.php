@@ -165,6 +165,14 @@ class ExportEntity
     /**
      * @return int
      */
+    public function getStoreId()
+    {
+        return $this->storeId;
+    }
+
+    /**
+     * @return int
+     */
     public function getStatus(): int
     {
         return $this->status;
