@@ -20,7 +20,7 @@ class CombinedStockHelper
     public function getChildStockStatus(ExportEntity $exportEntity, $requiredOnly = false)
     {
         $stockStatus = [];
-        foreach ($exportEntity->getExportChildren() as $child) {
+        foreach ($exportEntity->getExportChildrenIncludeOutOfStock() as $child) {
             $childOptions = $child->getChildOptions();
             if ($requiredOnly && $childOptions && !$childOptions->isRequired()) {
                 continue;
@@ -39,7 +39,7 @@ class CombinedStockHelper
     public function getChildStockQuantities(ExportEntity $exportEntity, $requiredOnly = false)
     {
         $stockQuantities = [];
-        foreach ($exportEntity->getExportChildren() as $child) {
+        foreach ($exportEntity->getExportChildrenIncludeOutOfStock() as $child) {
             $childOptions = $child->getChildOptions();
             if ($requiredOnly && $childOptions && !$childOptions->isRequired()) {
                 continue;

@@ -21,7 +21,7 @@ class Bundle implements CombinedStockItemInterface
     public function getCombinedStockItem(ExportEntity $exportEntity): StockItem
     {
         $optionGroups = [];
-        foreach ($exportEntity->getExportChildren() as $child) {
+        foreach ($exportEntity->getExportChildrenIncludeOutOfStock() as $child) {
             $childOptions = $child->getChildOptions();
             if (!$childOptions) {
                 continue;
