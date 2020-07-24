@@ -35,7 +35,7 @@ class ExportEntityChild extends ExportEntity
     /**
      * @param ChildOptions $childOptions
      */
-    public function setChildOptions(ChildOptions $childOptions): void
+    public function setChildOptions(ChildOptions $childOptions)
     {
         $this->childOptions = $childOptions;
     }
@@ -67,18 +67,5 @@ class ExportEntityChild extends ExportEntity
     protected function shouldExportByVisibility(): bool
     {
         return true;
-    }
-
-    /**
-     * @param bool $includeOutOfStock
-     * @return bool
-     */
-    public function shouldExport($includeOutOfStock = false): bool
-    {
-        if ($this->config->isOutOfStockChildren($this->storeId)) {
-            $includeOutOfStock = true;
-        }
-
-        return parent::shouldExport($includeOutOfStock);
     }
 }

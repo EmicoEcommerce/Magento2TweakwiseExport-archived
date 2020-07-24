@@ -36,11 +36,6 @@ class ExportEntity
     protected $attributes = [];
 
     /**
-     * @var ExportEntityChild[]|null
-     */
-    protected $children;
-
-    /**
      * @var int
      */
     protected $id;
@@ -64,11 +59,6 @@ class ExportEntity
      * @var float
      */
     protected $price = 0.0;
-
-    /**
-     * @var bool|null
-     */
-    protected $isComposite;
 
     /**
      * @var StockItem
@@ -243,6 +233,14 @@ class ExportEntity
     }
 
     /**
+     * @return bool
+     */
+    public function isComposite(): bool
+    {
+        return $this instanceof CompositeExportEntityInterface;
+    }
+
+    /**
      * @return float
      */
     public function getStockQty(): float
@@ -253,19 +251,20 @@ class ExportEntity
     /**
      * @return bool
      */
-    public function shouldExport($includeOutOfStock = false): bool
+    public function shouldExport(): bool
     {
-        $shouldExport = $this->shouldExportByStatus() &&
+        return $this->shouldExportByStock() && $this->shouldExportAllowOutOfStock();
+    }
+
+    /**
+     * @return bool
+     */
+    protected function shouldExportAllowOutOfStock(): bool
+    {
+        return $this->shouldExportByStatus() &&
             $this->shouldExportByWebsite() &&
             $this->shouldExportByVisibility() &&
-            $this->shouldExportByComposite() &&
             $this->shouldExportByNameAttribute();
-
-        if (!$includeOutOfStock) {
-            $shouldExport = $shouldExport && $this->shouldExportByStock();
-        }
-
-        return $shouldExport;
     }
 
     /**
@@ -318,6 +317,7 @@ class ExportEntity
      * @param string $attribute
      * @param bool $asArray
      * @return array|mixed
+     * @throws InvalidArgumentException
      */
     public function getAttribute(string $attribute, bool $asArray = true)
     {
@@ -330,86 +330,6 @@ class ExportEntity
         }
 
         return current($this->attributes[$attribute]);
-    }
-
-    /**
-     * @param ExportEntityChild[] $children
-     * @return $this
-     */
-    public function setChildren(array $children)
-    {
-        foreach ($children as $child) {
-            $this->addChild($child);
-        }
-        return $this;
-    }
-
-    /**
-     * @param ExportEntityChild $child
-     * @return $this
-     */
-    public function addChild(ExportEntityChild $child)
-    {
-        if ($this->children === null) {
-            $this->children = [];
-        }
-
-        $this->children[$child->getId()] = $child;
-        return $this;
-    }
-
-    /**
-     * @param ExportEntityChild $child
-     * @return $this
-     */
-    public function removeChild(ExportEntityChild $child)
-    {
-        if ($this->children === null || !isset($this->children[$child->getId()])) {
-            throw new InvalidArgumentException(sprintf('Child %s not set on %s', $child->getId(), $this->getId()));
-        }
-
-        unset($this->children[$child->getId()]);
-        return $this;
-    }
-
-    /**
-     * @return ExportEntityChild[]
-     */
-    public function getExportChildren(): array
-    {
-        if ($this->children === null) {
-            return [];
-        }
-
-        $result = [];
-        foreach ($this->children as $child) {
-            if (!$child->shouldExport()) {
-                continue;
-            }
-
-            $result[$child->getId()] = $child;
-        }
-
-        return $result;
-    }
-
-    /**
-     * @return ExportEntityChild[]
-     */
-    public function getExportChildrenIncludeOutOfStock(): array
-    {
-        if ($this->children === null) {
-            return [];
-        }
-
-        $children = [];
-        foreach ($this->children as $child) {
-            if ($child->shouldExport(true)) {
-                $children[] = $child;
-            }
-        }
-
-        return $children;
     }
 
     /**
@@ -426,24 +346,6 @@ class ExportEntity
     public function getTypeId()
     {
         return $this->typeId;
-    }
-
-    /**
-     * @param bool $isComposite
-     * @return $this
-     */
-    public function setIsComposite(bool $isComposite)
-    {
-        $this->isComposite = $isComposite;
-        return $this;
-    }
-
-    /**
-     * @return bool|null
-     */
-    public function isComposite()
-    {
-        return $this->isComposite;
     }
 
     /**
@@ -531,22 +433,6 @@ class ExportEntity
 
         return \in_array($this->getVisibility(), $this->visibilityObject->getVisibleInSiteIds(), true);
 
-    }
-
-    /**
-     * @return bool
-     */
-    protected function shouldExportByComposite(): bool
-    {
-        if ($this->isComposite === null || $this->isComposite === false) {
-            return true;
-        }
-
-        if ($this->children === null) {
-            return true;
-        }
-
-        return count($this->getExportChildren()) > 0;
     }
 
     /**

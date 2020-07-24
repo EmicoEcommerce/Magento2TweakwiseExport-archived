@@ -10,6 +10,7 @@ use Emico\TweakwiseExport\Model\CombinedStock\CombinedStockItemInterface;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockMapProviderInterface;
+use Emico\TweakwiseExport\Model\Write\Products\CompositeExportEntityInterface;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use Magento\Framework\App\ProductMetadataInterface;
 use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
@@ -80,7 +81,7 @@ class StockData implements DecoratorInterface
     {
         // This has to be called before setting the stock items.
         // This way the composite products are not filtered since they mostly have 0 stock.
-        $toBeCombinedEntities = $collection->getExported();
+        $toBeCombinedEntities = $collection->getAllEntities();
         $storeId = $collection->getStoreId();
 
         $this->addStockItems($storeId, $collection);
@@ -109,8 +110,10 @@ class StockData implements DecoratorInterface
         foreach ($collection as $entity) {
             $this->assignStockItem($stockItemMap, $entity);
 
-            foreach ($entity->getExportChildren() as $childEntity) {
-                $this->assignStockItem($stockItemMap, $childEntity);
+            if ($entity instanceof CompositeExportEntityInterface) {
+                foreach ($entity->getAllChildren() as $childEntity) {
+                    $this->assignStockItem($stockItemMap, $childEntity);
+                }
             }
         }
     }

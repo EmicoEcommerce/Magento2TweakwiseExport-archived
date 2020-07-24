@@ -11,6 +11,13 @@ use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Simplexml\Element;
 use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
 
+/**
+ * This is necessary to remain compatible with Magento 2.2.X
+ * setup:di:compile fails when there is a reference to a non existing Interface or Class in the constructor
+ *
+ * Class StockResolverFactory
+ * @package Emico\TweakwiseExport\Model
+ */
 class DefaultStockProviderInterfaceFactory
 {
     /**

@@ -15,7 +15,7 @@ use IteratorAggregate;
 class Collection implements IteratorAggregate, Countable
 {
     /**
-     * @var array
+     * @var ExportEntity[]
      */
     protected $entities = [];
 
@@ -23,6 +23,16 @@ class Collection implements IteratorAggregate, Countable
      * @var int
      */
     protected $storeId;
+
+    /**
+     * @var string[]
+     */
+    protected $skus;
+
+    /**
+     * @var int[]
+     */
+    protected $ids;
 
     /**
      * Collection constructor.
@@ -114,22 +124,48 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
+     * @return ExportEntity[]
+     */
+    public function getAllEntities()
+    {
+        return $this->entities;
+    }
+
+    /**
+     * Ensure
+     */
+    protected function ensureIdsAndSkus()
+    {
+        $ids = [];
+        $skus = [];
+        foreach ($this->getExported() as $entity) {
+            $ids[] = $entity->getId();
+            $skus[] = $entity->getAttribute('sku', false);
+
+            if ($entity instanceof CompositeExportEntityInterface) {
+                foreach ($entity->getAllChildren() as $child) {
+                    $ids[] = $child->getId();
+                    $skus[] = $child->getAttribute('sku', false);
+                }
+            }
+        }
+        // Make unique
+        $this->ids = array_flip($ids);
+        $this->skus = array_flip($skus);
+    }
+
+    /**
      * Fetches all entity ID's including childen
      *
      * @return int[]
      */
     public function getAllIds(): array
     {
-        $result = [];
-        foreach ($this->getExported() as $entity) {
-            $result[] = $entity->getId();
-
-            foreach ($entity->getExportChildren() as $child) {
-                $result[] = $child->getId();
-            }
+        if ($this->ids === null) {
+            $this->ensureIdsAndSkus();
         }
 
-        return array_keys(array_flip($result));
+        return array_keys($this->ids);
     }
 
     /**
@@ -137,17 +173,11 @@ class Collection implements IteratorAggregate, Countable
      */
     public function getAllSkus(): array
     {
-        $skus = [];
-        /** @var ExportEntity $entity */
-        foreach ($this->getExported() as $entity) {
-            $skus[] = $entity->getAttribute('sku', false);
-
-            foreach ($entity->getExportChildren() as $child) {
-                $skus[] = $child->getAttribute('sku', false);
-            }
+        if ($this->skus === null) {
+            $this->ensureIdsAndSkus();
         }
 
-        return array_keys(array_flip($skus));
+        return array_keys($this->skus);
     }
 
     /**
@@ -157,7 +187,18 @@ class Collection implements IteratorAggregate, Countable
      */
     public function remove(int $id)
     {
-        unset($this->entities[$id]);
+        unset($this->entities[$id], $this->ids[$id]);
+        if (!$entity = $this->entities[$id]) {
+            return;
+        }
+
+        try {
+            /** @var string $sku */
+            $sku = $entity->getAttribute('sku', false);
+            unset ($this->skus[$sku]);
+        } catch (InvalidArgumentException $e) {
+            // Wont happen in practice
+        }
     }
 
     /**

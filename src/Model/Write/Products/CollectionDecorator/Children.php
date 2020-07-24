@@ -12,8 +12,9 @@ use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\EavIteratorFactory;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\CollectionFactory;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntityChildFactory;
+use Emico\TweakwiseExport\Model\Write\Products\CompositeExportEntityInterface;
+use Emico\TweakwiseExport\Model\Write\Products\ExportEntityChild;
+use Emico\TweakwiseExport\Model\Write\Products\ExportEntityFactory;
 use Emico\TweakwiseExport\Model\Write\Products\IteratorInitializer;
 use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product;
@@ -37,7 +38,7 @@ class Children implements DecoratorInterface
     protected $eavIteratorFactory;
 
     /**
-     * @var ExportEntityChildFactory
+     * @var ExportEntityFactory
      */
     protected $entityChildFactory;
 
@@ -77,7 +78,7 @@ class Children implements DecoratorInterface
      * @param ProductType $productType
      * @param EavIteratorFactory $eavIteratorFactory
      * @param IteratorInitializer $iteratorInitializer
-     * @param ExportEntityChildFactory $entityChildFactory
+     * @param ExportEntityFactory $entityChildFactory
      * @param CollectionFactory $collectionFactory
      * @param Helper $helper
      * @param DbResourceHelper $dbResource
@@ -87,7 +88,7 @@ class Children implements DecoratorInterface
         ProductType $productType,
         EavIteratorFactory $eavIteratorFactory,
         IteratorInitializer $iteratorInitializer,
-        ExportEntityChildFactory $entityChildFactory,
+        ExportEntityFactory $entityChildFactory,
         CollectionFactory $collectionFactory,
         Helper $helper,
         DbResourceHelper $dbResource,
@@ -118,17 +119,11 @@ class Children implements DecoratorInterface
      */
     protected function createChildEntities(Collection $collection)
     {
-        foreach ($this->getGroupedEntities($collection) as $typeId => $group) {
+        foreach ($this->getCompositeEntities($collection) as $typeId => $group) {
             // Create fake product type to trick type factory to use getTypeId
             /** @var Product $fakeProduct */
             $fakeProduct = new DataObject(['type_id' => $typeId]);
             $type = $this->productType->factory($fakeProduct);
-            $isComposite = $type->isComposite($fakeProduct);
-            foreach ($group as $entity) {
-                $entity->setIsComposite($isComposite);
-                $entity->setTypeId($typeId);
-                $entity->setChildren([]);
-            }
 
             $parentIds = array_keys($group);
             if ($type instanceof Bundle) {
@@ -149,20 +144,20 @@ class Children implements DecoratorInterface
 
     /**
      * @param Collection $collection
-     * @return ExportEntity[][]
+     * @return CompositeExportEntityInterface[][]
      */
-    protected function getGroupedEntities(Collection $collection): array
+    protected function getCompositeEntities(Collection $collection): array
     {
-        $groups = [];
+        $compositeEntities = [];
         foreach ($collection as $entity) {
-            $typeId = $entity->getAttribute('type_id', false);
-            if (!isset($groups[$typeId])) {
-                $groups[$typeId] = [];
+            if (!$entity instanceof CompositeExportEntityInterface) {
+                continue;
             }
 
-            $groups[$typeId][$entity->getId()] = $entity;
+            $compositeEntities[$entity->getTypeId()][] = $entity;
         }
-        return $groups;
+
+        return $compositeEntities;
     }
 
     /**
@@ -307,13 +302,16 @@ class Children implements DecoratorInterface
         } else {
             $child = $this->childEntities->get($childId);
         }
-
+        /** @var ExportEntityChild $child */
         if ($childOptions) {
             $child->setChildOptions($childOptions);
         }
 
         try {
-            $collection->get($parentId)->addChild($child);
+            $parent = $collection->get($parentId);
+            if ($parent instanceof CompositeExportEntityInterface) {
+                $parent->addChild($child);
+            }
         } catch (InvalidArgumentException $exception) {
             // no implementation, parent was not found
         }
@@ -321,6 +319,7 @@ class Children implements DecoratorInterface
 
     /**
      * Load child attribute data
+     * @param int $storeId
      */
     protected function loadChildAttributes(int $storeId)
     {
