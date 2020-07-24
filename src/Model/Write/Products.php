@@ -16,6 +16,7 @@ use Magento\Catalog\Model\Product;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Eav\Model\Entity\Attribute\Source\SourceInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Profiler;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManager;
@@ -67,8 +68,14 @@ class Products implements WriterInterface
      * @param Logger $log
      * @param EavConfig $eavConfig
      */
-    public function __construct(Config $config, Iterator $iterator, StoreManager $storeManager, Helper $helper, Logger $log, EavConfig $eavConfig)
-    {
+    public function __construct(
+        Config $config,
+        Iterator $iterator,
+        StoreManager $storeManager,
+        Helper $helper,
+        Logger $log,
+        EavConfig $eavConfig
+    ) {
         $this->config = $config;
         $this->iterator = $iterator;
         $this->storeManager = $storeManager;
@@ -112,17 +119,23 @@ class Products implements WriterInterface
      * @param Store $store
      * @return $this
      */
-    protected function exportStore(Writer $writer, XmlWriter $xml, Store $store)
+    protected function exportStore(Writer $writer, XmlWriter $xml, Store $store): self
     {
         $storeId = $store->getId();
         $this->iterator->setStoreId($storeId);
         // Purge iterator entity ids for the new store
         $this->iterator->setEntityIds([]);
 
-        foreach ($this->iterator as $data) {
+        foreach ($this->iterator as $index => $data) {
             $this->writeProduct($xml, $storeId, $data);
-            $writer->flush();
+            // Flush every so often
+            if ($index % 100 === 0) {
+                $writer->flush();
+            }
         }
+
+        // Flush any remaining products
+        $writer->flush();
         return $this;
     }
 
@@ -133,7 +146,7 @@ class Products implements WriterInterface
      * @param array $data
      * @return $this
      */
-    protected function writeProduct(XmlWriter $xml, $storeId, array $data)
+    protected function writeProduct(XmlWriter $xml, $storeId, array $data): self
     {
         $xml->startElement('item');
 
@@ -151,7 +164,9 @@ class Products implements WriterInterface
             if ($xml->hasCategoryExport($categoryTweakwiseId)) {
                 $xml->writeElement('categoryid', $categoryTweakwiseId);
             } else {
-                $this->log->debug(sprintf('Skip product (%s) category (%s) relation', $tweakwiseId, $categoryTweakwiseId));
+                $this->log->debug(
+                    sprintf('Skip product (%s) category (%s) relation', $tweakwiseId, $categoryTweakwiseId)
+                );
             }
         }
         $xml->endElement(); // categories
@@ -177,7 +192,7 @@ class Products implements WriterInterface
      * @param string|string[]|int|int[]|float|float[] $attributeValue
      * @return $this
      */
-    public function writeAttribute(XmlWriter $xml, $storeId, $name, $attributeValue)
+    public function writeAttribute(XmlWriter $xml, $storeId, $name, $attributeValue): self
     {
         $values = $this->normalizeAttributeValue($storeId, $name, $attributeValue);
         $values = array_unique($values);
@@ -202,7 +217,7 @@ class Products implements WriterInterface
      * @param AbstractAttribute $attribute
      * @return string[]
      */
-    protected function getAttributeOptionMap($storeId, AbstractAttribute $attribute)
+    protected function getAttributeOptionMap($storeId, AbstractAttribute $attribute): array
     {
         $attributeKey = $storeId . '-' . $attribute->getId();
         if (!isset($this->attributeOptionMap[$attributeKey])) {
@@ -212,7 +227,7 @@ class Products implements WriterInterface
             $attribute->setData('store_id', $storeId);
 
             foreach ($attribute->getSource()->getAllOptions() as $option) {
-                $map[$option['value']] = (string) $option['label'];
+                $map[$option['value']] = (string)$option['label'];
             }
 
             $this->attributeOptionMap[$attributeKey] = $map;
@@ -243,7 +258,7 @@ class Products implements WriterInterface
             if (method_exists($value, 'toString')) {
                 $value = $value->toString();
             } else if (method_exists($value, '__toString')) {
-                $value = (string) $value;
+                $value = (string)$value;
             } else {
                 $value = spl_object_hash($value);
             }
@@ -280,23 +295,23 @@ class Products implements WriterInterface
      * @param mixed $data
      * @return array
      */
-    protected function ensureArray($data)
+    protected function ensureArray($data): array
     {
         return is_array($data) ? $data : [$data];
     }
 
     /**
-     * @param array $data
+     * @param string[] $data
      * @param string $delimiter
-     * @return array
+     * @return string[]
      */
-    protected function explodeValues(array $data, $delimiter = ',')
+    protected function explodeValues(array $data, string $delimiter = ','): array
     {
         $result = [];
         foreach ($data as $value) {
-            $result = array_merge($result, explode($delimiter, $value));
+            $result[] = explode($delimiter, $value) ?: [];
         }
-        return $result;
+        return !empty($result) ? array_merge([], ...$result) : [];
     }
 
     /**
@@ -307,14 +322,24 @@ class Products implements WriterInterface
      * @param mixed $value
      * @return array
      */
-    protected function normalizeAttributeValue($storeId, $attributeCode, $value)
+    protected function normalizeAttributeValue(int $storeId, string $attributeCode, $value): array
     {
         $values = $this->ensureArray($value);
-        $values = array_map(function($value) { return $this->scalarValue($value); }, $values);
+        $values = array_map(
+            function ($value) {
+                return $this->scalarValue($value);
+            },
+            $values
+        );
 
-        $attribute = $this->eavConfig->getAttribute(Product::ENTITY, $attributeCode);
+        try {
+            $attribute = $this->eavConfig->getAttribute(Product::ENTITY, $attributeCode);
+        } catch (LocalizedException $e) {
+            $this->log->error($e->getMessage());
+            return $values;
+        }
         // Attribute does not exists so just return value
-        if (!$attribute->getId()) {
+        if (!$attribute || !$attribute->getId()) {
             return $values;
         }
 
@@ -325,11 +350,18 @@ class Products implements WriterInterface
 
         // Explode values if source is used (multi select)
         $values = $this->explodeValues($values);
-        if (!$attribute->getSource() instanceof SourceInterface) {
+        try {
+            $attributeSource = $attribute->getSource();
+        } catch (LocalizedException $e) {
+            $this->log->error($e->getMessage());
+            return $values;
+        }
+        if (!$attributeSource instanceof SourceInterface) {
             return $values;
         }
 
         $result = [];
+        /** @var string $attributeValue */
         foreach ($values as $attributeValue) {
             $map = $this->getAttributeOptionMap($storeId, $attribute);
             $result[] = $map[$attributeValue] ?? null;

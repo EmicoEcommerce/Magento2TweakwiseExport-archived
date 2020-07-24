@@ -52,8 +52,13 @@ class Categories implements WriterInterface
      * @param Helper $helper
      * @param Logger $log
      */
-    public function __construct(Iterator $iterator, StoreManager $storeManager, Config $config, Helper $helper, Logger $log)
-    {
+    public function __construct(
+        Iterator $iterator,
+        StoreManager $storeManager,
+        Config $config,
+        Helper $helper,
+        Logger $log
+    ) {
         $this->iterator = $iterator;
         $this->storeManager = $storeManager;
         $this->config = $config;
@@ -98,7 +103,7 @@ class Categories implements WriterInterface
      * @param Store $store
      * @return $this
      */
-    protected function exportStore(Writer $writer, XmlWriter $xml, Store $store)
+    protected function exportStore(Writer $writer, XmlWriter $xml, Store $store): self
     {
         // Set root category as exported
         $exportedCategories = [1 => true];
@@ -108,7 +113,7 @@ class Categories implements WriterInterface
         // Purge iterator entity ids for the new store
         $this->iterator->setEntityIds([]);
 
-        foreach ($this->iterator as $data) {
+        foreach ($this->iterator as $index => $data) {
             // Skip magento root since we injected our fake root
             if ($data['entity_id'] === 1) {
                 continue;
@@ -139,9 +144,13 @@ class Categories implements WriterInterface
             // Set category as exported
             $exportedCategories[$data['entity_id']] = true;
             $this->writeCategory($xml, $storeId, $data);
-
-            $writer->flush();
+            // Flush every so often
+            if ($index % 100 === 0) {
+                $writer->flush();
+            }
         }
+        // Flush any remaining categories
+        $writer->flush();
         return $this;
     }
 
@@ -151,7 +160,7 @@ class Categories implements WriterInterface
      * @param array $data
      * @return $this
      */
-    protected function writeCategory(XmlWriter $xml, int $storeId, array $data)
+    protected function writeCategory(XmlWriter $xml, int $storeId, array $data): self
     {
         $tweakwiseId = $this->helper->getTweakwiseId($storeId, $data['entity_id']);
         $xml->addCategoryExport($tweakwiseId);
@@ -177,9 +186,6 @@ class Categories implements WriterInterface
         }
 
         $xml->endElement(); // </category>
-
-
-
         return $this;
     }
 }

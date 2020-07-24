@@ -187,7 +187,9 @@ class Writer
     public function flush()
     {
         $output = $this->getXml()->flush();
-        fwrite($this->resource, $output);
+        if ($output) {
+            fwrite($this->resource, $output);
+        }
         return $this;
     }
 
@@ -196,7 +198,7 @@ class Writer
      *
      * @return $this
      */
-    protected function startDocument()
+    protected function startDocument(): self
     {
         $xml = $this->getXml();
         $xml->startDocument('1.0', 'UTF-8');
@@ -228,7 +230,7 @@ class Writer
      * Write document end
      * @return $this
      */
-    protected function endDocument()
+    protected function endDocument(): self
     {
         $xml = $this->getXml();
         $xml->endElement(); // </tweakwise>
