@@ -62,7 +62,7 @@ The reason for this is that when a user searches for a t-shirt with size M then 
 The feed contains only attributes which have bearing on search or navigation, check ``src/Model/ProductAttributes.php:45`` to see the criteria an attribute must meet in order to be exported.
 
 ## A note on the feed implementation
-Magento's native interfaces and handlers for data retrieval were deemed to slow for a large catalogue.
+Magento's native interfaces and handlers for data retrieval were deemed to slow for a large catalog.
 Since performance is essential we decided on our own queries for data retrieval. The consequence is that we need to keep track of the inner workings of magento and are subject to its changes.
 If you find an issue with data retrieval please create an issue on github.
 
