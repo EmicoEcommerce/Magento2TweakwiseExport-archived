@@ -8,6 +8,7 @@
 
 namespace Emico\TweakwiseExport\Cron;
 
+use Emico\TweakwiseExport\Exception\FeedException;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Export as ExportService;
 use Emico\TweakwiseExport\Model\Logger;
@@ -17,7 +18,7 @@ class Export
     /**
      * Code of the cronjob
      */
-    const JOB_CODE = 'emico_tweakwise_export';
+    public const JOB_CODE = 'emico_tweakwise_export';
 
     /**
      * @var Config
@@ -41,8 +42,11 @@ class Export
      * @param ExportService $export
      * @param Logger $log
      */
-    public function __construct(Config $config, ExportService $export, Logger $log)
-    {
+    public function __construct(
+        Config $config,
+        ExportService $export,
+        Logger $log
+    ) {
         $this->config = $config;
         $this->export = $export;
         $this->log = $log;
@@ -50,8 +54,10 @@ class Export
 
     /**
      * Export feed
+     * @throws FeedException
      */
-    public function execute() {
+    public function execute()
+    {
         if ($this->config->isRealTime()) {
             $this->log->debug('Export set to real time, skipping cron export.');
             return;

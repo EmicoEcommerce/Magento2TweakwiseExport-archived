@@ -28,7 +28,7 @@ class ExportStart extends Field
      * @return string
      * @throws LocalizedException
      */
-    protected function _getElementHtml(AbstractElement $element)
+    protected function _getElementHtml(AbstractElement $element): string
     {
         /** @var Button $button  */
         $button = $this->getForm()->getLayout()->createBlock(Button::class);

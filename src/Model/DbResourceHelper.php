@@ -39,7 +39,7 @@ class DbResourceHelper
     /**
      * @return AdapterInterface
      */
-    public function getConnection()
+    public function getConnection(): AdapterInterface
     {
         return $this->getResources()->getConnection();
     }
@@ -47,7 +47,7 @@ class DbResourceHelper
     /**
      * @return ResourceConnection
      */
-    public function getResources()
+    public function getResources(): ResourceConnection
     {
         return $this->dbContext->getResources();
     }

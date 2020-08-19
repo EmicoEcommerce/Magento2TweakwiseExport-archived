@@ -20,22 +20,22 @@ class Config
     /**
      * Config path constants
      */
-    const PATH_ENABLED = 'tweakwise/export/enabled';
-    const PATH_REAL_TIME = 'tweakwise/export/real_time';
-    const PATH_VALIDATE = 'tweakwise/export/validate';
-    const PATH_API_IMPORT_URL = 'tweakwise/export/api_import_url';
-    const PATH_STOCK_CALCULATION = 'tweakwise/export/stock_calculation';
-    const PATH_STOCK_PERCENTAGE = 'tweakwise/export/stock_percentage';
-    const PATH_OUT_OF_STOCK_CHILDREN = 'tweakwise/export/out_of_stock_children';
-    const PATH_FEED_KEY = 'tweakwise/export/feed_key';
-    const PATH_ALLOW_CACHE_FLUSH = 'tweakwise/export/allow_cache_flush';
-    const PATH_PRICE_FIELD = 'tweakwise/export/price_field';
-    const PATH_EXCLUDE_CHILD_ATTRIBUTES = 'tweakwise/export/exclude_child_attributes';
+    public const PATH_ENABLED = 'tweakwise/export/enabled';
+    public const PATH_REAL_TIME = 'tweakwise/export/real_time';
+    public const PATH_VALIDATE = 'tweakwise/export/validate';
+    public const PATH_API_IMPORT_URL = 'tweakwise/export/api_import_url';
+    public const PATH_STOCK_CALCULATION = 'tweakwise/export/stock_calculation';
+    public const PATH_STOCK_PERCENTAGE = 'tweakwise/export/stock_percentage';
+    public const PATH_OUT_OF_STOCK_CHILDREN = 'tweakwise/export/out_of_stock_children';
+    public const PATH_FEED_KEY = 'tweakwise/export/feed_key';
+    public const PATH_ALLOW_CACHE_FLUSH = 'tweakwise/export/allow_cache_flush';
+    public const PATH_PRICE_FIELD = 'tweakwise/export/price_field';
+    public const PATH_EXCLUDE_CHILD_ATTRIBUTES = 'tweakwise/export/exclude_child_attributes';
 
     /**
      * default feed filename
      */
-    const FEED_FILE_NAME = 'tweakwise.xml';
+    public const FEED_FILE_NAME = 'tweakwise.xml';
 
     /**
      * @var ScopeConfigInterface
@@ -64,8 +64,11 @@ class Config
      * @param DirectoryList $directoryList
      * @param DeploymentConfig $deployConfig
      */
-    public function __construct(ScopeConfigInterface $config, DirectoryList $directoryList, DeploymentConfig $deployConfig)
-    {
+    public function __construct(
+        ScopeConfigInterface $config,
+        DirectoryList $directoryList,
+        DeploymentConfig $deployConfig
+    ) {
         $this->config = $config;
         $this->directoryList = $directoryList;
         $this->deployConfig = $deployConfig;
@@ -120,7 +123,7 @@ class Config
     /**
      * @return string|null
      */
-    public function getKey()
+    public function getKey(): ?string
     {
         return $this->config->getValue(self::PATH_FEED_KEY);
     }

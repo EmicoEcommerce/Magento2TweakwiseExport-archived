@@ -22,9 +22,14 @@ class ExportState extends Field
 
     /**
      * @param Context $context
+     * @param Helper $helper
      * @param array $data
      */
-    public function __construct(Context $context, Helper $helper, array $data = []) {
+    public function __construct(
+        Context $context,
+        Helper $helper,
+        array $data = []
+    ) {
         parent::__construct($context, $data);
         $this->helper = $helper;
     }
@@ -33,7 +38,7 @@ class ExportState extends Field
      * @param AbstractElement $element
      * @return string
      */
-    protected function _getElementHtml(AbstractElement $element)
+    protected function _getElementHtml(AbstractElement $element): string
     {
         return $this->helper->getExportStateText();
     }

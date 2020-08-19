@@ -55,6 +55,7 @@ class PriceField implements ArrayInterface
             if (\count($tmp) === 0) {
                 $permutations[] = $copy;
             } else {
+                /** @noinspection SlowArrayOperationsInLoopInspection */
                 $permutations = array_merge($permutations, $this->combineArrayPermutations($tmp, $copy));
             }
         }

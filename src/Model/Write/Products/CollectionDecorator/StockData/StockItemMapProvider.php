@@ -81,7 +81,7 @@ class StockItemMapProvider implements StockMapProviderInterface
      * @param StockItemInterface $item
      * @return StockItem
      */
-    protected function getTweakwiseStockItem(StockItemInterface $item)
+    protected function getTweakwiseStockItem(StockItemInterface $item): StockItem
     {
         $tweakwiseStockItem = $this->tweakwiseStockItemFactory->create();
         $tweakwiseStockItem->setQty((int)$item->getQty());

@@ -39,7 +39,7 @@ class ChildOptions
     /**
      * @return int
      */
-    public function getOptionId()
+    public function getOptionId(): ?int
     {
         return $this->optionId;
     }
@@ -53,9 +53,9 @@ class ChildOptions
     }
 
     /**
-     * @return bool
+     * @return bool|null
      */
-    public function isRequired()
+    public function isRequired(): ?bool
     {
         return $this->isRequired;
     }

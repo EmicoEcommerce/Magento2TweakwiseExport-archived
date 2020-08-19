@@ -55,7 +55,7 @@ class ProductReviewSummary
     /**
      * @param float $averageRating
      */
-    public function setAverageRating(float $averageRating)
+    public function setAverageRating(float $averageRating): void
     {
         $this->averageRating = $averageRating;
     }
@@ -71,7 +71,7 @@ class ProductReviewSummary
     /**
      * @param int $reviewCount
      */
-    public function setReviewCount(int $reviewCount)
+    public function setReviewCount(int $reviewCount): void
     {
         $this->reviewCount = $reviewCount;
     }
@@ -87,7 +87,7 @@ class ProductReviewSummary
     /**
      * @param int $productId
      */
-    public function setProductId(int $productId)
+    public function setProductId(int $productId): void
     {
         $this->productId = $productId;
     }

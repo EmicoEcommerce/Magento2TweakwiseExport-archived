@@ -87,7 +87,7 @@ class Helper
      *
      * @return DateTime|null
      */
-    public function getFeedExportStartDate()
+    public function getFeedExportStartDate(): ?DateTime
     {
         $file = new SplFileInfo($this->config->getFeedTmpFile());
         if (!$file->isFile()) {
@@ -102,7 +102,7 @@ class Helper
      *
      * @return DateTime|null
      */
-    public function getLastFeedExportDate()
+    public function getLastFeedExportDate(): ?DateTime
     {
         $file = new SplFileInfo($this->config->getDefaultFeedFile());
         if (!$file->isFile()) {

@@ -54,7 +54,7 @@ class StockItem
     /**
      * @param int $qty
      */
-    public function updateQty(int $qty)
+    public function updateQty(int $qty): void
     {
         $this->qty += $qty;
     }
@@ -62,7 +62,7 @@ class StockItem
     /**
      * @param int $isInStock
      */
-    public function updateIsInStock(int $isInStock)
+    public function updateIsInStock(int $isInStock): void
     {
         $this->isInStock = max($this->isInStock, $isInStock);
     }

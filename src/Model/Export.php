@@ -200,7 +200,7 @@ class Export
     /**
      * Trigger TW import call if configured
      */
-    protected function triggerTweakwiseImport()
+    protected function triggerTweakwiseImport(): void
     {
         $apiImportUrl = $this->config->getApiImportUrl();
         if (empty($apiImportUrl)) {
@@ -220,7 +220,7 @@ class Export
     /**
      * Update last modified time from feed file
      */
-    protected function touchFeedGenerateDate()
+    protected function touchFeedGenerateDate(): void
     {
         touch($this->config->getDefaultFeedFile());
     }

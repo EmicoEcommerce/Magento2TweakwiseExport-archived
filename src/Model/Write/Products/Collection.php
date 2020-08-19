@@ -45,12 +45,10 @@ class Collection implements IteratorAggregate, Countable
 
     /**
      * @param ExportEntity $entity
-     * @return $this
      */
-    public function add(ExportEntity $entity): self
+    public function add(ExportEntity $entity): void
     {
         $this->entities[$entity->getId()] = $entity;
-        return $this;
     }
 
     /**
@@ -64,7 +62,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * {@inheritdoc}
      */
-    public function count()
+    public function count(): int
     {
         return count($this->entities);
     }
@@ -126,7 +124,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * @return ExportEntity[]
      */
-    public function getAllEntities()
+    public function getAllEntities(): array
     {
         return $this->entities;
     }
@@ -134,7 +132,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Ensure
      */
-    protected function ensureIdsAndSkus()
+    protected function ensureIdsAndSkus(): void
     {
         $ids = [];
         $skus = [];
@@ -185,7 +183,7 @@ class Collection implements IteratorAggregate, Countable
      *
      * @param int $id
      */
-    public function remove(int $id)
+    public function remove(int $id): void
     {
         unset($this->entities[$id], $this->ids[$id]);
         if (!$entity = $this->entities[$id]) {
@@ -204,9 +202,9 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Allow for removal of export entities
      *
-     * @param \Emico\TweakwiseExport\Model\Write\Products\ExportEntity $exportEntity
+     * @param ExportEntity $exportEntity
      */
-    public function removeExportEntity(ExportEntity $exportEntity)
+    public function removeExportEntity(ExportEntity $exportEntity): void
     {
         $this->remove($exportEntity->getId());
     }

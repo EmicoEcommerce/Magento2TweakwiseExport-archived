@@ -51,8 +51,12 @@ class Scheduler
      * @param DateTime $dateTime
      * @param TimezoneInterface $timezone
      */
-    public function __construct(Collection $scheduleCollection, ProductMetadataInterface $productMetadata,  DateTime $dateTime, TimezoneInterface $timezone)
-    {
+    public function __construct(
+        Collection $scheduleCollection,
+        ProductMetadataInterface $productMetadata,
+        DateTime $dateTime,
+        TimezoneInterface $timezone
+    ) {
         $this->scheduleCollection = $scheduleCollection;
         $this->productMetadata = $productMetadata;
         $this->dateTime = $dateTime;
@@ -66,7 +70,7 @@ class Scheduler
      * @throws Exception
      * @return Schedule
      */
-    public function schedule()
+    public function schedule(): Schedule
     {
         $createdAtTime = $this->getCronTimestamp();
         $scheduledAtTime = $createdAtTime;
@@ -91,7 +95,7 @@ class Scheduler
      *
      * @return int
      */
-    protected function getCronTimestamp()
+    protected function getCronTimestamp(): int
     {
         /* @var $version string e.g. "2.1.7" */
         $version = $this->productMetadata->getVersion();

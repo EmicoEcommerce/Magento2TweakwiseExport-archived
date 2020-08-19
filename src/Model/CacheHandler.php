@@ -42,7 +42,7 @@ class CacheHandler
      *
      * @return void
      */
-    public function clear()
+    public function clear(): void
     {
         $this->manager->flush($this->cacheTypes);
     }

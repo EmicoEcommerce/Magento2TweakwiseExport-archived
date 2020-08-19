@@ -55,7 +55,7 @@ class ExportEntityChild extends ExportEntity
     /**
      * @return ChildOptions
      */
-    public function getChildOptions()
+    public function getChildOptions(): ?ChildOptions
     {
         return $this->childOptions;
     }
@@ -63,7 +63,7 @@ class ExportEntityChild extends ExportEntity
     /**
      * @param ChildOptions $childOptions
      */
-    public function setChildOptions(ChildOptions $childOptions)
+    public function setChildOptions(ChildOptions $childOptions): void
     {
         $this->childOptions = $childOptions;
     }

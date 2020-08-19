@@ -88,7 +88,7 @@ class StockData implements DecoratorInterface
      * @param int $storeId
      * @param Collection $collection
      */
-    protected function addStockItems(int $storeId, Collection $collection)
+    protected function addStockItems(int $storeId, Collection $collection): void
     {
         if ($collection->count() === 0) {
             return;
@@ -112,7 +112,7 @@ class StockData implements DecoratorInterface
      * @param array $stockItemMap
      * @param ExportEntity $entity
      */
-    protected function assignStockItem(array $stockItemMap, ExportEntity $entity)
+    protected function assignStockItem(array $stockItemMap, ExportEntity $entity): void
     {
         $entityId = $entity->getId();
         if (isset($stockItemMap[$entityId])) {
@@ -127,7 +127,7 @@ class StockData implements DecoratorInterface
     /**
      * @param ExportEntity $entity
      */
-    protected function addStockPercentage(ExportEntity $entity)
+    protected function addStockPercentage(ExportEntity $entity): void
     {
         $entity->addAttribute('stock_percentage', $this->calculateStockPercentage($entity));
     }

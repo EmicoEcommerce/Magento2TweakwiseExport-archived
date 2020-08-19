@@ -11,6 +11,7 @@ use Emico\TweakwiseExport\Model\StockItem;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogInventory\Api\StockConfigurationInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\StoreManagerInterface;
 
 class ExportEntity
@@ -110,9 +111,9 @@ class ExportEntity
     }
 
     /**
-     * {@inheritdoc}
+     * @param array $data
      */
-    public function setFromArray(array $data)
+    public function setFromArray(array $data): void
     {
         foreach ($data as $key => $value) {
             switch ($key) {
@@ -144,8 +145,6 @@ class ExportEntity
                     break;
             }
         }
-
-        return $this;
     }
 
     /**
@@ -159,7 +158,7 @@ class ExportEntity
     /**
      * @return int
      */
-    public function getStoreId()
+    public function getStoreId(): int
     {
         return $this->storeId;
     }
@@ -174,12 +173,10 @@ class ExportEntity
 
     /**
      * @param int $status
-     * @return $this
      */
-    public function setStatus(int $status)
+    public function setStatus(int $status): void
     {
         $this->status = $status;
-        return $this;
     }
 
     /**
@@ -192,12 +189,10 @@ class ExportEntity
 
     /**
      * @param int $visibility
-     * @return $this
      */
-    public function setVisibility(int $visibility)
+    public function setVisibility(int $visibility): void
     {
         $this->visibility = $visibility;
-        return $this;
     }
 
     /**
@@ -210,12 +205,10 @@ class ExportEntity
 
     /**
      * @param string $name
-     * @return $this
      */
-    public function setName(string $name)
+    public function setName(string $name): void
     {
         $this->name = $name;
-        return $this;
     }
 
     /**
@@ -228,12 +221,10 @@ class ExportEntity
 
     /**
      * @param float $price
-     * @return $this
      */
-    public function setPrice(float $price)
+    public function setPrice(float $price): void
     {
         $this->price = $price;
-        return $this;
     }
 
     /**
@@ -241,17 +232,15 @@ class ExportEntity
      */
     public function getStockQty(): float
     {
-        return (float) $this->getStockItem()->getQty();
+        return (float) ($this->getStockItem() ? $this->getStockItem()->getQty() : 0);
     }
 
     /**
      * @param int $id
-     * @return $this
      */
-    public function addCategoryId(int $id)
+    public function addCategoryId(int $id): void
     {
         $this->categories[] = $id;
-        return $this;
     }
 
     /**
@@ -266,7 +255,7 @@ class ExportEntity
      * @param string $attribute
      * @param $value
      */
-    public function addAttribute(string $attribute, $value)
+    public function addAttribute(string $attribute, $value): void
     {
         if (!isset($this->attributes[$attribute])) {
             $this->attributes[$attribute] = [];
@@ -312,7 +301,7 @@ class ExportEntity
     /**
      * @param string $typeId
      */
-    public function setTypeId(string $typeId)
+    public function setTypeId(string $typeId): void
     {
         $this->typeId = $typeId;
     }
@@ -320,7 +309,7 @@ class ExportEntity
     /**
      * @return string
      */
-    public function getTypeId()
+    public function getTypeId(): string
     {
         return $this->typeId;
     }
@@ -328,25 +317,23 @@ class ExportEntity
     /**
      * @return StockItem
      */
-    public function getStockItem()
+    public function getStockItem(): ?StockItem
     {
         return $this->stockItem;
     }
 
     /**
      * @param StockItem $stockItem
-     * @return $this
      */
-    public function setStockItem($stockItem)
+    public function setStockItem($stockItem): void
     {
         $this->stockItem = $stockItem;
-        return $this;
     }
 
     /**
      * @param int $id
      */
-    public function addLinkedWebsiteId(int $id)
+    public function addLinkedWebsiteId(int $id): void
     {
         $this->linkedWebsiteIds[] = $id;
     }
@@ -354,7 +341,7 @@ class ExportEntity
     /**
      * @return int[]
      */
-    public function getLinkedWebsiteIds()
+    public function getLinkedWebsiteIds(): ?array
     {
         return $this->linkedWebsiteIds;
     }
@@ -419,7 +406,7 @@ class ExportEntity
             return true;
         }
 
-        return $this->getStockItem()->getIsInStock();
+        return $this->getStockItem() ? (bool) $this->getStockItem()->getIsInStock() : false;
     }
 
     /**

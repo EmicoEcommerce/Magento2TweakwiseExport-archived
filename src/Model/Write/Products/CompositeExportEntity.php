@@ -30,12 +30,10 @@ class CompositeExportEntity extends ExportEntity implements CompositeExportEntit
 
     /**
      * @param ExportEntityChild $child
-     * @return $this
      */
-    public function addChild(ExportEntityChild $child)
+    public function addChild(ExportEntityChild $child): void
     {
         $this->children[$child->getId()] = $child;
-        return $this;
     }
 
     /**

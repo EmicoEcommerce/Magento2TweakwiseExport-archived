@@ -233,10 +233,11 @@ class SourceItemMapProvider implements StockMapProviderInterface
 
     /**
      * @param int $storeId
+     * @return array|null[]|string[]
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    protected function getSourceCodesForStore(int $storeId)
+    protected function getSourceCodesForStore(int $storeId): array
     {
         $stockId = $this->getStockIdForStoreId($storeId);
         $sourceModels = $this->getStockSourceProvider()->execute($stockId);
@@ -254,7 +255,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
      *
      * @return GetSourcesAssignedToStockOrderedByPriorityInterface
      */
-    protected function getStockSourceProvider()
+    protected function getStockSourceProvider(): GetSourcesAssignedToStockOrderedByPriorityInterface
     {
         if (!$this->stockSourceProvider) {
             $this->stockSourceProvider = $this->stockSourceProviderFactory->create();
@@ -266,7 +267,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
     /**
      * @return DefaultStockProviderInterface
      */
-    protected function getDefaultStockProvider()
+    protected function getDefaultStockProvider(): DefaultStockProviderInterface
     {
         if (!$this->defaultStockProvider) {
             $this->defaultStockProvider = $this->defaultStockProviderFactory->create();
@@ -281,7 +282,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    protected function getStockIdForStoreId(int $storeId)
+    protected function getStockIdForStoreId(int $storeId): ?int
     {
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
         $websiteCode = $this->storeManager->getWebsite($websiteId)->getCode();
@@ -294,7 +295,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
      *
      * @return StockResolverInterface
      */
-    protected function getStockResolver()
+    protected function getStockResolver(): StockResolverInterface
     {
         if (!$this->stockResolver) {
             $this->stockResolver = $this->stockResolverFactory->create();
@@ -307,7 +308,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
      * @param SourceItemInterface $item
      * @return StockItem
      */
-    protected function getTweakwiseStockItem(array $item)
+    protected function getTweakwiseStockItem(array $item): StockItem
     {
         /** @var StockItem $tweakwiseStockItem */
         $tweakwiseStockItem = $this->tweakwiseStockItemFactory->create();

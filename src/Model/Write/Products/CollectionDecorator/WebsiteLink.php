@@ -65,7 +65,7 @@ class WebsiteLink implements DecoratorInterface
      * @param Collection $collection
      * @throws Zend_Db_Statement_Exception
      */
-    protected function addLinkedWebsiteIds(Collection $collection)
+    protected function addLinkedWebsiteIds(Collection $collection): void
     {
         $select = $this->dbResource->getConnection()->select()
             ->from($this->getProductWebsiteTable(), ['product_id', 'website_id'])

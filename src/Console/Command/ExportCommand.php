@@ -56,7 +56,7 @@ class ExportCommand extends Command
     /**
      * {@inheritdoc}
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('tweakwise:export')
             ->addArgument('file', InputArgument::OPTIONAL, 'Export to specific file', $this->config->getDefaultFeedFile())
@@ -87,7 +87,7 @@ class ExportCommand extends Command
                 $output->writeln('Validate option can only contain y or n');
                 return;
             }
-            
+
             $validate = $validate === "" ? $this->config->isValidate() : $validate === 'y';
 
             $startTime = microtime(true);

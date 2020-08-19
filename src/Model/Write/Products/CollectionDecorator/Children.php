@@ -117,7 +117,7 @@ class Children implements DecoratorInterface
     /**
      * @param Collection $collection
      */
-    protected function createChildEntities(Collection $collection)
+    protected function createChildEntities(Collection $collection): void
     {
         foreach ($this->getCompositeEntities($collection) as $typeId => $group) {
             // Create fake product type to trick type factory to use getTypeId
@@ -164,7 +164,7 @@ class Children implements DecoratorInterface
      * @param Collection $collection
      * @param int[] $parentIds
      */
-    protected function addBundleChildren(Collection $collection, array $parentIds)
+    protected function addBundleChildren(Collection $collection, array $parentIds): void
     {
         $connection = $this->dbResource->getConnection();
         $select = $connection->select();
@@ -213,7 +213,7 @@ class Children implements DecoratorInterface
      * @param int[] $parentIds
      * @param int $typeId
      */
-    protected function addLinkChildren(Collection $collection, array $parentIds, $typeId)
+    protected function addLinkChildren(Collection $collection, array $parentIds, $typeId): void
     {
         $connection = $this->dbResource->getConnection();
         $select = $connection->select();
@@ -248,7 +248,7 @@ class Children implements DecoratorInterface
      * @param Collection $collection
      * @param int[] $parentIds
      */
-    protected function addConfigurableChildren(Collection $collection, array $parentIds)
+    protected function addConfigurableChildren(Collection $collection, array $parentIds): void
     {
         $connection = $this->dbResource->getConnection();
         $select = $connection->select();
@@ -290,7 +290,8 @@ class Children implements DecoratorInterface
         int $parentId,
         int $childId,
         ChildOptions $childOptions = null
-    ) {
+    ): void
+    {
         if (!$this->childEntities->has($childId)) {
             $child = $this->entityChildFactory->createChild(
                 [
@@ -321,7 +322,7 @@ class Children implements DecoratorInterface
      * Load child attribute data
      * @param int $storeId
      */
-    protected function loadChildAttributes(int $storeId)
+    protected function loadChildAttributes(int $storeId): void
     {
         if ($this->childEntities->count() === 0) {
             return;

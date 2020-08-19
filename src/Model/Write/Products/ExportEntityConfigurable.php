@@ -20,7 +20,7 @@ class ExportEntityConfigurable extends CompositeExportEntity
     /**
      * @return StockItem
      */
-    public function getStockItem()
+    public function getStockItem(): ?StockItem
     {
         if ($this->isStockCombined) {
             return $this->stockItem;

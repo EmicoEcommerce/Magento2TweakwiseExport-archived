@@ -39,21 +39,18 @@ class CategoryReference implements DecoratorInterface
             ->where('product_id IN(' . implode(',', $collection->getIds()) . ')');
         $resultSet = $select->query();
 
-        $result = [];
         while ($row = $resultSet->fetch()) {
             $entityId = (int) $row['product_id'];
             $entity = $collection->get($entityId);
             $entity->addCategoryId((int) $row['category_id']);
         }
-
-        return $result;
     }
 
     /**
      * @param int $storeId
      * @return string
      */
-    protected function getIndexTableName(int $storeId)
+    protected function getIndexTableName(int $storeId): string
     {
         $baseTableName = AbstractAction::MAIN_INDEX_TABLE;
         $categoryProductIndexTable = sprintf(
