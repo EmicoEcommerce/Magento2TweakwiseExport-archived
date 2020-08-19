@@ -27,11 +27,6 @@ use Zend_Db_Select;
 class EavIterator implements IteratorAggregate
 {
     /**
-     * @deprecated use property $batchSize instead
-     */
-    public const ENTITY_BATCH_SIZE = 500;
-
-    /**
      * @var int
      */
     protected $batchSize;
@@ -130,6 +125,7 @@ class EavIterator implements IteratorAggregate
     public function selectAttribute(string $attributeCode)
     {
         $attribute = $this->eavConfig->getAttribute($this->entityCode, $attributeCode);
+        /** @noinspection NullPointerExceptionInspection */
         $attributeKey = $attribute->getId() ?: $attributeCode;
 
         $this->attributes[$attributeKey] = $attribute;
@@ -144,6 +140,7 @@ class EavIterator implements IteratorAggregate
     public function removeAttribute(string $attributeCode)
     {
         $attribute = $this->eavConfig->getAttribute($this->entityCode, $attributeCode);
+        /** @noinspection NullPointerExceptionInspection */
         $attributeKey = $attribute->getId() ?: $attributeCode;
 
         if (!isset($this->attributes[$attributeKey])) {
