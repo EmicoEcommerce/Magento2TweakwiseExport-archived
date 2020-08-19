@@ -138,7 +138,7 @@ class StockData implements DecoratorInterface
      */
     protected function calculateStockPercentage(ExportEntity $entity): float
     {
-        if (!$entity->isComposite()) {
+        if (!$entity instanceof CompositeExportEntityInterface) {
             return (int) $this->isInStock($entity) * 100;
         }
 

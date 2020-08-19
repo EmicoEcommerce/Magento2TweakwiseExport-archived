@@ -8,6 +8,7 @@ namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Emico\TweakwiseExport\Model\Write\Products\CompositeExportEntityInterface;
 
 class ChildrenAttributes implements DecoratorInterface
 {
@@ -32,7 +33,7 @@ class ChildrenAttributes implements DecoratorInterface
     public function decorate(Collection $collection)
     {
         foreach ($collection as $exportEntity) {
-            if (!$exportEntity->isComposite()) {
+            if (!$exportEntity instanceof CompositeExportEntityInterface) {
                 continue;
             }
 

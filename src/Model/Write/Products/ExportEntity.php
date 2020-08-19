@@ -237,14 +237,6 @@ class ExportEntity
     }
 
     /**
-     * @return bool
-     */
-    public function isComposite(): bool
-    {
-        return $this instanceof CompositeExportEntityInterface;
-    }
-
-    /**
      * @return float
      */
     public function getStockQty(): float
