@@ -6,7 +6,6 @@
 
 namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
-use Emico\TweakwiseExport\Model\CombinedStock\CombinedStockItemInterface;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockMapProviderInterface;
@@ -44,18 +43,12 @@ class StockData implements DecoratorInterface
     protected $moduleManager;
 
     /**
-     * @var CombinedStockItemInterface
-     */
-    protected $combinedStockItemProvider;
-
-    /**
      * StockData constructor.
      *
      * @param ProductMetadataInterface $metaData
      * @param TweakwiseStockItemFactory $stockItemFactory
      * @param Config $config
      * @param Manager $moduleManager
-     * @param CombinedStockItemInterface $combinedStockItemProvider
      * @param StockMapProviderInterface[] $stockMapProviders
      */
     public function __construct(
@@ -63,7 +56,6 @@ class StockData implements DecoratorInterface
         TweakwiseStockItemFactory $stockItemFactory,
         Config $config,
         Manager $moduleManager,
-        CombinedStockItemInterface $combinedStockItemProvider,
         array $stockMapProviders
     ) {
         $this->metaData = $metaData;
@@ -71,7 +63,6 @@ class StockData implements DecoratorInterface
         $this->stockItemFactory = $stockItemFactory;
         $this->config = $config;
         $this->moduleManager = $moduleManager;
-        $this->combinedStockItemProvider = $combinedStockItemProvider;
     }
 
     /**
@@ -86,14 +77,13 @@ class StockData implements DecoratorInterface
 
         $this->addStockItems($storeId, $collection);
         foreach ($toBeCombinedEntities as $item) {
-            $this->combineStock($item);
             $this->addStockPercentage($item);
         }
     }
 
     /**
-     * This registers stock items to export entities, they will be combined later for "final"
-     * stock items
+     * This registers stock items to export entities, they will be combined later to "final" stock items
+     *
      *
      * @param int $storeId
      * @param Collection $collection
@@ -136,16 +126,6 @@ class StockData implements DecoratorInterface
 
     /**
      * @param ExportEntity $entity
-     * @param int $storeId
-     */
-    protected function combineStock(ExportEntity $entity)
-    {
-        $combinedStockItem = $this->combinedStockItemProvider->getCombinedStockItem($entity);
-        $entity->setStockItem($combinedStockItem);
-    }
-
-    /**
-     * @param ExportEntity $entity
      */
     protected function addStockPercentage(ExportEntity $entity)
     {
@@ -162,7 +142,7 @@ class StockData implements DecoratorInterface
             return (int) $this->isInStock($entity) * 100;
         }
 
-        $children = $entity->getExportChildrenIncludeOutOfStock();
+        $children = $entity->getEnabledChildren();
         $childrenCount = \count($children);
         // Just to be sure we dont divide by 0, we really should not get here
         if ($childrenCount <= 0) {

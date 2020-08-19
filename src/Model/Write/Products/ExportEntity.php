@@ -73,7 +73,7 @@ class ExportEntity
     /**
      * @var int[]|null
      */
-    protected $linkedWebsiteIds;
+    protected $linkedWebsiteIds = [];
 
     /**
      * @var StoreManagerInterface
@@ -118,6 +118,10 @@ class ExportEntity
             switch ($key) {
                 case 'entity_id';
                     $this->id = (int) $value;
+                    break;
+                case 'type_id';
+                    $this->setTypeId((string) $value);
+                    $this->addAttribute($key, (string) $value);
                     break;
                 case 'status';
                     $this->setStatus((int) $value);
@@ -245,26 +249,7 @@ class ExportEntity
      */
     public function getStockQty(): float
     {
-        return (float) $this->stockItem->getQty();
-    }
-
-    /**
-     * @return bool
-     */
-    public function shouldExport(): bool
-    {
-        return $this->shouldExportByStock() && $this->shouldExportAllowOutOfStock();
-    }
-
-    /**
-     * @return bool
-     */
-    protected function shouldExportAllowOutOfStock(): bool
-    {
-        return $this->shouldExportByStatus() &&
-            $this->shouldExportByWebsite() &&
-            $this->shouldExportByVisibility() &&
-            $this->shouldExportByNameAttribute();
+        return (float) $this->getStockItem()->getQty();
     }
 
     /**
@@ -371,22 +356,11 @@ class ExportEntity
      */
     public function addLinkedWebsiteId(int $id)
     {
-        $this->ensureWebsiteLinkedIdsSet();
         $this->linkedWebsiteIds[] = $id;
     }
 
     /**
-     * Ensure linked website ids is no longer NULL
-     */
-    public function ensureWebsiteLinkedIdsSet()
-    {
-        if ($this->linkedWebsiteIds === null) {
-            $this->linkedWebsiteIds = [];
-        }
-    }
-
-    /**
-     * @return int[]|null
+     * @return int[]
      */
     public function getLinkedWebsiteIds()
     {
@@ -396,12 +370,29 @@ class ExportEntity
     /**
      * @return bool
      */
-    protected function shouldExportByStatus(): bool
+    public function shouldProcess(): bool
     {
-        if ($this->status === null) {
-            return true;
-        }
+        return $this->shouldExportByStatus()
+            && $this->shouldExportByVisibility()
+            && $this->shouldExportByNameAttribute();
+    }
 
+    /**
+     * @return bool
+     */
+    public function shouldExport(): bool
+    {
+        return $this->shouldProcess()
+            && $this->shouldExportByWebsite()
+            && $this->shouldExportByVisibility()
+            && $this->shouldExportByStock();
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldExportByStatus(): bool
+    {
         return $this->getStatus() === Status::STATUS_ENABLED;
     }
 
@@ -410,10 +401,6 @@ class ExportEntity
      */
     protected function shouldExportByWebsite(): bool
     {
-        if ($this->linkedWebsiteIds === null) {
-            return true;
-        }
-
         if ($this->storeManager->isSingleStoreMode()) {
             return true;
         }
@@ -427,10 +414,6 @@ class ExportEntity
      */
     protected function shouldExportByVisibility(): bool
     {
-        if ($this->visibility === null) {
-            return true;
-        }
-
         return \in_array($this->getVisibility(), $this->visibilityObject->getVisibleInSiteIds(), true);
 
     }
@@ -440,15 +423,11 @@ class ExportEntity
      */
     protected function shouldExportByStock(): bool
     {
-        if ($this->stockItem === null) {
-            return true;
-        }
-
         if ($this->stockConfiguration->isShowOutOfStock($this->storeId)) {
             return true;
         }
 
-        return $this->stockItem->getIsInStock();
+        return $this->getStockItem()->getIsInStock();
     }
 
     /**

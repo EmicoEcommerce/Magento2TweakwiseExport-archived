@@ -51,7 +51,6 @@ class WebsiteLink implements DecoratorInterface
         }
 
         $this->addLinkedWebsiteIds($collection);
-        $this->ensureWebsiteLinkedSet($collection);
     }
 
     /**
@@ -76,17 +75,6 @@ class WebsiteLink implements DecoratorInterface
         while ($row = $query->fetch()) {
             $productId = (int)$row['product_id'];
             $collection->get($productId)->addLinkedWebsiteId((int)$row['website_id']);
-        }
-    }
-
-    /**
-     * @param Collection $collection
-     */
-    protected function ensureWebsiteLinkedSet(Collection $collection)
-    {
-        /** @var ExportEntity $entity */
-        foreach ($collection as $entity) {
-            $entity->ensureWebsiteLinkedIdsSet();
         }
     }
 }

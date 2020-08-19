@@ -31,18 +31,18 @@ class ChildrenAttributes implements DecoratorInterface
      */
     public function decorate(Collection $collection)
     {
-        foreach ($collection as $parent) {
-            if (!$parent->isComposite()) {
+        foreach ($collection as $exportEntity) {
+            if (!$exportEntity->isComposite()) {
                 continue;
             }
 
-            foreach ($parent->getExportChildren() as $child) {
+            foreach ($exportEntity->getExportChildren() as $child) {
                 foreach ($child->getAttributes() as $attributeData) {
                     if ($this->config->getSkipChildAttribute($attributeData['attribute'])) {
                         continue;
                     }
 
-                    $parent->addAttribute($attributeData['attribute'], $attributeData['value']);
+                    $exportEntity->addAttribute($attributeData['attribute'], $attributeData['value']);
                 }
             }
         }

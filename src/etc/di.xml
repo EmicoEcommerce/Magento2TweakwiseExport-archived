@@ -13,21 +13,6 @@
                 type="Emico\TweakwiseExport\Model\Review\MagentoReviewProvider"
     />
 
-    <preference for="Emico\TweakwiseExport\Model\CombinedStock\CombinedStockItemInterface"
-                type="Emico\TweakwiseExport\Model\CombinedStock\CombinedStockItemProvider"
-    />
-
-    <!-- If you happen to have your own product types, register them here -->
-    <type name="Emico\TweakwiseExport\Model\CombinedStock\CombinedStockItemProvider">
-        <arguments>
-            <argument name="productTypes" xsi:type="array">
-                <item name="bundle" xsi:type="object">Emico\TweakwiseExport\Model\CombinedStock\Bundle</item>
-                <item name="configurable" xsi:type="object">Emico\TweakwiseExport\Model\CombinedStock\Configurable</item>
-                <item name="grouped" xsi:type="object">Emico\TweakwiseExport\Model\CombinedStock\Grouped</item>
-            </argument>
-        </arguments>
-    </type>
-
     <type name="Magento\Framework\Console\CommandListInterface">
         <arguments>
             <argument name="commands" xsi:type="array">
@@ -105,6 +90,19 @@
     <type name="Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Children">
         <arguments>
             <argument name="batchSize" xsi:type="number">5000</argument>
+        </arguments>
+    </type>
+
+    <!--
+        If you have custom product types register them here.
+    -->
+    <type name="Emico\TweakwiseExport\Model\Write\Products\ExportEntityFactory">
+        <arguments>
+            <argument name="typeMap" xsi:type="array">
+                <item name="configurable" xsi:type="string">Emico\TweakwiseExport\Model\Write\Products\ExportEntityConfigurable</item>
+                <item name="grouped" xsi:type="string">Emico\TweakwiseExport\Model\Write\Products\ExportEntityGrouped</item>
+                <item name="bundle" xsi:type="string">Emico\TweakwiseExport\Model\Write\Products\ExportEntityBundle</item>
+            </argument>
         </arguments>
     </type>
 

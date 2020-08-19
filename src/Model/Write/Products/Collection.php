@@ -138,7 +138,7 @@ class Collection implements IteratorAggregate, Countable
     {
         $ids = [];
         $skus = [];
-        foreach ($this->getExported() as $entity) {
+        foreach ($this as $entity) {
             $ids[] = $entity->getId();
             $skus[] = $entity->getAttribute('sku', false);
 

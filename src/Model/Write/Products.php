@@ -123,7 +123,8 @@ class Products implements WriterInterface
     {
         $storeId = $store->getId();
         $this->iterator->setStoreId($storeId);
-        // Purge iterator entity ids for the new store
+
+        // Purge iterator entity ids for each store
         $this->iterator->setEntityIds([]);
 
         foreach ($this->iterator as $index => $data) {

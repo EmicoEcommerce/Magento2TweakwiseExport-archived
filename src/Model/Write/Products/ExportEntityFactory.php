@@ -27,17 +27,25 @@ class ExportEntityFactory
     protected $type;
 
     /**
+     * @var array
+     */
+    protected $typeMap;
+
+    /**
      * Factory constructor
      *
      * @param ObjectManagerInterface $objectManager
      * @param Type $type
+     * @param array $typeMap
      */
     public function __construct(
         ObjectManagerInterface $objectManager,
-        Type $type
+        Type $type,
+        array $typeMap = []
     ) {
         $this->_objectManager = $objectManager;
         $this->type = $type;
+        $this->typeMap = $typeMap;
     }
 
     /**
@@ -49,6 +57,9 @@ class ExportEntityFactory
     public function create(array $data = []): ExportEntity
     {
         $typeId = $data['data']['type_id'] ?? null;
+        if (!$typeId) {
+            $this->_objectManager->create(ExportEntity::class, $data);
+        }
         return $this->_objectManager->create($this->getInstanceType($typeId), $data);
     }
 
@@ -67,18 +78,9 @@ class ExportEntityFactory
      * @param string $typeId
      * @return string
      */
-    protected function getInstanceType(string $typeId): string
+    protected function getInstanceType(string $typeId = null): string
     {
-        switch ($typeId) {
-            case 'configurable':
-                return ExportEntityConfigurable::class;
-            case 'grouped':
-                return ExportEntityGrouped::class;
-            case 'bundle':
-                return ExportEntityBundle::class;
-            default:
-                return $this->getDefaultType($typeId);
-        }
+        return $this->typeMap[$typeId] ?? $this->getDefaultType($typeId);
     }
 
     /**
@@ -90,10 +92,12 @@ class ExportEntityFactory
         /** @var Product $fakeProduct */
         $fakeProduct = new DataObject(['type_id' => $typeId]);
         $typeModel = $this->type->factory($fakeProduct);
+
         if ($typeModel->isComposite($fakeProduct)) {
-            return CompositeExportEntity::class;
+            $this->typeMap[$typeId] = CompositeExportEntity::class;
         }
 
-        return ExportEntity::class;
+        $this->typeMap[$typeId] = ExportEntity::class;
+        return $this->typeMap[$typeId];
     }
 }

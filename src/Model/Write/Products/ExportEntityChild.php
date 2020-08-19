@@ -15,14 +15,42 @@ use Magento\Store\Model\StoreManagerInterface;
 class ExportEntityChild extends ExportEntity
 {
     /**
+     * @var ChildOptions
+     */
+    protected $childOptions;
+
+    /**
      * @var Config
      */
     protected $config;
 
     /**
-     * @var ChildOptions
+     * ExportEntityChild constructor.
+     * @param Config $config
+     * @param int $storeId
+     * @param StoreManagerInterface $storeManager
+     * @param StockConfigurationInterface $stockConfiguration
+     * @param Visibility $visibility
+     * @param array $data
      */
-    protected $childOptions;
+    public function __construct(
+        Config $config,
+        int $storeId,
+        StoreManagerInterface $storeManager,
+        StockConfigurationInterface $stockConfiguration,
+        Visibility $visibility,
+        array $data = []
+    ) {
+        parent::__construct(
+            $storeId,
+            $storeManager,
+            $stockConfiguration,
+            $visibility,
+            $data
+        );
+
+        $this->config = $config;
+    }
 
     /**
      * @return ChildOptions
@@ -41,31 +69,20 @@ class ExportEntityChild extends ExportEntity
     }
 
     /**
-     * ExportEntityChild constructor.
-     * @param int $storeId
-     * @param StoreManagerInterface $storeManager
-     * @param StockConfigurationInterface $stockConfiguration
-     * @param Config $config
-     * @param Visibility $visibility
-     * @param array $data
+     * @return bool
      */
-    public function __construct(
-        int $storeId,
-        StoreManagerInterface $storeManager,
-        StockConfigurationInterface $stockConfiguration,
-        Config $config,
-        Visibility $visibility,
-        array $data = []
-    ) {
-        parent::__construct($storeId, $storeManager, $stockConfiguration, $visibility, $data);
-        $this->config = $config;
+    public function shouldExport(): bool
+    {
+        return $this->shouldExportByStock()
+            && $this->shouldExportByStatus();
     }
 
     /**
      * @return bool
      */
-    protected function shouldExportByVisibility(): bool
+    public function shouldExportByStock(): bool
     {
-        return true;
+        return $this->config->isOutOfStockChildren()
+            || parent::shouldExportByStock();
     }
 }

@@ -154,7 +154,7 @@ class Children implements DecoratorInterface
                 continue;
             }
 
-            $compositeEntities[$entity->getTypeId()][] = $entity;
+            $compositeEntities[$entity->getTypeId()][$entity->getId()] = $entity;
         }
 
         return $compositeEntities;
@@ -196,8 +196,8 @@ class Children implements DecoratorInterface
         $query = $select->query();
         while ($row = $query->fetch()) {
             $bundleOption = new ChildOptions(
-                (int)$row['option_id'],
-                (bool)$row['required']
+                (int) $row['option_id'],
+                (bool) $row['required']
             );
             $this->addChild(
                 $collection,
@@ -292,7 +292,7 @@ class Children implements DecoratorInterface
         ChildOptions $childOptions = null
     ) {
         if (!$this->childEntities->has($childId)) {
-            $child = $this->entityChildFactory->create(
+            $child = $this->entityChildFactory->createChild(
                 [
                     'storeId' => $collection->getStoreId(),
                     'data' => ['entity_id' => $childId],

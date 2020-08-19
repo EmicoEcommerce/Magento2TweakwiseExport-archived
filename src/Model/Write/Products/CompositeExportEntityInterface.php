@@ -30,10 +30,9 @@ interface CompositeExportEntityInterface
     public function getExportChildren(): array;
 
     /**
-     * This method should return all children that are eligible for export except for maybe they are out of stock
-     * This is used to keep track of stock status on the product, stock status may depend on the children that are out of stock
+     * This method should return all enabled export children regardless of stock status and quantity
      *
      * @return ExportEntityChild[]
      */
-    public function getExportChildrenIncludeOutOfStock(): array;
+    public function getEnabledChildren(): array;
 }

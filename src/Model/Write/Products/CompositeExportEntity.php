@@ -21,12 +21,12 @@ class CompositeExportEntity extends ExportEntity implements CompositeExportEntit
     /**
      * @var ExportEntityChild[]
      */
-    protected $exportableChildren = [];
+    protected $enabledChildren;
 
     /**
      * @var ExportEntityChild[]
      */
-    protected $exportableChildrenIncludingOutOfStock = [];
+    protected $exportableChildren;
 
     /**
      * @param ExportEntityChild $child
@@ -53,33 +53,41 @@ class CompositeExportEntity extends ExportEntity implements CompositeExportEntit
      */
     public function getExportChildren(): array
     {
-        if ($this->exportableChildren) {
+        if ($this->exportableChildren !== null) {
             return $this->exportableChildren;
         }
 
-        $this->exportableChildren = array_filter(
-            $this->children,
-            [$this, 'shouldExport']
-        );
+        $this->exportableChildren = [];
+
+        foreach ($this->getAllChildren() as $child) {
+            if ($child->shouldExport()) {
+                $this->exportableChildren[] = $child;
+            }
+        }
 
         return $this->exportableChildren;
     }
 
     /**
-     * @return array|ExportEntityChild[]
+     * This method should return all enabled export children regardless of stock status and quantity
+     *
+     * @return ExportEntityChild[]
      */
-    public function getExportChildrenIncludeOutOfStock(): array
+    public function getEnabledChildren(): array
     {
-        if ($this->exportableChildrenIncludingOutOfStock) {
-            return $this->exportableChildrenIncludingOutOfStock;
+        if ($this->enabledChildren !== null) {
+            return $this->enabledChildren;
         }
 
-        $this->exportableChildrenIncludingOutOfStock = array_filter(
-            $this->children,
-            [$this, 'shouldExportAllowOutOfStock']
-        );
+        $this->enabledChildren = [];
 
-        return $this->exportableChildrenIncludingOutOfStock;
+        foreach ($this->getAllChildren() as $child) {
+            if ($child->shouldExportByStatus()) {
+                $this->enabledChildren[] = $child;
+            }
+        }
+
+        return $this->enabledChildren;
     }
 
     /**
@@ -87,26 +95,14 @@ class CompositeExportEntity extends ExportEntity implements CompositeExportEntit
      */
     public function shouldExport(): bool
     {
-        return $this->shouldExportByComposite() && parent::shouldExport();
+        return $this->shouldExportByChildStatus() && parent::shouldExport();
     }
 
     /**
      * @return bool
      */
-    public function shouldExportAllowOutOfStock(): bool
+    protected function shouldExportByChildStatus(): bool
     {
-        return $this->shouldExportByComposite() && parent::shouldExportAllowOutOfStock();
-    }
-
-    /**
-     * @return bool
-     */
-    protected function shouldExportByComposite(): bool
-    {
-        if ($this->children === null) {
-            return true;
-        }
-
-        return count($this->getExportChildren()) > 0;
+        return count($this->getEnabledChildren()) > 0;
     }
 }
