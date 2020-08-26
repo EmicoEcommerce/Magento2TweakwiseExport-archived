@@ -20,7 +20,7 @@ use Magento\Framework\DB\Select;
 use Magento\Framework\DB\Statement\Pdo\Mysql as MysqlStatement;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Magento\Framework\Profiler;
-use Magento\Setup\Module\I18n\Dictionary\Generator;
+use Magento\Store\Model\Store;
 use Zend_Db_Expr;
 use Zend_Db_Select;
 
@@ -52,9 +52,9 @@ class EavIterator implements IteratorAggregate
     protected $attributesByCode = [];
 
     /**
-     * @var int
+     * @var Store
      */
-    protected $storeId = 0;
+    protected $store;
 
     /**
      * @var int[]
@@ -148,13 +148,11 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
-     * @param int $storeId
-     * @return $this
+     * @param Store $store
      */
-    public function setStoreId(int $storeId)
+    public function setStore(Store $store): void
     {
-        $this->storeId = $storeId;
-        return $this;
+        $this->store = $store;
     }
 
     /**
@@ -274,7 +272,7 @@ class EavIterator implements IteratorAggregate
      */
     protected function getEntityBatch(): ?array
     {
-        $storeId = $this->storeId;
+        $storeId = $this->store->getId();
         if (!isset($this->entitySet[$storeId])) {
             $select = $this->getConnection()->select();
             $select->from($this->getEntityType()->getEntityTable());
@@ -391,8 +389,9 @@ class EavIterator implements IteratorAggregate
             ->from($table, ['entity_id', 'store_id', 'attribute_id', 'value'])
             ->where('attribute_id IN (?)', array_keys($attributes));
 
-        if ($this->storeId) {
-            $select->where('store_id = 0 OR store_id = ?', $this->storeId);
+        $storeId = $this->store->getId();
+        if ($storeId) {
+            $select->where('store_id = 0 OR store_id = ?',$storeId);
         } else {
             $select->where('store_id = 0');
         }
@@ -423,8 +422,9 @@ class EavIterator implements IteratorAggregate
             ])
             ->where('attribute_id IN (?)', array_keys($attributes));
 
-        if ($this->storeId) {
-            $select->where('store_id = 0 OR store_id = ?', $this->storeId);
+        $storeId = $this->store->getId();
+        if ($storeId) {
+            $select->where('store_id = 0 OR store_id = ?', $storeId);
         } else {
             $select->where('store_id = 0');
         }

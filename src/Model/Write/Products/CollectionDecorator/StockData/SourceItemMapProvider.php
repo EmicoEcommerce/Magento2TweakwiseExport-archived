@@ -11,13 +11,12 @@ use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Emico\TweakwiseExport\Model\DbResourceHelper;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\InventoryApi\Api\Data\SourceInterface;
-use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Emico\TweakwiseExport\Model\StockSourceProviderFactory;
 use Emico\TweakwiseExport\Model\StockResolverFactory;
 use Emico\TweakwiseExport\Model\DefaultStockProviderInterfaceFactory;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\InventoryApi\Api\GetSourcesAssignedToStockOrderedByPriorityInterface;
 use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
@@ -105,13 +104,11 @@ class SourceItemMapProvider implements StockMapProviderInterface
 
     /**
      * @param Collection $collection
-     * @param int $storeId
      * @return StockItem[]
      * @throws LocalizedException
-     * @throws NoSuchEntityException
      * @throws \Zend_Db_Statement_Exception
      */
-    public function getStockItemMap(Collection $collection, int $storeId): array
+    public function getStockItemMap(Collection $collection): array
     {
         if ($collection->count() === 0) {
             return [];
@@ -119,8 +116,9 @@ class SourceItemMapProvider implements StockMapProviderInterface
 
         $skus = $collection->getAllSkus();
 
-        $sourceCodes = $this->getSourceCodesForStore($storeId);
-        $stockId = $this->getStockIdForStoreId($storeId);
+        $store = $collection->getStore();
+        $sourceCodes = $this->getSourceCodesForStore($store);
+        $stockId = $this->getStockIdForStoreId($store);
 
         $dbConnection = $this->dbResource->getConnection();
 
@@ -232,14 +230,13 @@ class SourceItemMapProvider implements StockMapProviderInterface
     }
 
     /**
-     * @param int $storeId
+     * @param Store $store
      * @return array|null[]|string[]
      * @throws LocalizedException
-     * @throws NoSuchEntityException
      */
-    protected function getSourceCodesForStore(int $storeId): array
+    protected function getSourceCodesForStore(Store $store): array
     {
-        $stockId = $this->getStockIdForStoreId($storeId);
+        $stockId = $this->getStockIdForStoreId($store);
         $sourceModels = $this->getStockSourceProvider()->execute($stockId);
 
         $sourceCodeMapper = static function (SourceInterface $source) {
@@ -277,15 +274,13 @@ class SourceItemMapProvider implements StockMapProviderInterface
     }
 
     /**
-     * @param int $storeId
+     * @param Store $store
      * @return int|null
      * @throws LocalizedException
-     * @throws NoSuchEntityException
      */
-    protected function getStockIdForStoreId(int $storeId): ?int
+    protected function getStockIdForStoreId(Store $store): ?int
     {
-        $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
-        $websiteCode = $this->storeManager->getWebsite($websiteId)->getCode();
+        $websiteCode = $store->getWebsite()->getCode();
         return $this->getStockResolver()->execute('website', $websiteCode)->getStockId();
     }
 
@@ -305,12 +300,11 @@ class SourceItemMapProvider implements StockMapProviderInterface
     }
 
     /**
-     * @param SourceItemInterface $item
+     * @param array $item
      * @return StockItem
      */
     protected function getTweakwiseStockItem(array $item): StockItem
     {
-        /** @var StockItem $tweakwiseStockItem */
         $tweakwiseStockItem = $this->tweakwiseStockItemFactory->create();
 
         $qty = (int)$item['qty'];

@@ -120,14 +120,12 @@ class Products implements WriterInterface
      */
     protected function exportStore(Writer $writer, XmlWriter $xml, Store $store): void
     {
-        $storeId = $store->getId();
-        $this->iterator->setStoreId($storeId);
-
+        $this->iterator->setStore($store);
         // Purge iterator entity ids for each store
         $this->iterator->setEntityIds([]);
 
         foreach ($this->iterator as $index => $data) {
-            $this->writeProduct($xml, $storeId, $data);
+            $this->writeProduct($xml, $store->getId(), $data);
             // Flush every so often
             if ($index % 100 === 0) {
                 $writer->flush();

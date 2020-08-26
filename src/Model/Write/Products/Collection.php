@@ -11,6 +11,7 @@ use Countable;
 use Emico\TweakwiseExport\Exception\InvalidArgumentException;
 use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use IteratorAggregate;
+use Magento\Store\Model\Store;
 
 class Collection implements IteratorAggregate, Countable
 {
@@ -20,9 +21,9 @@ class Collection implements IteratorAggregate, Countable
     protected $entities = [];
 
     /**
-     * @var int
+     * @var Store
      */
-    protected $storeId;
+    protected $store;
 
     /**
      * @var string[]
@@ -36,11 +37,11 @@ class Collection implements IteratorAggregate, Countable
 
     /**
      * Collection constructor.
-     * @param int $storeId
+     * @param Store $store
      */
-    public function __construct(int $storeId)
+    public function __construct(Store $store)
     {
-        $this->storeId = $storeId;
+        $this->store = $store;
     }
 
     /**
@@ -68,11 +69,11 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * @return int
+     * @return Store
      */
-    public function getStoreId(): int
+    public function getStore(): Store
     {
-        return $this->storeId;
+        return $this->store;
     }
 
     /**

@@ -38,7 +38,7 @@ class MagentoReviewProvider implements ReviewProviderInterface
     public function getProductReviews(Collection $collection): array
     {
         $summaryCollection = $this->summaryCollectionFactory->create()
-            ->addStoreFilter($collection->getStoreId())
+            ->addStoreFilter($collection->getStore()->getId())
             ->addEntityFilter($collection->getAllIds());
 
         $reviews = [];

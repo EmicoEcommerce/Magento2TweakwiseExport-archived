@@ -76,11 +76,11 @@ class Iterator extends EavIterator
      */
     public function getIterator()
     {
-        $batch = $this->collectionFactory->create(['storeId' => $this->storeId]);
+        $batch = $this->collectionFactory->create(['store' => $this->store]);
         foreach (parent::getIterator() as $entityData) {
             $entity = $this->entityFactory->create(
                 [
-                    'storeId' => $this->storeId,
+                    'store' => $this->store,
                     'data' => $entityData
                 ]
             );
@@ -95,7 +95,7 @@ class Iterator extends EavIterator
                 foreach ($this->processBatch($batch) as $processedEntity) {
                     yield $processedEntity;
                 }
-                $batch = $this->collectionFactory->create(['storeId' => $this->storeId]);
+                $batch = $this->collectionFactory->create(['store' => $this->store]);
             }
         }
 

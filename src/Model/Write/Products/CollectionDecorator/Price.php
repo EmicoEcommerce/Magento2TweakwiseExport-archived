@@ -10,7 +10,6 @@ use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
 use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\StoreManagerInterface;
 use Zend_Db_Select;
 
@@ -49,19 +48,18 @@ class Price implements DecoratorInterface
 
     /**
      * @param Collection $collection
-     * @throws NoSuchEntityException
      * @throws \Zend_Db_Statement_Exception
      */
     public function decorate(Collection $collection): void
     {
-        $websiteId = $this->storeManager->getStore($collection->getStoreId())->getWebsiteId();
+        $websiteId = $collection->getStore()->getWebsiteId();
         $priceSelect = $this->createPriceSelect($collection->getIds(), $websiteId);
 
         $priceQuery = $priceSelect->getSelect()->query();
 
         while ($row = $priceQuery->fetch()) {
             $entityId = $row['entity_id'];
-            $row['price'] = $this->getPriceValue($collection->getStoreId(), $row);
+            $row['price'] = $this->getPriceValue($collection->getStore()->getId(), $row);
             $collection->get($entityId)->setFromArray($row);
         }
     }

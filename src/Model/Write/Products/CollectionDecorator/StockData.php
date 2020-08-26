@@ -75,7 +75,7 @@ class StockData implements DecoratorInterface
         // This has to be called before setting the stock items.
         // This way the composite products are not filtered since they mostly have 0 stock.
         $toBeCombinedEntities = $collection->getAllEntities();
-        $storeId = $collection->getStoreId();
+        $storeId = $collection->getStore()->getId();
 
         $this->addStockItems($storeId, $collection);
         foreach ($toBeCombinedEntities as $item) {

@@ -51,10 +51,9 @@ class StockItemMapProvider implements StockMapProviderInterface
 
     /**
      * @param Collection $collection
-     * @param int $storeId
      * @return StockItemInterface[]
      */
-    public function getStockItemMap(Collection $collection, int $storeId): array
+    public function getStockItemMap(Collection $collection): array
     {
         if ($collection->count() === 0) {
             return [];

@@ -108,7 +108,7 @@ class Categories implements WriterInterface
         $exportedCategories = [1 => true];
         $storeId = $store->getId();
         $storeRootCategoryId = (int) $store->getRootCategoryId();
-        $this->iterator->setStoreId($storeId);
+        $this->iterator->setStore($store);
         // Purge iterator entity ids for the new store
         $this->iterator->setEntityIds([]);
 

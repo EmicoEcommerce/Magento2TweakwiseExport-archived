@@ -33,11 +33,11 @@ class CategoryReference implements DecoratorInterface
      */
     public function decorate(Collection $collection): void
     {
-        $storeId = $collection->getStoreId();
+        $storeId = $collection->getStore()->getId();
         $select = $this->dbResource->getConnection()
             ->select()
             ->from($this->getIndexTableName($storeId), ['category_id', 'product_id'])
-            ->where('store_id = ?', $collection->getStoreId())
+            ->where('store_id = ?', $collection->getStore()->getId())
             ->where('product_id IN(' . implode(',', $collection->getIds()) . ')');
         $resultSet = $select->query();
 

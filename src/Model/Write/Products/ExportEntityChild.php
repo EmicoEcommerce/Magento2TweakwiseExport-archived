@@ -10,6 +10,7 @@ use Emico\TweakwiseExport\Model\ChildOptions;
 use Emico\TweakwiseExport\Model\Config;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogInventory\Api\StockConfigurationInterface;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 
 class ExportEntityChild extends ExportEntity
@@ -27,7 +28,7 @@ class ExportEntityChild extends ExportEntity
     /**
      * ExportEntityChild constructor.
      * @param Config $config
-     * @param int $storeId
+     * @param Store $store
      * @param StoreManagerInterface $storeManager
      * @param StockConfigurationInterface $stockConfiguration
      * @param Visibility $visibility
@@ -35,14 +36,14 @@ class ExportEntityChild extends ExportEntity
      */
     public function __construct(
         Config $config,
-        int $storeId,
+        Store $store,
         StoreManagerInterface $storeManager,
         StockConfigurationInterface $stockConfiguration,
         Visibility $visibility,
         array $data = []
     ) {
         parent::__construct(
-            $storeId,
+            $store,
             $storeManager,
             $stockConfiguration,
             $visibility,

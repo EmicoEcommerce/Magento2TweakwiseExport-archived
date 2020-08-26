@@ -24,6 +24,7 @@ use Magento\Framework\DataObject;
 use Magento\GroupedProduct\Model\Product\Type\Grouped;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link;
 use Emico\TweakwiseExport\Model\ChildOptions;
+use Magento\Store\Model\Store;
 
 class Children implements DecoratorInterface
 {
@@ -111,9 +112,9 @@ class Children implements DecoratorInterface
      */
     public function decorate(Collection $collection): void
     {
-        $this->childEntities = $this->collectionFactory->create(['storeId' => $collection->getStoreId()]);
+        $this->childEntities = $this->collectionFactory->create(['store' => $collection->getStore()]);
         $this->createChildEntities($collection);
-        $this->loadChildAttributes($collection->getStoreId());
+        $this->loadChildAttributes($collection->getStore());
     }
 
     /**
@@ -297,7 +298,7 @@ class Children implements DecoratorInterface
         if (!$this->childEntities->has($childId)) {
             $child = $this->entityChildFactory->createChild(
                 [
-                    'storeId' => $collection->getStoreId(),
+                    'store' => $collection->getStore(),
                     'data' => ['entity_id' => $childId],
                 ]
             );
@@ -322,9 +323,9 @@ class Children implements DecoratorInterface
 
     /**
      * Load child attribute data
-     * @param int $storeId
+     * @param Store $store
      */
-    protected function loadChildAttributes(int $storeId): void
+    protected function loadChildAttributes(Store $store): void
     {
         if ($this->childEntities->count() === 0) {
             return;
@@ -338,7 +339,7 @@ class Children implements DecoratorInterface
             ]
         );
         $iterator->setEntityIds($this->childEntities->getIds());
-        $iterator->setStoreId($storeId);
+        $iterator->setStore($store);
         $this->iteratorInitializer->initializeAttributes($iterator);
 
         foreach ($iterator as $childData) {

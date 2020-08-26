@@ -8,6 +8,7 @@ namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockDa
 
 use Emico\TweakwiseExport\Model\StockItem;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Magento\Store\Model\Store;
 
 /**
  * Interface StockMapProviderInterface
@@ -20,8 +21,7 @@ interface StockMapProviderInterface
      * the values should be StockItem objects
      *
      * @param Collection $collection
-     * @param int $storeId
      * @return StockItem[]
      */
-    public function getStockItemMap(Collection $collection, int $storeId);
+    public function getStockItemMap(Collection $collection);
 }

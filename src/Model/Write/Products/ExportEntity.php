@@ -12,13 +12,14 @@ use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogInventory\Api\StockConfigurationInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Store\Model\Store;
 
 class ExportEntity
 {
     /**
-     * @var int
+     * @var Store
      */
-    protected $storeId;
+    protected $store;
 
     /**
      * @var Visibility
@@ -88,7 +89,7 @@ class ExportEntity
     /**
      * ExportEntity constructor.
      *
-     * @param int $storeId
+     * @param Store $store
      * @param StoreManagerInterface $storeManager
      * @param StockConfigurationInterface $stockConfiguration
      * @param Visibility $visibility
@@ -96,7 +97,7 @@ class ExportEntity
      * @internal param int $storeId
      */
     public function __construct(
-        int $storeId,
+        Store $store,
         StoreManagerInterface $storeManager,
         StockConfigurationInterface $stockConfiguration,
         Visibility $visibility,
@@ -104,7 +105,7 @@ class ExportEntity
     ) {
         $this->setFromArray($data);
         $this->visibilityObject = $visibility;
-        $this->storeId = $storeId;
+        $this->store = $store;
         $this->stockConfiguration = $stockConfiguration;
         $this->storeManager = $storeManager;
     }
@@ -155,11 +156,11 @@ class ExportEntity
     }
 
     /**
-     * @return int
+     * @return Store
      */
-    public function getStoreId(): int
+    public function getStore(): Store
     {
-        return $this->storeId;
+        return $this->store;
     }
 
     /**
@@ -383,7 +384,7 @@ class ExportEntity
             return true;
         }
 
-        $websiteId = (int) $this->storeManager->getStore($this->storeId)->getWebsiteId();
+        $websiteId = (int) $this->store->getWebsiteId();
         return \in_array($websiteId, $this->linkedWebsiteIds, true);
     }
 
@@ -401,7 +402,7 @@ class ExportEntity
      */
     protected function shouldExportByStock(): bool
     {
-        if ($this->stockConfiguration->isShowOutOfStock($this->storeId)) {
+        if ($this->stockConfiguration->isShowOutOfStock($this->store->getId())) {
             return true;
         }
 
