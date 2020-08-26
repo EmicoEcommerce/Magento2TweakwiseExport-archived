@@ -1,4 +1,6 @@
 <?php
+/** @noinspection PhpDeprecationInspection */
+
 /**
  * @author Emico <info@emico.nl>
  * @copyright (c) Emico B.V. 2017

@@ -28,7 +28,7 @@ class Export
     /**
      * Feed buffer copy size for writing already generated feed to resource
      */
-    const FEED_COPY_BUFFER_SIZE = 1024;
+    protected const FEED_COPY_BUFFER_SIZE = 1024;
 
     /**
      * @var Config
@@ -68,9 +68,9 @@ class Export
 
     /**
      * @param callable $action
-     * @return $this
+     * @throws Exception
      */
-    protected function executeLocked(callable $action)
+    protected function executeLocked(callable $action): void
     {
         Profiler::start('tweakwise::export');
         $lockFile = $this->config->getFeedLockFile();
@@ -97,39 +97,32 @@ class Export
             }
             Profiler::stop('tweakwise::export');
         }
-
-        return $this;
     }
 
     /**
      * Generate and write feed content to handle
      *
      * @param resource $targetHandle
-     * @return $this
-     * @throws FeedException
-     * @throws LockException
+     * @throws Exception
      */
-    public function generateFeed($targetHandle)
+    public function generateFeed($targetHandle): void
     {
         $this->executeLocked(function () use ($targetHandle) {
             $this->writer->write($targetHandle);
             $this->touchFeedGenerateDate();
         });
-        return $this;
     }
 
     /**
      * Get latest generated feed and write to resource or create new if real time is enabled.
      *
      * @param resource $targetHandle
-     * @return $this
-     * @throws FeedException
+     * @throws Exception
      */
-    public function getFeed($targetHandle)
+    public function getFeed($targetHandle): void
     {
         if ($this->config->isRealTime()) {
             $this->generateFeed($targetHandle);
-            return $this;
         }
 
         $feedFile = $this->config->getDefaultFeedFile();
@@ -147,17 +140,14 @@ class Export
             $this->generateToFile($feedFile, $this->config->isValidate());
             $this->getFeed($targetHandle);
         }
-
-        return $this;
     }
 
     /**
      * @param string $feedFile
      * @param bool $validate
-     * @return $this
-     * @throws FeedException
+     * @throws Exception
      */
-    public function generateToFile($feedFile, $validate)
+    public function generateToFile($feedFile, $validate): void
     {
         $this->executeLocked(function () use ($feedFile, $validate) {
             $tmpFeedFile = $this->config->getFeedTmpFile($feedFile);
@@ -194,7 +184,6 @@ class Export
             $this->touchFeedGenerateDate();
             $this->triggerTweakwiseImport();
         });
-        return $this;
     }
 
     /**
