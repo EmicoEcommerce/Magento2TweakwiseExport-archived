@@ -54,9 +54,9 @@ class Export
 
     /**
      * Export feed
-     * @throws FeedException
+     * @throws \Exception
      */
-    public function execute()
+    public function execute(): void
     {
         if ($this->config->isRealTime()) {
             $this->log->debug('Export set to real time, skipping cron export.');
