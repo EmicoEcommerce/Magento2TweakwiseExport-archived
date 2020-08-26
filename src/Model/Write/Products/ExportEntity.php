@@ -361,8 +361,7 @@ class ExportEntity
      */
     public function shouldExport(): bool
     {
-        return $this->shouldProcess()
-            && $this->shouldExportByWebsite()
+        return $this->shouldExportByWebsite()
             && $this->shouldExportByVisibility()
             && $this->shouldExportByStock();
     }
