@@ -67,9 +67,10 @@ class Categories implements WriterInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param Writer $writer
+     * @param XmlWriter $xml
      */
-    public function write(Writer $writer, XmlWriter $xml)
+    public function write(Writer $writer, XmlWriter $xml): void
     {
         $xml->startElement('categories');
         $writer->flush();
@@ -94,16 +95,14 @@ class Categories implements WriterInterface
 
         $xml->endElement(); // categories
         $writer->flush();
-        return $this;
     }
 
     /**
      * @param Writer $writer
      * @param XmlWriter $xml
      * @param Store $store
-     * @return $this
      */
-    protected function exportStore(Writer $writer, XmlWriter $xml, Store $store): self
+    protected function exportStore(Writer $writer, XmlWriter $xml, Store $store): void
     {
         // Set root category as exported
         $exportedCategories = [1 => true];
@@ -151,16 +150,14 @@ class Categories implements WriterInterface
         }
         // Flush any remaining categories
         $writer->flush();
-        return $this;
     }
 
     /**
      * @param XmlWriter $xml
      * @param int $storeId
      * @param array $data
-     * @return $this
      */
-    protected function writeCategory(XmlWriter $xml, int $storeId, array $data): self
+    protected function writeCategory(XmlWriter $xml, int $storeId, array $data): void
     {
         $tweakwiseId = $this->helper->getTweakwiseId($storeId, $data['entity_id']);
         $xml->addCategoryExport($tweakwiseId);
@@ -186,6 +183,5 @@ class Categories implements WriterInterface
         }
 
         $xml->endElement(); // </category>
-        return $this;
     }
 }

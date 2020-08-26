@@ -120,9 +120,8 @@ class EavIterator implements IteratorAggregate
 
     /**
      * @param string $attributeCode
-     * @return $this
      */
-    public function selectAttribute(string $attributeCode)
+    public function selectAttribute(string $attributeCode): void
     {
         $attribute = $this->eavConfig->getAttribute($this->entityCode, $attributeCode);
         /** @noinspection NullPointerExceptionInspection */
@@ -130,14 +129,12 @@ class EavIterator implements IteratorAggregate
 
         $this->attributes[$attributeKey] = $attribute;
         $this->attributesByCode[$attributeCode] = $attribute;
-        return $this;
     }
 
     /**
      * @param string $attributeCode
-     * @return $this
      */
-    public function removeAttribute(string $attributeCode)
+    public function removeAttribute(string $attributeCode): void
     {
         $attribute = $this->eavConfig->getAttribute($this->entityCode, $attributeCode);
         /** @noinspection NullPointerExceptionInspection */
@@ -148,8 +145,6 @@ class EavIterator implements IteratorAggregate
         }
 
         unset($this->attributes[$attributeKey], $this->attributesByCode[$attributeCode]);
-
-        return $this;
     }
 
     /**
@@ -164,12 +159,10 @@ class EavIterator implements IteratorAggregate
 
     /**
      * @param int[] $entityIds
-     * @return $this
      */
-    public function setEntityIds(array $entityIds)
+    public function setEntityIds(array $entityIds): void
     {
         $this->entityIds = $entityIds;
-        return $this;
     }
 
     /**
@@ -182,7 +175,8 @@ class EavIterator implements IteratorAggregate
 
     /**
      * @param MysqlStatement $stmt
-     * @return array[]|Generator
+     * @return \Generator
+     * @throws \Zend_Db_Statement_Exception
      */
     protected function loopUnionRows(MysqlStatement $stmt)
     {
@@ -276,9 +270,9 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
-     * @return int[]
+     * @return int[]|null
      */
-    protected function getEntityBatch()
+    protected function getEntityBatch(): ?array
     {
         $storeId = $this->storeId;
         if (!isset($this->entitySet[$storeId])) {
@@ -305,7 +299,7 @@ class EavIterator implements IteratorAggregate
      * Add order fields
      * @param Zend_Db_Select $select
      */
-    protected function addEavSelectOrder(\Zend_Db_Select $select)
+    protected function addEavSelectOrder(\Zend_Db_Select $select): void
     {
         foreach ($this->eavSelectOrder as $order) {
             $select->order($order);
@@ -315,7 +309,7 @@ class EavIterator implements IteratorAggregate
     /**
      * @param Zend_Db_Select $select
      */
-    protected function addEntityBatchOrder(\Zend_Db_Select $select)
+    protected function addEntityBatchOrder(\Zend_Db_Select $select): void
     {
         foreach ($this->entityBatchOrder as $order) {
             $select->order($order);

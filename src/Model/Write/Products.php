@@ -85,9 +85,10 @@ class Products implements WriterInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param Writer $writer
+     * @param XmlWriter $xml
      */
-    public function write(Writer $writer, XmlWriter $xml)
+    public function write(Writer $writer, XmlWriter $xml): void
     {
         $xml->startElement('items');
 
@@ -110,16 +111,14 @@ class Products implements WriterInterface
 
         $xml->endElement(); // items
         $writer->flush();
-        return $this;
     }
 
     /**
      * @param Writer $writer
      * @param XmlWriter $xml
      * @param Store $store
-     * @return $this
      */
-    protected function exportStore(Writer $writer, XmlWriter $xml, Store $store): self
+    protected function exportStore(Writer $writer, XmlWriter $xml, Store $store): void
     {
         $storeId = $store->getId();
         $this->iterator->setStoreId($storeId);
@@ -137,7 +136,6 @@ class Products implements WriterInterface
 
         // Flush any remaining products
         $writer->flush();
-        return $this;
     }
 
 
@@ -145,9 +143,8 @@ class Products implements WriterInterface
      * @param XmlWriter $xml
      * @param int $storeId
      * @param array $data
-     * @return $this
      */
-    protected function writeProduct(XmlWriter $xml, $storeId, array $data): self
+    protected function writeProduct(XmlWriter $xml, $storeId, array $data): void
     {
         $xml->startElement('item');
 
@@ -182,7 +179,6 @@ class Products implements WriterInterface
         $xml->endElement(); // </item>
 
         $this->log->debug(sprintf('Export product [%s] %s', $tweakwiseId, $data['name']));
-        return $this;
     }
 
 

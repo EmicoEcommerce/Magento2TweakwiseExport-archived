@@ -9,7 +9,6 @@
 namespace Emico\TweakwiseExport\Model\Write;
 
 use DateTime;
-use Emico\TweakwiseExport\Exception\WriteException;
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\Profiler;
 use Magento\Store\Model\StoreManager;
@@ -77,7 +76,7 @@ class Writer
     /**
      * @return DateTime
      */
-    public function getNow()
+    public function getNow(): DateTime
     {
         if (!$this->now) {
             $this->now = new DateTime();
@@ -87,42 +86,37 @@ class Writer
 
     /**
      * @param DateTime $now
-     * @return $this
      */
-    public function setNow(DateTime $now)
+    public function setNow(DateTime $now): void
     {
         $this->now = $now;
-        return $this;
     }
 
     /**
      * @param WriterInterface[] $writers
-     * @return $this
+     * @return void
      */
-    public function setWriters($writers)
+    public function setWriters($writers): void
     {
         $this->writers = [];
         foreach ($writers as $writer) {
             $this->addWriter($writer);
         }
-        return $this;
     }
 
     /**
      * @param WriterInterface $writer
-     * @return $this
+     * @return void
      */
-    public function addWriter(WriterInterface $writer)
+    public function addWriter(WriterInterface $writer): void
     {
         $this->writers[] = $writer;
-        return $this;
     }
 
     /**
      * @param resource $resource
-     * @throws WriteException
      */
-    public function write($resource)
+    public function write($resource): void
     {
         try {
             Profiler::start('write');
@@ -142,12 +136,12 @@ class Writer
     /**
      * @return XMLWriter
      */
-    protected function getXml()
+    protected function getXml(): XMLWriter
     {
         if (!$this->xml) {
             $xml = new XMLWriter();
             $xml->openMemory();
-            if ($this->appState->getMode() == AppState::MODE_DEVELOPER) {
+            if ($this->appState->getMode() === AppState::MODE_DEVELOPER) {
                 $xml->setIndent(true);
                 $xml->setIndentString('    ');
             } else {
@@ -162,14 +156,11 @@ class Writer
 
     /**
      * Close xml and writer references
-     *
-     * @return $this
      */
-    protected function close()
+    protected function close(): void
     {
         $this->xml = null;
         $this->resource = null;
-        return $this;
     }
 
     /**
@@ -182,23 +173,19 @@ class Writer
 
     /**
      * Flush current content of writer to resource
-     * @return $this
      */
-    public function flush()
+    public function flush(): void
     {
         $output = $this->getXml()->flush();
         if ($output) {
             fwrite($this->resource, $output);
         }
-        return $this;
     }
 
     /**
      * Write document start
-     *
-     * @return $this
      */
-    protected function startDocument(): self
+    protected function startDocument(): void
     {
         $xml = $this->getXml();
         $xml->startDocument('1.0', 'UTF-8');
@@ -207,7 +194,6 @@ class Writer
         $xml->writeElement('timestamp', $this->getNow()->format('Y-m-d\TH:i:s.uP'));
         $xml->writeElement('generatedby', $this->getModuleVersion());
         $this->flush();
-        return $this;
     }
 
     /**
@@ -228,14 +214,12 @@ class Writer
 
     /**
      * Write document end
-     * @return $this
      */
-    protected function endDocument(): self
+    protected function endDocument(): void
     {
         $xml = $this->getXml();
         $xml->endElement(); // </tweakwise>
         $xml->endDocument();
         $this->flush();
-        return $this;
     }
 }

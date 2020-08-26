@@ -50,27 +50,23 @@ class XMLWriter extends BaseXMLWriter
      */
     protected function xmlPrepare($value)
     {
-        $result = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '', $value);
-
-        return $result;
+        return preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '', $value);
     }
 
     /**
      * @param int $categoryId
-     * @return $this
      */
-    public function addCategoryExport($categoryId)
+    public function addCategoryExport($categoryId): void
     {
         $categoryId = (int) $categoryId;
         $this->categories[$categoryId] = true;
-        return $this;
     }
 
     /**
      * @param int $categoryId
      * @return bool
      */
-    public function hasCategoryExport($categoryId)
+    public function hasCategoryExport($categoryId): bool
     {
         $categoryId = (int) $categoryId;
         return isset($this->categories[$categoryId]);
