@@ -37,7 +37,7 @@ class Review implements DecoratorInterface
      *
      * @param Collection $collection
      */
-    public function decorate(Collection $collection)
+    public function decorate(Collection $collection): void
     {
         $reviews = $this->reviewProvider->getProductReviews($collection);
         foreach ($reviews as $review) {

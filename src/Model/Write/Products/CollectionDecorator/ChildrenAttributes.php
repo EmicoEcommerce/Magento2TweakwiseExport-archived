@@ -28,9 +28,11 @@ class ChildrenAttributes implements DecoratorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Decorate items with extra data or remove items completely
+     *
+     * @param Collection $collection
      */
-    public function decorate(Collection $collection)
+    public function decorate(Collection $collection): void
     {
         foreach ($collection as $exportEntity) {
             if (!$exportEntity instanceof CompositeExportEntityInterface) {

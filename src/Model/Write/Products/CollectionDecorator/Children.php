@@ -105,9 +105,11 @@ class Children implements DecoratorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Decorate items with extra data or remove items completely
+     *
+     * @param Collection $collection
      */
-    public function decorate(Collection $collection)
+    public function decorate(Collection $collection): void
     {
         $this->childEntities = $this->collectionFactory->create(['storeId' => $collection->getStoreId()]);
         $this->createChildEntities($collection);

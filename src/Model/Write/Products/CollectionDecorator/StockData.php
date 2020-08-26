@@ -66,9 +66,11 @@ class StockData implements DecoratorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Decorate items with extra data or remove items completely
+     *
+     * @param Collection $collection
      */
-    public function decorate(Collection $collection)
+    public function decorate(Collection $collection): void
     {
         // This has to be called before setting the stock items.
         // This way the composite products are not filtered since they mostly have 0 stock.

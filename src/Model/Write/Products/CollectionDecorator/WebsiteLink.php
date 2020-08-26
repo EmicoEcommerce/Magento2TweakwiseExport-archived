@@ -8,7 +8,6 @@ namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
 use Emico\TweakwiseExport\Model\DbResourceHelper;
 use Emico\TweakwiseExport\Model\Write\Products\Collection;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use Magento\Store\Model\StoreManagerInterface;
 use Zend_Db_Statement_Exception;
 
@@ -44,7 +43,7 @@ class WebsiteLink implements DecoratorInterface
      * @param Collection $collection
      * @throws Zend_Db_Statement_Exception
      */
-    public function decorate(Collection $collection)
+    public function decorate(Collection $collection): void
     {
         if ($this->storeManager->isSingleStoreMode()) {
             return;

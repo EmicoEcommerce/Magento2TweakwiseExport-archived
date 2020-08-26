@@ -27,9 +27,11 @@ class CategoryReference implements DecoratorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Decorate items with extra data or remove items completely
+     *
+     * @param Collection $collection
      */
-    public function decorate(Collection $collection)
+    public function decorate(Collection $collection): void
     {
         $storeId = $collection->getStoreId();
         $select = $this->dbResource->getConnection()
