@@ -187,9 +187,13 @@ class Products implements WriterInterface
      * @param int $storeId
      * @param string $name
      * @param string|string[]|int|int[]|float|float[] $attributeValue
-     * @return $this
      */
-    public function writeAttribute(XmlWriter $xml, $storeId, $name, $attributeValue): self
+    public function writeAttribute(
+        XmlWriter $xml,
+        $storeId,
+        $name,
+        $attributeValue
+    ): void
     {
         $values = $this->normalizeAttributeValue($storeId, $name, $attributeValue);
         $values = array_unique($values);
@@ -205,8 +209,6 @@ class Products implements WriterInterface
             $xml->writeElement('value', $value);
             $xml->endElement(); // </attribute>
         }
-
-        return $this;
     }
 
     /**

@@ -93,12 +93,10 @@ class AttributeProvider
     /**
      * @param string $code
      * @param string|int $set
-     * @return $this
      */
-    public function ensureSet(string $code, $set): self
+    public function ensureSet(string $code, $set): void
     {
         $this->categorySetup->addAttributeToGroup(Product::ENTITY, $set, 'Default', $code);
-        return $this;
     }
 
     /**
