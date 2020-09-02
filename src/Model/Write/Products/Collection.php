@@ -9,7 +9,6 @@ namespace Emico\TweakwiseExport\Model\Write\Products;
 use ArrayIterator;
 use Countable;
 use Emico\TweakwiseExport\Exception\InvalidArgumentException;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
 use IteratorAggregate;
 use Magento\Store\Model\Store;
 
@@ -154,7 +153,7 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * Fetches all entity ID's including childen
+     * Fetches all entity ID's including children
      *
      * @return int[]
      */
@@ -186,15 +185,16 @@ class Collection implements IteratorAggregate, Countable
      */
     public function remove(int $id): void
     {
+        $entity = $this->entities[$id] ?? null;
         unset($this->entities[$id], $this->ids[$id]);
-        if (!$entity = $this->entities[$id]) {
+
+        if (!$entity) {
             return;
         }
-
         try {
             /** @var string $sku */
             $sku = $entity->getAttribute('sku', false);
-            unset ($this->skus[$sku]);
+            unset($this->skus[$sku]);
         } catch (InvalidArgumentException $e) {
             // Wont happen in practice
         }

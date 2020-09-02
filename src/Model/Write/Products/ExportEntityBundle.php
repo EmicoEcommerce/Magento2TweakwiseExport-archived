@@ -40,12 +40,14 @@ class ExportEntityBundle extends CompositeExportEntity
             if (!$childOptions) {
                 continue;
             }
+
             $optionId = $childOptions->getOptionId();
+            $childQty = $child->getStockItem() ? $child->getStockItem()->getQty() : 0;
 
             $optionGroups[$optionId]['qty'] =
                 isset($optionGroups[$optionId]['qty'])
-                    ? $optionGroups[$optionId]['qty'] + $child->getStockItem()->getQty()
-                    : $child->getStockItem()->getQty();
+                    ? $optionGroups[$optionId]['qty'] + $childQty
+                    : $childQty;
 
             if (isset($optionGroups[$optionId]['is_in_stock']) && $optionGroups[$optionId]['is_in_stock']) {
                 continue;

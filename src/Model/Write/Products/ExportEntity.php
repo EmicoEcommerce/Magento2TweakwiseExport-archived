@@ -94,7 +94,6 @@ class ExportEntity
      * @param StockConfigurationInterface $stockConfiguration
      * @param Visibility $visibility
      * @param array $data
-     * @internal param int $storeId
      */
     public function __construct(
         Store $store,
@@ -117,26 +116,26 @@ class ExportEntity
     {
         foreach ($data as $key => $value) {
             switch ($key) {
-                case 'entity_id';
+                case 'entity_id':
                     $this->id = (int) $value;
                     break;
-                case 'type_id';
+                case 'type_id':
                     $this->setTypeId((string) $value);
                     $this->addAttribute($key, (string) $value);
                     break;
-                case 'status';
+                case 'status':
                     $this->setStatus((int) $value);
                     $this->addAttribute($key, (int) $value);
                     break;
-                case 'visibility';
+                case 'visibility':
                     $this->setVisibility((int) $value);
                     $this->addAttribute($key, (int) $value);
                     break;
-                case 'name';
+                case 'name':
                     $this->setName((string) $value);
                     $this->addAttribute($key, (string) $value);
                     break;
-                case 'price';
+                case 'price':
                     $this->setPrice((float) $value);
                     $this->addAttribute($key, (float) $value);
                     break;
