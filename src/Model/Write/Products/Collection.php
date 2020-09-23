@@ -192,8 +192,17 @@ class Collection implements IteratorAggregate, Countable
             return;
         }
         try {
-            /** @var string $sku */
+            /** @var string|array $sku */
             $sku = $entity->getAttribute('sku', false);
+            if (is_array($sku)) {
+                /*
+                If this export entity has children we want the first entry.
+                We only remove the that entry so that we dont remove children which could also be a child of some
+                other export entity.
+                */
+                $sku = reset($sku);
+            }
+            /** @var string $sku */
             unset($this->skus[$sku]);
         } catch (InvalidArgumentException $e) {
             // Wont happen in practice
