@@ -44,12 +44,12 @@ class ExportEntity
     /**
      * @var int
      */
-    protected $status;
+    protected $status = Status::STATUS_DISABLED;
 
     /**
      * @var int
      */
-    protected $visibility;
+    protected $visibility = Visibility::VISIBILITY_NOT_VISIBLE;
 
     /**
      * @var string
@@ -215,7 +215,7 @@ class ExportEntity
      */
     public function getPrice(): float
     {
-        return $this->price;
+        return (float) $this->price;
     }
 
     /**
@@ -392,7 +392,6 @@ class ExportEntity
     protected function shouldExportByVisibility(): bool
     {
         return \in_array($this->getVisibility(), $this->visibilityObject->getVisibleInSiteIds(), true);
-
     }
 
     /**
