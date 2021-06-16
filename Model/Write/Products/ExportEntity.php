@@ -399,10 +399,6 @@ class ExportEntity
      */
     protected function shouldExportByStock(): bool
     {
-        if ($this->stockConfiguration->isShowOutOfStock($this->store->getId())) {
-            return true;
-        }
-
         return $this->getStockItem() ? (bool) $this->getStockItem()->getIsInStock() : false;
     }
 
