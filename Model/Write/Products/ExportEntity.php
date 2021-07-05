@@ -397,9 +397,21 @@ class ExportEntity
     /**
      * @return bool
      */
+    protected function isInStock(): bool
+    {
+        return $this->getStockItem() !== null ? $this->getStockItem()->getIsInStock() : false;
+    }
+
+    /**
+     * @return bool
+     */
     protected function shouldExportByStock(): bool
     {
-        return $this->getStockItem() ? (bool) $this->getStockItem()->getIsInStock() : false;
+        if ($this->stockConfiguration->isShowOutOfStock($this->store->getId())) {
+            return true;
+        }
+
+        return $this->isInStock();
     }
 
     /**
