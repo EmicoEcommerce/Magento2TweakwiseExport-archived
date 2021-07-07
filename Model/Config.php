@@ -31,6 +31,9 @@ class Config
     public const PATH_ALLOW_CACHE_FLUSH = 'tweakwise/export/allow_cache_flush';
     public const PATH_PRICE_FIELD = 'tweakwise/export/price_field';
     public const PATH_EXCLUDE_CHILD_ATTRIBUTES = 'tweakwise/export/exclude_child_attributes';
+    public const BATCH_SIZE_CATEGORIES = 'tweakwise/export/batch_size_categories';
+    public const BATCH_SIZE_PRODUCTS = 'tweakwise/export/batch_size_products';
+    public const BATCH_SIZE_PRODUCTS_CHILDREN = 'tweakwise/export/batch_size_products_children';
 
     /**
      * default feed filename
@@ -203,5 +206,29 @@ class Config
         }
 
         return $file . '.tmp';
+    }
+
+    /**
+     * @return int
+     */
+    public function getBatchSizeCategories(): int
+    {
+        return (int) $this->config->getValue(self::BATCH_SIZE_CATEGORIES);
+    }
+
+    /**
+     * @return int
+     */
+    public function getBatchSizeProducts(): int
+    {
+        return (int) $this->config->getValue(self::BATCH_SIZE_PRODUCTS);
+    }
+
+    /**
+     * @return int
+     */
+    public function getBatchSizeProductsChildren(): int
+    {
+        return (int) $this->config->getValue(self::BATCH_SIZE_PRODUCTS_CHILDREN);
     }
 }

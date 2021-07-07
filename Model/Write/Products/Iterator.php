@@ -15,7 +15,12 @@ use Generator;
 use Magento\Catalog\Model\Product;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
+use Emico\TweakwiseExport\Model\Config as EmicoConfig;
 
+/**
+ * Class Iterator
+ * @package Emico\TweakwiseExport\Model\Write\Products
+ */
 class Iterator extends EavIterator
 {
     /**
@@ -44,6 +49,7 @@ class Iterator extends EavIterator
      * @param CollectionFactory $collectionFactory
      * @param IteratorInitializer $iteratorInitializer
      * @param DecoratorInterface[] $collectionDecorators
+     * @param EmicoConfig $config
      */
     public function __construct(
         Helper $helper,
@@ -53,7 +59,7 @@ class Iterator extends EavIterator
         CollectionFactory $collectionFactory,
         IteratorInitializer $iteratorInitializer,
         array $collectionDecorators,
-        int $batchSize = 5000
+        EmicoConfig $config
     ) {
         parent::__construct(
             $helper,
@@ -61,7 +67,7 @@ class Iterator extends EavIterator
             $dbContext,
             Product::ENTITY,
             [],
-            $batchSize
+            $config->getBatchSizeProducts()
         );
 
         $this->entityFactory = $entityFactory;

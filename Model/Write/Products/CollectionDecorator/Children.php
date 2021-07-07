@@ -25,7 +25,12 @@ use Magento\GroupedProduct\Model\Product\Type\Grouped;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link;
 use Emico\TweakwiseExport\Model\ChildOptions;
 use Magento\Store\Model\Store;
+use Emico\TweakwiseExport\Model\Config as EmicoConfig;
 
+/**
+ * Class Children
+ * @package Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator
+ */
 class Children implements DecoratorInterface
 {
     /**
@@ -84,6 +89,7 @@ class Children implements DecoratorInterface
      * @param Helper $helper
      * @param DbResourceHelper $dbResource
      * @param int $batchSize
+     * @param EmicoConfig $config
      */
     public function __construct(
         ProductType $productType,
@@ -93,7 +99,7 @@ class Children implements DecoratorInterface
         CollectionFactory $collectionFactory,
         Helper $helper,
         DbResourceHelper $dbResource,
-        int $batchSize = 5000
+        EmicoConfig $config
     ) {
         $this->productType = $productType;
         $this->eavIteratorFactory = $eavIteratorFactory;
@@ -102,7 +108,7 @@ class Children implements DecoratorInterface
         $this->collectionFactory = $collectionFactory;
         $this->helper = $helper;
         $this->dbResource = $dbResource;
-        $this->batchSize = $batchSize;
+        $this->batchSize = $config->getBatchSizeProductsChildren();
     }
 
     /**
