@@ -22,6 +22,9 @@
                 <out_of_stock_children>1</out_of_stock_children>
                 <exclude_child_attributes>url_key,small_image,small_image_label,thumbnail_label,status,tax_class_id,type_id,required_options,visibility</exclude_child_attributes>
                 <price_field>min_price,final_price,price,max_price</price_field>
+                <batch_size_categories>5000</batch_size_categories>
+                <batch_size_products>5000</batch_size_products>
+                <batch_size_products_children>5000</batch_size_products_children>
             </export>
         </tweakwise>
     </default>

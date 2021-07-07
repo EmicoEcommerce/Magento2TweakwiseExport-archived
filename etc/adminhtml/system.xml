@@ -108,6 +108,54 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
+
+                <field id="batch_size_categories"
+                       translate="batch size for categories"
+                       type="text"
+                       sortOrder="110"
+                       showInDefault="1"
+                       showInWebsite="0"
+                       showInStore="0"
+                >
+                    <label>Batch size categories</label>
+                    <comment>
+                        Set the batch size for categories during export.
+                        If memory is less important than speed lower the batch size.
+                        If note, increase the batch size.
+                    </comment>
+                </field>
+
+                <field id="batch_size_products"
+                       translate="batch size for products"
+                       type="text"
+                       sortOrder="120"
+                       showInDefault="1"
+                       showInWebsite="0"
+                       showInStore="0"
+                >
+                    <label>Batch size products</label>
+                    <comment>
+                        Set the batch size for products during export.
+                        If memory is less important than speed lower the batch size.
+                        If note, increase the batch size.
+                    </comment>
+                </field>
+
+                <field id="batch_size_products_children"
+                       translate="batch size for products children"
+                       type="text"
+                       sortOrder="130"
+                       showInDefault="1"
+                       showInWebsite="0"
+                       showInStore="0"
+                >
+                    <label>Batch size products children</label>
+                    <comment>
+                        Set the batch size for products children during export.
+                        If memory is less important than speed lower the batch size.
+                        If note, increase the batch size.
+                    </comment>
+                </field>
             </group>
         </section>
     </system>
