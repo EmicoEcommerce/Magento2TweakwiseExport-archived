@@ -17,7 +17,7 @@ use Magento\Catalog\Model\Product\Attribute\Source\Status;
 class ExportEntityBundle extends CompositeExportEntity
 {
     /**
-     * @var boolean
+     * @var bool
      */
     protected $isStockCombined;
 
