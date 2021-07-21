@@ -45,7 +45,7 @@ trait HasStockThroughChildren
         $qty = (int) array_sum($childQty);
         $isInStock = min(
             max($childStockStatus),
-            $this->getTypeId() === Configurable::TYPE_CODE ? 1 : $this->stockItem->getIsInStockk()
+            $this->getTypeId() === Configurable::TYPE_CODE ? 1 : $this->stockItem->getIsInStock()
         );
         $stockItem = new StockItem();
         $stockItem->setQty($qty);
