@@ -14,7 +14,12 @@ use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
+use Emico\TweakwiseExport\Model\Config as EmicoConfig;
 
+/**
+ * Class Iterator
+ * @package Emico\TweakwiseExport\Model\Write\Categories
+ */
 class Iterator extends EavIterator
 {
     /**
@@ -42,13 +47,14 @@ class Iterator extends EavIterator
      * @param EavConfig $eavConfig
      * @param DbContext $dbContext
      * @param array|string[] $attributes
+     * @param EmicoConfig $config
      */
     public function __construct(
         Helper $helper,
         EavConfig $eavConfig,
         DbContext $dbContext,
         $attributes,
-        int $batchSize = 5000
+        EmicoConfig $config
     ) {
         parent::__construct(
             $helper,
@@ -56,7 +62,7 @@ class Iterator extends EavIterator
             $dbContext,
             'catalog_category',
             $attributes,
-            $batchSize
+            $config->getBatchSizeCategories()
         );
     }
 
