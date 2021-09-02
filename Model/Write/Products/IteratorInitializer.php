@@ -18,7 +18,7 @@ class IteratorInitializer
     /**
      * @var ProductAttributes
      */
-    protected $productAttributes;
+    protected ProductAttributes $productAttributes;
 
     /**
      * IteratorInitializer constructor.

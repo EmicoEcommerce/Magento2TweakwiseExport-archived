@@ -15,7 +15,7 @@ class ChildrenAttributes implements DecoratorInterface
     /**
      * @var Config
      */
-    protected $config;
+    protected Config $config;
 
     /**
      * ChildrenAttributes constructor.

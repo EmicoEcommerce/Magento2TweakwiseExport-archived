@@ -16,12 +16,12 @@ class WebsiteLink implements DecoratorInterface
     /**
      * @var StoreManagerInterface
      */
-    protected $storeManager;
+    protected StoreManagerInterface $storeManager;
 
     /**
      * @var DbResourceHelper
      */
-    protected $dbResource;
+    protected DbResourceHelper $dbResource;
 
     /**
      * WebsiteLink constructor.

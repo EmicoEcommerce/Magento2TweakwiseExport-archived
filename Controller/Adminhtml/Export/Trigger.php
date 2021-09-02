@@ -21,7 +21,7 @@ class Trigger extends Action
     /**
      * @var Scheduler
      */
-    protected $scheduler;
+    protected Scheduler $scheduler;
 
     /**
      * Trigger constructor.

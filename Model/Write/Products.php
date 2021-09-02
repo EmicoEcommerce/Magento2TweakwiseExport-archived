@@ -26,37 +26,37 @@ class Products implements WriterInterface
     /**
      * @var Config
      */
-    protected $config;
+    protected Config $config;
 
     /**
      * @var Iterator
      */
-    protected $iterator;
+    protected Iterator $iterator;
 
     /**
      * @var StoreManager
      */
-    protected $storeManager;
+    protected StoreManager $storeManager;
 
     /**
      * @var Helper
      */
-    protected $helper;
+    protected Helper $helper;
 
     /**
      * @var Logger
      */
-    protected $log;
+    protected Logger $log;
 
     /**
      * @var EavConfig
      */
-    protected $eavConfig;
+    protected EavConfig $eavConfig;
 
     /**
      * @var array
      */
-    protected $attributeOptionMap = [];
+    protected array $attributeOptionMap = [];
 
     /**
      * Products constructor.

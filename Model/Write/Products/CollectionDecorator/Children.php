@@ -36,47 +36,47 @@ class Children implements DecoratorInterface
     /**
      * @var ProductType
      */
-    protected $productType;
+    protected ProductType $productType;
 
     /**
      * @var EavIteratorFactory
      */
-    protected $eavIteratorFactory;
+    protected EavIteratorFactory $eavIteratorFactory;
 
     /**
      * @var ExportEntityFactory
      */
-    protected $entityChildFactory;
+    protected ExportEntityFactory $entityChildFactory;
 
     /**
      * @var Collection
      */
-    protected $childEntities;
+    protected Collection $childEntities;
 
     /**
      * @var IteratorInitializer
      */
-    protected $iteratorInitializer;
+    protected IteratorInitializer $iteratorInitializer;
 
     /**
      * @var CollectionFactory
      */
-    protected $collectionFactory;
+    protected CollectionFactory $collectionFactory;
 
     /**
      * @var Helper
      */
-    protected $helper;
+    protected Helper $helper;
 
     /**
      * @var DbResourceHelper
      */
-    protected $dbResource;
+    protected DbResourceHelper $dbResource;
 
     /**
      * @var int
      */
-    protected $batchSize;
+    protected int $batchSize;
 
     /**
      * ChildId constructor.

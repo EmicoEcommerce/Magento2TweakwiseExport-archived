@@ -19,7 +19,7 @@ class PriceField implements ArrayInterface
     /**
      * {@inheritdoc}
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $priceFields = [
             'min_price' => 'Min Price',
@@ -42,7 +42,7 @@ class PriceField implements ArrayInterface
 
     /**
      * @param array $input
-     * @param array $processed
+     * @param array|null $processed
      * @return array
      */
     protected function combineArrayPermutations(array $input, array $processed = null): array

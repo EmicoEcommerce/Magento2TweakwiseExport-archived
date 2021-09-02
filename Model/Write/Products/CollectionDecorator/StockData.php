@@ -20,27 +20,27 @@ class StockData implements DecoratorInterface
     /**
      * @var ProductMetadataInterface
      */
-    protected $metaData;
+    protected ProductMetadataInterface $metaData;
 
     /**
      * @var DecoratorInterface[]
      */
-    protected $stockMapProviders = [];
+    protected array $stockMapProviders = [];
 
     /**
      * @var TweakwiseStockItemFactory
      */
-    protected $stockItemFactory;
+    protected TweakwiseStockItemFactory $stockItemFactory;
 
     /**
      * @var Config
      */
-    protected $config;
+    protected Config $config;
 
     /**
      * @var Manager
      */
-    protected $moduleManager;
+    protected Manager $moduleManager;
 
     /**
      * StockData constructor.
