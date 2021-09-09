@@ -28,22 +28,22 @@ class Scheduler
     /**
      * @var Collection
      */
-    protected $scheduleCollection;
+    protected Collection $scheduleCollection;
 
     /**
      * @var ProductMetadataInterface
      */
-    protected $productMetadata;
+    protected ProductMetadataInterface $productMetadata;
 
     /**
      * @var DateTime
      */
-    protected $dateTime;
+    protected DateTime $dateTime;
 
     /**
      * @var TimezoneInterface
      */
-    protected $timezone;
+    protected TimezoneInterface $timezone;
 
     /**
      * @param Collection $scheduleCollection

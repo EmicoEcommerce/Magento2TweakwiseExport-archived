@@ -19,7 +19,7 @@ class ExportEntityBundle extends CompositeExportEntity
     /**
      * @var bool
      */
-    protected $isStockCombined;
+    protected bool $isStockCombined;
 
     /**
      * @return StockItem

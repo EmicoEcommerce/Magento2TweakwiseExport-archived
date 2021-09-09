@@ -18,12 +18,12 @@ class CacheHandler
     /**
      * @var Manager Magento native cache handler
      */
-    protected $manager;
+    protected Manager $manager;
 
     /**
      * @var array
      */
-    protected $cacheTypes = [];
+    protected array $cacheTypes = [];
 
     /**
      * CacheHandler constructor.

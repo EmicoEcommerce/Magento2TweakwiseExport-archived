@@ -12,23 +12,24 @@ use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Zend_Db_Select;
+use Zend_Db_Statement_Exception;
 
 class Price implements DecoratorInterface
 {
     /**
      * @var CollectionFactory
      */
-    protected $collectionFactory;
+    protected CollectionFactory $collectionFactory;
 
     /**
      * @var StoreManagerInterface
      */
-    protected $storeManager;
+    protected StoreManagerInterface $storeManager;
 
     /**
      * @var Config
      */
-    protected $config;
+    protected Config $config;
 
     /**
      * Price constructor.
@@ -48,7 +49,7 @@ class Price implements DecoratorInterface
 
     /**
      * @param Collection $collection
-     * @throws \Zend_Db_Statement_Exception
+     * @throws Zend_Db_Statement_Exception
      */
     public function decorate(Collection $collection): void
     {

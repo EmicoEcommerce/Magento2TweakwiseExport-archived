@@ -26,27 +26,27 @@ class Flush implements ActionInterface
     /**
      * @var Context
      */
-    protected $context;
+    protected Context $context;
 
     /**
      * @var Config
      */
-    protected $config;
+    protected Config $config;
 
     /**
      * @var RequestValidator
      */
-    protected $requestValidator;
+    protected RequestValidator $requestValidator;
 
     /**
      * @var ResponseFactory
      */
-    protected $responseFactory;
+    protected ResponseFactory $responseFactory;
 
     /**
      * @var CacheHandler
      */
-    protected $cacheHandler;
+    protected CacheHandler $cacheHandler;
 
     /**
      * Flush constructor.

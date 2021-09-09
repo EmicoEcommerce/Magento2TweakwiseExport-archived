@@ -21,12 +21,12 @@ class ProductAttributes implements OptionSourceInterface
     /**
      * @var EavConfig
      */
-    protected $eavConfig;
+    protected EavConfig $eavConfig;
 
     /**
      * @var ProductAttributesHelper
      */
-    protected $productAttributesHelper;
+    protected ProductAttributesHelper $productAttributesHelper;
 
     /**
      * ProductAttributes constructor.

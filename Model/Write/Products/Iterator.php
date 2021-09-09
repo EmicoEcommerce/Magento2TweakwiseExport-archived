@@ -26,17 +26,17 @@ class Iterator extends EavIterator
     /**
      * @var ExportEntityFactory
      */
-    protected $entityFactory;
+    protected ExportEntityFactory $entityFactory;
 
     /**
      * @var CollectionFactory
      */
-    protected $collectionFactory;
+    protected CollectionFactory $collectionFactory;
 
     /**
      * @var DecoratorInterface[]
      */
-    protected $collectionDecorators;
+    protected array $collectionDecorators;
 
     /**
      * Iterator constructor.

@@ -33,22 +33,22 @@ class Export
     /**
      * @var Config
      */
-    protected $config;
+    protected Config $config;
 
     /**
      * @var Validator
      */
-    protected $validator;
+    protected Validator $validator;
 
     /**
      * @var Writer
      */
-    protected $writer;
+    protected Writer $writer;
 
     /**
      * @var Logger
      */
-    protected $log;
+    protected Logger $log;
 
     /**
      * Export constructor.
@@ -147,7 +147,7 @@ class Export
      * @param bool $validate
      * @throws Exception
      */
-    public function generateToFile($feedFile, $validate): void
+    public function generateToFile(string $feedFile, bool $validate): void
     {
         $this->executeLocked(function () use ($feedFile, $validate) {
             $tmpFeedFile = $this->config->getFeedTmpFile($feedFile);

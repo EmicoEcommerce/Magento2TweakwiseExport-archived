@@ -16,17 +16,17 @@ class CompositeExportEntity extends ExportEntity implements CompositeExportEntit
     /**
      * @var ExportEntityChild[]
      */
-    protected $children = [];
+    protected array $children = [];
 
     /**
      * @var ExportEntityChild[]
      */
-    protected $enabledChildren;
+    protected array $enabledChildren;
 
     /**
      * @var ExportEntityChild[]
      */
-    protected $exportableChildren;
+    protected array $exportableChildren;
 
     /**
      * @param ExportEntityChild $child
