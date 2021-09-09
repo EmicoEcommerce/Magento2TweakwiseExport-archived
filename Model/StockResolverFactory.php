@@ -23,7 +23,7 @@ class StockResolverFactory
     /**
      * @var ObjectManagerInterface
      */
-    protected $_objectManager;
+    protected ObjectManagerInterface $_objectManager;
 
     /**
      * @param ObjectManagerInterface $objectManager
@@ -38,7 +38,7 @@ class StockResolverFactory
      * @param string|Element $sourceData
      * @return StockResolverInterface
      */
-    public function create($sourceData = null)
+    public function create($sourceData = null): StockResolverInterface
     {
         return $this->_objectManager->create(StockResolverInterface::class, ['sourceData' => $sourceData]);
     }

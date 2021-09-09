@@ -23,6 +23,7 @@ use Magento\Framework\Profiler;
 use Magento\Store\Model\Store;
 use Zend_Db_Expr;
 use Zend_Db_Select;
+use Zend_Db_Statement_Exception;
 
 class EavIterator implements IteratorAggregate
 {
@@ -174,9 +175,9 @@ class EavIterator implements IteratorAggregate
     /**
      * @param MysqlStatement $stmt
      * @return \Generator
-     * @throws \Zend_Db_Statement_Exception
+     * @throws Zend_Db_Statement_Exception
      */
-    protected function loopUnionRows(MysqlStatement $stmt)
+    protected function loopUnionRows(MysqlStatement $stmt): \Generator
     {
         $entity = ['entity_id' => null];
         while ($row = $stmt->fetch()) {

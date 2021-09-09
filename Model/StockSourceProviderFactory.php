@@ -23,7 +23,7 @@ class StockSourceProviderFactory
     /**
      * @var ObjectManagerInterface
      */
-    protected $_objectManager;
+    protected ObjectManagerInterface $_objectManager;
 
     /**
      * @param ObjectManagerInterface $objectManager

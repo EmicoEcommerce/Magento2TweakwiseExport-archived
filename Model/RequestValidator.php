@@ -14,7 +14,7 @@ class RequestValidator
     /**
      * @var Config
      */
-    protected $config;
+    protected \Emico\TweakwiseExport\Model\Config $config;
 
     /**
      * RequestValidator constructor.

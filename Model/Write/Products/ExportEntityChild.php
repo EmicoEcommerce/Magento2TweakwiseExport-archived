@@ -18,12 +18,12 @@ class ExportEntityChild extends ExportEntity
     /**
      * @var ChildOptions
      */
-    protected $childOptions;
+    protected ChildOptions $childOptions;
 
     /**
      * @var Config
      */
-    protected $config;
+    protected Config $config;
 
     /**
      * ExportEntityChild constructor.

@@ -18,7 +18,7 @@ class Validator
      * @param string $file
      * @throws ValidationException
      */
-    public function validate($file)
+    public function validate(string $file)
     {
         $internalXmlErrors = libxml_use_internal_errors(true);
 

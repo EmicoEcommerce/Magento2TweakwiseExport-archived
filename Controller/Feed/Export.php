@@ -23,7 +23,7 @@ class Export implements ActionInterface
     /**
      * @var Export
      */
-    protected Export|ExportModel $export;
+    protected Export $export;
 
     /**
      * @var Logger
@@ -43,7 +43,7 @@ class Export implements ActionInterface
     /**
      * @var RequestValidator
      */
-    protected $requestValidator;
+    protected RequestValidator $requestValidator;
 
     /**
      * Export constructor.
