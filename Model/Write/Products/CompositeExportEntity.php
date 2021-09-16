@@ -21,12 +21,12 @@ class CompositeExportEntity extends ExportEntity implements CompositeExportEntit
     /**
      * @var ExportEntityChild[]
      */
-    protected array $enabledChildren;
+    protected array $enabledChildren = [];
 
     /**
      * @var ExportEntityChild[]
      */
-    protected array $exportableChildren;
+    protected array $exportableChildren = [];
 
     /**
      * @param ExportEntityChild $child

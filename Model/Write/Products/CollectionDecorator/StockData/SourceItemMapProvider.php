@@ -42,12 +42,12 @@ class SourceItemMapProvider implements StockMapProviderInterface
     /**
      * @var StockResolverInterface
      */
-    protected StockResolverInterface $stockResolver;
+    protected ?StockResolverInterface $stockResolver = null;
 
     /**
      * @var GetSourcesAssignedToStockOrderedByPriorityInterface
      */
-    protected GetSourcesAssignedToStockOrderedByPriorityInterface $stockSourceProvider;
+    protected ?GetSourcesAssignedToStockOrderedByPriorityInterface $stockSourceProvider = null;
 
     /**
      * @var StockSourceProviderFactory
@@ -72,7 +72,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
     /**
      * @var DefaultStockProviderInterface
      */
-    protected DefaultStockProviderInterface $defaultStockProvider;
+    protected ?DefaultStockProviderInterface $defaultStockProvider = null;
 
     /**
      * StockData constructor.

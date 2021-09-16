@@ -51,7 +51,7 @@ class Children implements DecoratorInterface
     /**
      * @var Collection
      */
-    protected Collection $childEntities;
+    protected ?Collection $childEntities = null;
 
     /**
      * @var IteratorInitializer
