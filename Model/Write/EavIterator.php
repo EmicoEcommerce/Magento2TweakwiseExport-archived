@@ -55,7 +55,7 @@ class EavIterator implements IteratorAggregate
     /**
      * @var Store
      */
-    protected Store $store;
+    protected ?Store $store = null;
 
     /**
      * @var int[]
