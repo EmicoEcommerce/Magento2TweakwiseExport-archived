@@ -65,6 +65,14 @@
                         <field id="enabled">1</field>
                     </depends>
                 </field>
+                <field id="archive" translate="label,comment" type="text" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Archive</label>
+                    <comment>Number of feeds to keep in archive.</comment>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                </field>
                 <field id="real_time" translate="label,comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Export in Real Time</label>
                     <comment>When feed is requested it will always be exported in real time.</comment>
