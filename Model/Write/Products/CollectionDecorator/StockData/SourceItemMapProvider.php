@@ -21,6 +21,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\InventoryApi\Api\GetSourcesAssignedToStockOrderedByPriorityInterface;
 use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
 use Zend_Db_Expr;
+use Zend_Db_Statement_Exception;
 
 /**
  * Class DefaultImplementation
@@ -31,47 +32,47 @@ class SourceItemMapProvider implements StockMapProviderInterface
     /**
      * @var TweakwiseStockItemFactory
      */
-    protected $tweakwiseStockItemFactory;
+    protected TweakwiseStockItemFactory $tweakwiseStockItemFactory;
 
     /**
      * @var StoreManagerInterface
      */
-    protected $storeManager;
+    protected StoreManagerInterface $storeManager;
 
     /**
      * @var StockResolverInterface
      */
-    protected $stockResolver;
+    protected ?StockResolverInterface $stockResolver = null;
 
     /**
      * @var GetSourcesAssignedToStockOrderedByPriorityInterface
      */
-    protected $stockSourceProvider;
+    protected ?GetSourcesAssignedToStockOrderedByPriorityInterface $stockSourceProvider = null;
 
     /**
      * @var StockSourceProviderFactory
      */
-    protected $stockSourceProviderFactory;
+    protected StockSourceProviderFactory $stockSourceProviderFactory;
 
     /**
      * @var StockResolverFactory
      */
-    protected $stockResolverFactory;
+    protected StockResolverFactory $stockResolverFactory;
 
     /**
      * @var DbResourceHelper
      */
-    protected $dbResource;
+    protected DbResourceHelper $dbResource;
 
     /**
      * @var DefaultStockProviderInterfaceFactory
      */
-    protected $defaultStockProviderFactory;
+    protected DefaultStockProviderInterfaceFactory $defaultStockProviderFactory;
 
     /**
      * @var DefaultStockProviderInterface
      */
-    protected $defaultStockProvider;
+    protected ?DefaultStockProviderInterface $defaultStockProvider = null;
 
     /**
      * StockData constructor.
@@ -106,7 +107,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
      * @param Collection $collection
      * @return StockItem[]
      * @throws LocalizedException
-     * @throws \Zend_Db_Statement_Exception
+     * @throws Zend_Db_Statement_Exception
      */
     public function getStockItemMap(Collection $collection): array
     {

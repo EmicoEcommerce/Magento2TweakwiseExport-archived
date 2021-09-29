@@ -16,7 +16,7 @@ class Logger implements LoggerInterface
     /**
      * @var LoggerInterface
      */
-    protected $log;
+    protected LoggerInterface $log;
 
     /**
      * Log constructor.

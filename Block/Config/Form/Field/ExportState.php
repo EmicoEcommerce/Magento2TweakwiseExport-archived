@@ -18,7 +18,7 @@ class ExportState extends Field
     /**
      * @var Helper
      */
-    protected $helper;
+    protected Helper $helper;
 
     /**
      * @param Context $context

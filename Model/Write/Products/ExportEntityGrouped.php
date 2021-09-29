@@ -20,5 +20,5 @@ class ExportEntityGrouped extends CompositeExportEntity
     /**
      * @var bool
      */
-    protected $isStockCombined;
+    protected ?bool $isStockCombined = null;
 }

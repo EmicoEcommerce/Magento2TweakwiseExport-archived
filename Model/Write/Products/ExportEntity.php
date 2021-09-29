@@ -19,27 +19,27 @@ class ExportEntity
     /**
      * @var Store
      */
-    protected $store;
+    protected Store $store;
 
     /**
      * @var Visibility
      */
-    protected $visibilityObject;
+    protected Visibility $visibilityObject;
 
     /**
      * @var int[]
      */
-    protected $categories = [];
+    protected array $categories = [];
 
     /**
      * @var array[]
      */
-    protected $attributes = [];
+    protected array $attributes = [];
 
     /**
      * @var int
      */
-    protected $id;
+    protected ?int $id = null;
 
     /**
      * @var int
@@ -54,37 +54,37 @@ class ExportEntity
     /**
      * @var string
      */
-    protected $name = '';
+    protected string $name = '';
 
     /**
      * @var float
      */
-    protected $price = 0.0;
+    protected float $price = 0.0;
 
     /**
      * @var StockItem
      */
-    protected $stockItem;
+    protected ?StockItem $stockItem = null;
 
     /**
      * @var StockConfigurationInterface
      */
-    protected $stockConfiguration;
+    protected StockConfigurationInterface $stockConfiguration;
 
     /**
      * @var int[]|null
      */
-    protected $linkedWebsiteIds = [];
+    protected ?array $linkedWebsiteIds = [];
 
     /**
      * @var StoreManagerInterface
      */
-    protected $storeManager;
+    protected StoreManagerInterface $storeManager;
 
     /**
      * @var string
      */
-    protected $typeId;
+    protected ?string $typeId = null;
 
     /**
      * ExportEntity constructor.
@@ -324,7 +324,7 @@ class ExportEntity
     /**
      * @param StockItem $stockItem
      */
-    public function setStockItem($stockItem): void
+    public function setStockItem(StockItem $stockItem): void
     {
         $this->stockItem = $stockItem;
     }

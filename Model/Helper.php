@@ -9,7 +9,9 @@
 namespace Emico\TweakwiseExport\Model;
 
 use DateTime;
+use Exception;
 use IntlDateFormatter;
+use Magento\Framework\Phrase;
 use SplFileInfo;
 use Magento\Framework\App\ProductMetadata as CommunityProductMetadata;
 use Magento\Framework\App\ProductMetadataInterface;
@@ -20,17 +22,17 @@ class Helper
     /**
      * @var ProductMetadataInterface
      */
-    protected $productMetadata;
+    protected ProductMetadataInterface $productMetadata;
 
     /**
      * @var Config
      */
-    protected $config;
+    protected Config $config;
 
     /**
      * @var TimezoneInterface
      */
-    protected $localDate;
+    protected TimezoneInterface $localDate;
 
     /**
      * Helper constructor.
@@ -86,6 +88,7 @@ class Helper
      * Get start date of current feed export. Only working with export to file.
      *
      * @return DateTime|null
+     * @throws Exception
      */
     public function getFeedExportStartDate(): ?DateTime
     {
@@ -101,6 +104,7 @@ class Helper
      * Get date of last finished feed export
      *
      * @return DateTime|null
+     * @throws Exception
      */
     public function getLastFeedExportDate(): ?DateTime
     {
@@ -113,7 +117,8 @@ class Helper
     }
 
     /**
-     * @return \Magento\Framework\Phrase|string
+     * @return Phrase|string
+     * @throws Exception
      */
     public function getExportStateText()
     {
