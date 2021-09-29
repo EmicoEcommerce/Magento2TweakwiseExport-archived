@@ -13,11 +13,11 @@
             <export>
                 <enabled>0</enabled>
                 <schedule>0 3 * * *</schedule>
-                <key />
+                <archive/>
                 <validate>0</validate>
                 <real_time>0</real_time>
-                <api_server_url>https://navigator-api.tweakwise.com/task/trigger/</api_server_url>
-                <api_import_key />
+                <api_import_url/>
+                <feed_key/>
                 <stock_calculation>sum</stock_calculation>
                 <out_of_stock_children>1</out_of_stock_children>
                 <exclude_child_attributes>url_key,small_image,small_image_label,thumbnail_label,status,tax_class_id,type_id,required_options,visibility</exclude_child_attributes>
