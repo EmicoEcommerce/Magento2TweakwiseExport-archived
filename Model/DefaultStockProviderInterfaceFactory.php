@@ -23,7 +23,7 @@ class DefaultStockProviderInterfaceFactory
     /**
      * @var ObjectManagerInterface
      */
-    protected ObjectManagerInterface $_objectManager;
+    protected $_objectManager;
 
     /**
      * @param ObjectManagerInterface $objectManager
@@ -38,7 +38,7 @@ class DefaultStockProviderInterfaceFactory
      * @param string|Element $sourceData
      * @return DefaultStockProviderInterface
      */
-    public function create($sourceData = null): DefaultStockProviderInterface
+    public function create($sourceData = null)
     {
         return $this->_objectManager->create(DefaultStockProviderInterface::class, ['sourceData' => $sourceData]);
     }
