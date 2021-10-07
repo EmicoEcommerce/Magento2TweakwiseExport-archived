@@ -20,17 +20,17 @@ class StockItemMapProvider implements StockMapProviderInterface
     /**
      * @var StockItemRepositoryInterface
      */
-    protected StockItemRepositoryInterface $stockItemRepository;
+    protected $stockItemRepository;
 
     /**
      * @var StockItemCriteriaInterfaceFactory
      */
-    protected StockItemCriteriaInterfaceFactory $criteriaFactory;
+    protected $criteriaFactory;
 
     /**
      * @var TweakwiseStockItemFactory
      */
-    protected TweakwiseStockItemFactory $tweakwiseStockItemFactory;
+    protected $tweakwiseStockItemFactory;
 
     /**
      * StockData constructor.
