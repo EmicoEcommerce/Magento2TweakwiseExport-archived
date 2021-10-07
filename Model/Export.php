@@ -158,6 +158,7 @@ class Export
             }
 
             try {
+                // Write
                 try {
                     $this->writer->write($sourceHandle);
                     $this->log->debug('Feed exported to ' . $tmpFeedFile);
@@ -165,17 +166,36 @@ class Export
                     fclose($sourceHandle);
                 }
 
+                // Validate
                 if ($validate) {
                     $this->validator->validate($tmpFeedFile);
                     $this->log->debug('Feed validated ' . $tmpFeedFile);
                 }
 
+                // Archive
+                $maxSuffix = $this->config->getMaxArchiveFiles();
+                for ($suffix = $maxSuffix; $suffix > 0; $suffix--) {
+                    $source = $feedFile . ($suffix > 1 ? '.' . ($suffix - 1) : '');
+                    if (!file_exists($source)) {
+                        continue;
+                    }
+                    $target = $feedFile . '.' . $suffix;
+                    // Move
+                    if (!rename($source, $target)) {
+                        $this->log->debug('Archive feed rename failed (' . $source . ' to ' . $target . ')');
+                    } else {
+                        $this->log->debug('Archive feed renamed (' . $source . ' to ' . $target . ')');
+                    }
+                }
+
+                // Rename
                 if (!rename($tmpFeedFile, $feedFile)) {
-                    $this->log->debug('Feed rename failed ' . $tmpFeedFile);
+                    $this->log->debug('Feed rename failed (' . $tmpFeedFile . ' to ' . $feedFile . ')');
                 } else {
-                    $this->log->debug('Feed renamed ' . $tmpFeedFile);
+                    $this->log->debug('Feed renamed (' . $tmpFeedFile . ' to ' . $feedFile . ')');
                 }
             } finally {
+                // Remove temporary file
                 if (file_exists($tmpFeedFile)) {
                     unlink($tmpFeedFile);
                 }

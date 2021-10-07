@@ -23,9 +23,8 @@ class Config
     public const PATH_ENABLED = 'tweakwise/export/enabled';
     public const PATH_REAL_TIME = 'tweakwise/export/real_time';
     public const PATH_VALIDATE = 'tweakwise/export/validate';
+    public const PATH_ARCHIVE = 'tweakwise/export/archive';
     public const PATH_API_IMPORT_URL = 'tweakwise/export/api_import_url';
-    public const PATH_STOCK_CALCULATION = 'tweakwise/export/stock_calculation';
-    public const PATH_STOCK_PERCENTAGE = 'tweakwise/export/stock_percentage';
     public const PATH_OUT_OF_STOCK_CHILDREN = 'tweakwise/export/out_of_stock_children';
     public const PATH_FEED_KEY = 'tweakwise/export/feed_key';
     public const PATH_ALLOW_CACHE_FLUSH = 'tweakwise/export/allow_cache_flush';
@@ -104,6 +103,14 @@ class Config
         }
 
         return (bool) $this->config->isSetFlag(self::PATH_VALIDATE);
+    }
+
+    /**
+     * @return integer
+     */
+    public function getMaxArchiveFiles(): int
+    {
+        return (integer) $this->config->getValue(self::PATH_ARCHIVE);
     }
 
     /**
