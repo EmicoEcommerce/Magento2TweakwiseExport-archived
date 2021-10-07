@@ -29,7 +29,7 @@ class ProductAttributes
      *
      * @var array
      */
-    protected array $attributeBlacklist = [];
+    protected array $attributeBlacklist;
 
     /**
      * ProductAttributes constructor.

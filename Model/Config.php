@@ -42,22 +42,22 @@ class Config
     /**
      * @var ScopeConfigInterface
      */
-    protected ScopeConfigInterface $config;
+    protected $config;
 
     /**
      * @var DirectoryList
      */
-    protected DirectoryList $directoryList;
+    protected $directoryList;
 
     /**
      * @var array
      */
-    protected array $skipAttributes = [];
+    protected $skipAttributes;
 
     /**
      * @var DeploymentConfig
      */
-    protected DeploymentConfig $deployConfig;
+    protected $deployConfig;
 
     /**
      * Export constructor.

@@ -39,7 +39,7 @@ class ExportEntity
     /**
      * @var int
      */
-    protected ?int $id = null;
+    protected int $id;
 
     /**
      * @var int
@@ -64,7 +64,7 @@ class ExportEntity
     /**
      * @var StockItem
      */
-    protected ?StockItem $stockItem = null;
+    protected StockItem $stockItem;
 
     /**
      * @var StockConfigurationInterface
@@ -84,7 +84,7 @@ class ExportEntity
     /**
      * @var string
      */
-    protected ?string $typeId = null;
+    protected string $typeId;
 
     /**
      * ExportEntity constructor.
