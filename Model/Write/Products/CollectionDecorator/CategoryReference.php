@@ -15,7 +15,7 @@ class CategoryReference implements DecoratorInterface
     /**
      * @var DbResourceHelper
      */
-    protected DbResourceHelper $dbResource;
+    protected $dbResource;
 
     /**
      * CategoryReference constructor.

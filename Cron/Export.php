@@ -23,17 +23,17 @@ class Export
     /**
      * @var Config
      */
-    protected Config $config;
+    protected $config;
 
     /**
      * @var ExportService
      */
-    protected ExportService $export;
+    protected $export;
 
     /**
      * @var Logger
      */
-    protected Logger $log;
+    protected $log;
 
     /**
      * Export constructor.

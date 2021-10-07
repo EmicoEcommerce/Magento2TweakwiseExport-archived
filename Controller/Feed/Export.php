@@ -23,22 +23,22 @@ class Export implements ActionInterface
     /**
      * @var Export
      */
-    protected Export|ExportModel $export;
+    protected $export;
 
     /**
      * @var Logger
      */
-    protected Logger $log;
+    protected $log;
 
     /**
      * @var ResponseFactory
      */
-    protected ResponseFactory $responseFactory;
+    protected $responseFactory;
 
     /**
      * @var Context
      */
-    protected Context $context;
+    protected $context;
 
     /**
      * @var RequestValidator

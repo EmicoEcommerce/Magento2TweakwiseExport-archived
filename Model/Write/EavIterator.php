@@ -29,57 +29,57 @@ class EavIterator implements IteratorAggregate
     /**
      * @var int
      */
-    protected int $batchSize;
+    protected $batchSize;
 
     /**
      * @var string
      */
-    protected string $entityCode;
+    protected $entityCode;
 
     /**
      * @var EavConfig
      */
-    protected EavConfig $eavConfig;
+    protected $eavConfig;
 
     /**
      * @var AbstractAttribute[]
      */
-    protected array $attributes = [];
+    protected $attributes = [];
 
     /**
      * @var AbstractAttribute[]
      */
-    protected array $attributesByCode = [];
+    protected $attributesByCode = [];
 
     /**
      * @var Store
      */
-    protected Store $store;
+    protected $store;
 
     /**
      * @var int[]
      */
-    protected array $entityIds = [];
+    protected $entityIds = [];
 
     /**
      * @var Helper
      */
-    protected Helper $helper;
+    protected $helper;
 
     /**
      * @var DbContext
      */
-    protected DbContext $dbContext;
+    protected $dbContext;
 
     /**
      * @var \ArrayIterator[]
      */
-    protected array $entitySet;
+    protected $entitySet;
 
     /**
      * @var array
      */
-    protected array $eavSelectOrder = [
+    protected $eavSelectOrder = [
         'entity_id',
         'store_id',
     ];
@@ -87,7 +87,7 @@ class EavIterator implements IteratorAggregate
     /**
      * @var array
      */
-    protected array $entityBatchOrder = [];
+    protected $entityBatchOrder = [];
 
     /**
      * EavIterator constructor.

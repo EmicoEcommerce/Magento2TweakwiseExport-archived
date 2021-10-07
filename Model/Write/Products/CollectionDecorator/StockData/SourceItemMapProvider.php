@@ -21,7 +21,6 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\InventoryApi\Api\GetSourcesAssignedToStockOrderedByPriorityInterface;
 use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
 use Zend_Db_Expr;
-use Zend_Db_Statement_Exception;
 
 /**
  * Class DefaultImplementation
@@ -32,47 +31,47 @@ class SourceItemMapProvider implements StockMapProviderInterface
     /**
      * @var TweakwiseStockItemFactory
      */
-    protected TweakwiseStockItemFactory $tweakwiseStockItemFactory;
+    protected $tweakwiseStockItemFactory;
 
     /**
      * @var StoreManagerInterface
      */
-    protected StoreManagerInterface $storeManager;
+    protected $storeManager;
 
     /**
      * @var StockResolverInterface
      */
-    protected StockResolverInterface $stockResolver;
+    protected $stockResolver;
 
     /**
      * @var GetSourcesAssignedToStockOrderedByPriorityInterface
      */
-    protected GetSourcesAssignedToStockOrderedByPriorityInterface $stockSourceProvider;
+    protected $stockSourceProvider;
 
     /**
      * @var StockSourceProviderFactory
      */
-    protected StockSourceProviderFactory $stockSourceProviderFactory;
+    protected $stockSourceProviderFactory;
 
     /**
      * @var StockResolverFactory
      */
-    protected StockResolverFactory $stockResolverFactory;
+    protected $stockResolverFactory;
 
     /**
      * @var DbResourceHelper
      */
-    protected DbResourceHelper $dbResource;
+    protected $dbResource;
 
     /**
      * @var DefaultStockProviderInterfaceFactory
      */
-    protected DefaultStockProviderInterfaceFactory $defaultStockProviderFactory;
+    protected $defaultStockProviderFactory;
 
     /**
      * @var DefaultStockProviderInterface
      */
-    protected DefaultStockProviderInterface $defaultStockProvider;
+    protected $defaultStockProvider;
 
     /**
      * StockData constructor.
@@ -107,7 +106,7 @@ class SourceItemMapProvider implements StockMapProviderInterface
      * @param Collection $collection
      * @return StockItem[]
      * @throws LocalizedException
-     * @throws Zend_Db_Statement_Exception
+     * @throws \Zend_Db_Statement_Exception
      */
     public function getStockItemMap(Collection $collection): array
     {

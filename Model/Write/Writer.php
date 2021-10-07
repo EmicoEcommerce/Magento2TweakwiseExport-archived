@@ -19,7 +19,7 @@ class Writer
     /**
      * @var XMLWriter
      */
-    protected XMLWriter $xml;
+    protected $xml;
 
     /**
      * Resource where XML is written to after each flush
@@ -31,27 +31,27 @@ class Writer
     /**
      * @var StoreManager
      */
-    protected StoreManager $storeManager;
+    protected $storeManager;
 
     /**
      * @var AppState
      */
-    protected AppState $appState;
+    protected $appState;
 
     /**
      * @var WriterInterface[]
      */
-    protected array $writers;
+    protected $writers;
 
     /**
      * @var DateTime
      */
-    protected DateTime $now;
+    protected $now;
 
     /**
      * @var ComposerInformation
      */
-    protected ComposerInformation $composerInformation;
+    protected $composerInformation;
 
     /**
      * Writer constructor.
