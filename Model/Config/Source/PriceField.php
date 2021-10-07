@@ -19,7 +19,7 @@ class PriceField implements ArrayInterface
     /**
      * {@inheritdoc}
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $priceFields = [
             'min_price' => 'Min Price',
