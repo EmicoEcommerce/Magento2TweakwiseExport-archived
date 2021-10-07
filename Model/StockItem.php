@@ -12,12 +12,12 @@ class StockItem
     /**
      * @var int
      */
-    protected int $qty = 0;
+    protected $qty = 0;
 
     /**
      * @var int
      */
-    protected int $isInStock = 0;
+    protected $isInStock = 0;
 
     /**
      * @return int

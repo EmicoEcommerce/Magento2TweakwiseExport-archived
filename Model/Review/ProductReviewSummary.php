@@ -16,17 +16,17 @@ class ProductReviewSummary
     /**
      * @var float
      */
-    protected float $averageRating;
+    protected $averageRating;
 
     /**
      * @var int
      */
-    protected int $reviewCount;
+    protected $reviewCount;
 
     /**
      * @var int
      */
-    protected int $productId;
+    protected $productId;
 
     /**
      * ProductSummary constructor.
