@@ -18,7 +18,7 @@ class ExportEntityChild extends ExportEntity
     /**
      * @var ChildOptions
      */
-    protected ?ChildOptions $childOptions = null;
+    protected ChildOptions $childOptions;
 
     /**
      * @var Config
