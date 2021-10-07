@@ -20,7 +20,7 @@ class ProductAttributes
     /**
      * @var EavConfig
      */
-    protected EavConfig $eavConfig;
+    protected $eavConfig;
 
     /**
      * Apparently some of magento core attributes are marked as static
@@ -29,7 +29,7 @@ class ProductAttributes
      *
      * @var array
      */
-    protected array $attributeBlacklist = [];
+    protected $attributeBlacklist;
 
     /**
      * ProductAttributes constructor.

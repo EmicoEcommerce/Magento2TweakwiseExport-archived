@@ -20,19 +20,19 @@ interface CompositeExportEntityInterface
      *
      * @return ExportEntityChild[]
      */
-    public function getAllChildren(): array;
+    public function getAllChildren();
 
     /**
      * This method should return all children that are eligible for export (this will be written in the feed)
      *
      * @return ExportEntityChild[]
      */
-    public function getExportChildren(): array;
+    public function getExportChildren();
 
     /**
      * This method should return all enabled export children regardless of stock status and quantity
      *
      * @return ExportEntityChild[]
      */
-    public function getEnabledChildren(): array;
+    public function getEnabledChildren();
 }

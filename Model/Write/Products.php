@@ -26,37 +26,37 @@ class Products implements WriterInterface
     /**
      * @var Config
      */
-    protected Config $config;
+    protected $config;
 
     /**
      * @var Iterator
      */
-    protected Iterator $iterator;
+    protected $iterator;
 
     /**
      * @var StoreManager
      */
-    protected StoreManager $storeManager;
+    protected $storeManager;
 
     /**
      * @var Helper
      */
-    protected Helper $helper;
+    protected $helper;
 
     /**
      * @var Logger
      */
-    protected Logger $log;
+    protected $log;
 
     /**
      * @var EavConfig
      */
-    protected EavConfig $eavConfig;
+    protected $eavConfig;
 
     /**
      * @var array
      */
-    protected array $attributeOptionMap = [];
+    protected $attributeOptionMap = [];
 
     /**
      * Products constructor.
@@ -125,7 +125,7 @@ class Products implements WriterInterface
         $this->iterator->setEntityIds([]);
 
         foreach ($this->iterator as $index => $data) {
-            $this->writeProduct($xml, (int) $store->getId(), $data);
+            $this->writeProduct($xml, $store->getId(), $data);
             // Flush every so often
             if ($index % 100 === 0) {
                 $writer->flush();
@@ -142,7 +142,7 @@ class Products implements WriterInterface
      * @param int $storeId
      * @param array $data
      */
-    protected function writeProduct(XmlWriter $xml, int $storeId, array $data): void
+    protected function writeProduct(XmlWriter $xml, $storeId, array $data): void
     {
         $xml->startElement('item');
 
@@ -188,8 +188,8 @@ class Products implements WriterInterface
      */
     public function writeAttribute(
         XmlWriter $xml,
-        int $storeId,
-        string $name,
+        $storeId,
+        $name,
         $attributeValue
     ): void
     {
@@ -214,7 +214,7 @@ class Products implements WriterInterface
      * @param AbstractAttribute $attribute
      * @return string[]
      */
-    protected function getAttributeOptionMap(int $storeId, AbstractAttribute $attribute): array
+    protected function getAttributeOptionMap($storeId, AbstractAttribute $attribute): array
     {
         $attributeKey = $storeId . '-' . $attribute->getId();
         if (!isset($this->attributeOptionMap[$attributeKey])) {
@@ -358,6 +358,7 @@ class Products implements WriterInterface
         }
 
         $result = [];
+        /** @var string $attributeValue */
         foreach ($values as $attributeValue) {
             $map = $this->getAttributeOptionMap($storeId, $attribute);
             $result[] = $map[$attributeValue] ?? null;

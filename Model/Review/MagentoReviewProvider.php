@@ -19,7 +19,7 @@ class MagentoReviewProvider implements ReviewProviderInterface
     /**
      * @var SummaryCollectionFactory
      */
-    protected SummaryCollectionFactory $summaryCollectionFactory;
+    protected $summaryCollectionFactory;
 
     /**
      * MagentoReviewProvider constructor.

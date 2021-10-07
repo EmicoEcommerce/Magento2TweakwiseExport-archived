@@ -15,7 +15,7 @@ class XMLWriter extends BaseXMLWriter
     /**
      * @var int[]
      */
-    protected array $categories = [];
+    protected $categories = [];
 
     /**
      * Write value in a single element. $value must be a scalar value

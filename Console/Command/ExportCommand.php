@@ -26,17 +26,17 @@ class ExportCommand extends Command
     /**
      * @var Config
      */
-    protected Config $config;
+    protected $config;
 
     /**
      * @var Export
      */
-    protected Export $export;
+    protected $export;
 
     /**
      * @var State
      */
-    protected State $state;
+    protected $state;
 
     /**
      * ExportCommand constructor.

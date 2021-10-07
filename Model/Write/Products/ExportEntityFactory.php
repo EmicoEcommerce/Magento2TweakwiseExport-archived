@@ -19,17 +19,17 @@ class ExportEntityFactory
      *
      * @var ObjectManagerInterface
      */
-    protected ObjectManagerInterface $_objectManager;
+    protected $_objectManager;
 
     /**
      * @var Type
      */
-    protected Type $type;
+    protected $type;
 
     /**
      * @var array
      */
-    protected array $typeMap;
+    protected $typeMap;
 
     /**
      * Factory constructor
