@@ -21,27 +21,27 @@ class Categories implements WriterInterface
     /**
      * @var Iterator
      */
-    protected Iterator $iterator;
+    protected $iterator;
 
     /**
      * @var StoreManager
      */
-    protected StoreManager $storeManager;
+    protected $storeManager;
 
     /**
      * @var Config
      */
-    protected Config $config;
+    protected $config;
 
     /**
      * @var Helper
      */
-    protected Helper $helper;
+    protected $helper;
 
     /**
      * @var Logger
      */
-    protected Logger $log;
+    protected $log;
 
     /**
      * Categories constructor.

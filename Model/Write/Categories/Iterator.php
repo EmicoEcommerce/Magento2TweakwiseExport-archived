@@ -25,7 +25,7 @@ class Iterator extends EavIterator
     /**
      * @var array
      */
-    protected array $entityBatchOrder = [
+    protected $entityBatchOrder = [
         'level',
         'path'
     ];
@@ -33,7 +33,7 @@ class Iterator extends EavIterator
     /**
      * {@inheritDoc}
      */
-    protected array $eavSelectOrder = [
+    protected $eavSelectOrder = [
         'path',
         'entity_id',
         'store_id'

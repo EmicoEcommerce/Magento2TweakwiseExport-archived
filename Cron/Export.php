@@ -12,7 +12,6 @@ use Emico\TweakwiseExport\Exception\FeedException;
 use Emico\TweakwiseExport\Model\Config;
 use Emico\TweakwiseExport\Model\Export as ExportService;
 use Emico\TweakwiseExport\Model\Logger;
-use Magento\Store\Model\StoreManagerInterface;
 
 class Export
 {
@@ -24,22 +23,17 @@ class Export
     /**
      * @var Config
      */
-    protected Config $config;
+    protected $config;
 
     /**
      * @var ExportService
      */
-    protected ExportService $export;
+    protected $export;
 
     /**
      * @var Logger
      */
-    protected Logger $log;
-
-    /**
-     * @var StoreManagerInterface
-     */
-    protected $storeManager;
+    protected $log;
 
     /**
      * Export constructor.
@@ -51,13 +45,11 @@ class Export
     public function __construct(
         Config $config,
         ExportService $export,
-        Logger $log,
-        StoreManagerInterface $storeManager
+        Logger $log
     ) {
         $this->config = $config;
         $this->export = $export;
         $this->log = $log;
-        $this->storeManager = $storeManager;
     }
 
     /**
@@ -68,10 +60,6 @@ class Export
     {
         if ($this->config->isRealTime()) {
             $this->log->debug('Export set to real time, skipping cron export.');
-            return;
-        }
-
-        if ($this->storeManager->isSingleStoreMode() && !$this->config->isEnabled()) {
             return;
         }
 

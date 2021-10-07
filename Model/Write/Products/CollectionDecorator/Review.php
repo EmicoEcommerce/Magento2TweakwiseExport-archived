@@ -21,7 +21,7 @@ class Review implements DecoratorInterface
     /**
      * @var ReviewProviderInterface
      */
-    protected ReviewProviderInterface $reviewProvider;
+    protected $reviewProvider;
 
     /**
      * Review constructor.

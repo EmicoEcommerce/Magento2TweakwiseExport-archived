@@ -18,12 +18,12 @@ class ChildOptions
     /**
      * @var int
      */
-    protected ?int $optionId = null;
+    protected $optionId;
 
     /**
      * @var bool
      */
-    protected ?bool $isRequired = null;
+    protected $isRequired;
 
     /**
      * ChildOptions constructor.

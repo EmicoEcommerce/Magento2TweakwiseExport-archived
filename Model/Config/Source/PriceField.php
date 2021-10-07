@@ -42,7 +42,7 @@ class PriceField implements ArrayInterface
 
     /**
      * @param array $input
-     * @param array|null $processed
+     * @param array $processed
      * @return array
      */
     protected function combineArrayPermutations(array $input, array $processed = null): array

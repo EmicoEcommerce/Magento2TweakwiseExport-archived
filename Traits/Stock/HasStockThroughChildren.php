@@ -17,7 +17,7 @@ use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 trait HasStockThroughChildren
 {
     /**
-     * @return StockItem|null
+     * @return StockItem
      */
     public function getStockItem(): ?StockItem
     {

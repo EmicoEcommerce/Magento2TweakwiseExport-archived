@@ -24,12 +24,12 @@ class FeedContent
     /**
      * @var Export
      */
-    protected Export $export;
+    protected $export;
 
     /**
      * @var Logger
      */
-    protected Logger $log;
+    protected $log;
 
     /**
      * SomeFeedResponse constructor.
