@@ -86,9 +86,9 @@ class Products implements WriterInterface
 
     /**
      * @param Writer $writer
-     * @param XmlWriter $xml
+     * @param XMLWriter $xml
      */
-    public function write(Writer $writer, XmlWriter $xml): void
+    public function write(Writer $writer, XMLWriter $xml): void
     {
         $xml->startElement('items');
 
@@ -115,10 +115,10 @@ class Products implements WriterInterface
 
     /**
      * @param Writer $writer
-     * @param XmlWriter $xml
+     * @param XMLWriter $xml
      * @param Store $store
      */
-    protected function exportStore(Writer $writer, XmlWriter $xml, Store $store): void
+    protected function exportStore(Writer $writer, XMLWriter $xml, Store $store): void
     {
         $this->iterator->setStore($store);
         // Purge iterator entity ids for each store
@@ -138,11 +138,11 @@ class Products implements WriterInterface
 
 
     /**
-     * @param XmlWriter $xml
+     * @param XMLWriter $xml
      * @param int $storeId
      * @param array $data
      */
-    protected function writeProduct(XmlWriter $xml, $storeId, array $data): void
+    protected function writeProduct(XMLWriter $xml, $storeId, array $data): void
     {
         $xml->startElement('item');
 
@@ -181,13 +181,13 @@ class Products implements WriterInterface
 
 
     /**
-     * @param XmlWriter $xml
+     * @param XMLWriter $xml
      * @param int $storeId
      * @param string $name
      * @param string|string[]|int|int[]|float|float[] $attributeValue
      */
     public function writeAttribute(
-        XmlWriter $xml,
+        XMLWriter $xml,
         $storeId,
         $name,
         $attributeValue

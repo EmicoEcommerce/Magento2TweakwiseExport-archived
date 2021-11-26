@@ -12,7 +12,7 @@ interface WriterInterface
 {
     /**
      * @param Writer $writer
-     * @param XmlWriter $xml
+     * @param XMLWriter $xml
      */
-    public function write(Writer $writer, XmlWriter $xml);
+    public function write(Writer $writer, XMLWriter $xml);
 }
