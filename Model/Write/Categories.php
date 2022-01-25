@@ -101,8 +101,9 @@ class Categories implements WriterInterface
      * @param Writer $writer
      * @param XMLWriter $xml
      * @param Store $store
+     * @param int[] $entityIds
      */
-    protected function exportStore(Writer $writer, XMLWriter $xml, Store $store): void
+    public function exportStore(Writer $writer, XMLWriter $xml, Store $store, array $entityIds = []): void
     {
         // Set root category as exported
         $exportedCategories = [1 => true];
@@ -110,7 +111,7 @@ class Categories implements WriterInterface
         $storeRootCategoryId = (int) $store->getRootCategoryId();
         $this->iterator->setStore($store);
         // Purge iterator entity ids for the new store
-        $this->iterator->setEntityIds([]);
+        $this->iterator->setEntityIds($entityIds);
 
         foreach ($this->iterator as $index => $data) {
             // Skip magento root since we injected our fake root
