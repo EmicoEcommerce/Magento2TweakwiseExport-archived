@@ -66,7 +66,7 @@ class ExportEntityBundle extends CompositeExportEntity
         }
 
         $qty = min(array_column($optionGroups, 'qty'));
-        $isInStock = min($this->stockItem->getIsInStock(), ...array_column($optionGroups, 'is_in_stock'));
+        $isInStock = max(array_map(fn ($child) => $child['is_in_stock'], $optionGroups));
         $stockItem = new StockItem();
         $stockItem->setQty($qty);
         $stockItem->setIsInStock($isInStock);
