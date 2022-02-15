@@ -6,38 +6,39 @@
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Emico\TweakwiseExport\Model\Write\Products;
+namespace Emico\TweakwiseExport\Model\Write\Categories;
 
 use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Write\EavIterator;
-use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\DecoratorInterface;
-use Generator;
-use Magento\Catalog\Model\Product;
 use Magento\Eav\Model\Config as EavConfig;
+use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
+use Magento\Framework\DB\Select;
 use Magento\Framework\Event\Manager;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
 use Emico\TweakwiseExport\Model\Config as EmicoConfig;
 
 /**
  * Class Iterator
- * @package Emico\TweakwiseExport\Model\Write\Products
+ * @package Emico\TweakwiseExport\Model\Write\Categories
  */
 class Iterator extends EavIterator
 {
     /**
-     * @var ExportEntityFactory
+     * @var array
      */
-    protected $entityFactory;
+    protected $entityBatchOrder = [
+        'level',
+        'path'
+    ];
 
     /**
-     * @var CollectionFactory
+     * {@inheritDoc}
      */
-    protected $collectionFactory;
-
-    /**
-     * @var DecoratorInterface[]
-     */
-    protected $collectionDecorators;
+    protected $eavSelectOrder = [
+        'path',
+        'entity_id',
+        'store_id'
+    ];
 
     /**
      * Iterator constructor.
@@ -46,10 +47,7 @@ class Iterator extends EavIterator
      * @param Helper $helper
      * @param EavConfig $eavConfig
      * @param DbContext $dbContext
-     * @param ExportEntityFactory $entityFactory
-     * @param CollectionFactory $collectionFactory
-     * @param IteratorInitializer $iteratorInitializer
-     * @param DecoratorInterface[] $collectionDecorators
+     * @param array|string[] $attributes
      * @param EmicoConfig $config
      */
     public function __construct(
@@ -57,10 +55,7 @@ class Iterator extends EavIterator
         EavConfig $eavConfig,
         DbContext $dbContext,
         Manager $eventManager,
-        ExportEntityFactory $entityFactory,
-        CollectionFactory $collectionFactory,
-        IteratorInitializer $iteratorInitializer,
-        array $collectionDecorators,
+        $attributes,
         EmicoConfig $config
     ) {
         parent::__construct(
@@ -68,73 +63,49 @@ class Iterator extends EavIterator
             $eavConfig,
             $dbContext,
             $eventManager,
-            Product::ENTITY,
-            [],
-            $config->getBatchSizeProducts()
+            'catalog_category',
+            $attributes,
+            $config->getBatchSizeCategories()
         );
-
-        $this->entityFactory = $entityFactory;
-        $this->collectionFactory = $collectionFactory;
-        $this->collectionDecorators = $collectionDecorators;
-
-        $iteratorInitializer->initializeAttributes($this);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getIterator()
+    protected function getStaticAttributeSelect(array $attributes): array
     {
-        $batch = $this->collectionFactory->create(['store' => $this->store]);
-        foreach (parent::getIterator() as $entityData) {
-            $entity = $this->entityFactory->create(
-                [
-                    'store' => $this->store,
-                    'data' => $entityData
-                ]
-            );
-            if (!$entity->shouldProcess()) {
-                continue;
-            }
+        $selects = parent::getStaticAttributeSelect($attributes);
 
-            $batch->add($entity);
-
-            if ($batch->count() === $this->batchSize) {
-                // After PHP7+ we can use yield from
-                foreach ($this->processBatch($batch) as $processedEntity) {
-                    yield $processedEntity;
-                }
-                $batch = $this->collectionFactory->create(['store' => $this->store]);
-            }
+        foreach ($selects as $select) {
+            $select->columns('path');
         }
 
-        // After PHP7+ we can use yield from
-        foreach ($this->processBatch($batch) as $processedEntity) {
-            yield $processedEntity;
-        }
+        return $selects;
     }
 
     /**
-     * @param Collection $collection
-     * @return Generator
+     * {@inheritdoc}
      */
-    protected function processBatch(Collection $collection)
+    protected function createEavAttributeGroupSelect(string $group, array $attributes): Select
     {
-        if ($collection->count()) {
-            foreach ($this->collectionDecorators as $decorator) {
-                $decorator->decorate($collection);
-            }
+        $select = parent::createEavAttributeGroupSelect($group, $attributes);
+
+        if ($this->helper->isEnterprise()) {
+            $select->columns('main_table.path');
+        } else {
+            /** @var AbstractAttribute $staticAttribute */
+            $staticAttribute = reset($this->getAttributeGroups()['_static']);
+
+            /** @var AbstractAttribute $eavAttribute */
+            $eavAttribute = reset($attributes);
+
+            $select->join(
+                $staticAttribute->getBackendTable(),
+                $staticAttribute->getBackendTable() . '.entity_id = ' . $eavAttribute->getBackendTable() . '.entity_id',
+                ['path']
+            );
         }
 
-        foreach ($collection->getExported() as $entity) {
-            yield [
-                'entity_id' => $entity->getId(),
-                'name' => $entity->getName(),
-                'price' => $entity->getPrice(),
-                'stock' => (int) round($entity->getStockQty()),
-                'categories' => $entity->getCategories(),
-                'attributes' => $entity->getAttributes(),
-            ];
-        }
+        return $select;
     }
 }
