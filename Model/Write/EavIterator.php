@@ -11,6 +11,7 @@ namespace Emico\TweakwiseExport\Model\Write;
 use Emico\TweakwiseExport\Exception\InvalidArgumentException;
 use Emico\TweakwiseExport\Model\Helper;
 use IteratorAggregate;
+use Magento\Framework\Event\Manager;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Eav\Model\Entity\Type;
@@ -30,6 +31,11 @@ class EavIterator implements IteratorAggregate
      * @var int
      */
     protected $batchSize;
+
+    /**
+     * @var Manager
+     */
+    protected $eventManager;
 
     /**
      * @var string
@@ -103,6 +109,7 @@ class EavIterator implements IteratorAggregate
         Helper $helper,
         EavConfig $eavConfig,
         DbContext $dbContext,
+        Manager $eventManager,
         string $entityCode,
         array $attributes,
         int $batchSize = 5000
@@ -113,6 +120,7 @@ class EavIterator implements IteratorAggregate
         $this->dbContext = $dbContext;
         $this->attributes = [];
         $this->batchSize = $batchSize;
+        $this->eventManager = $eventManager;
         foreach ($attributes as $attribute) {
             $this->selectAttribute($attribute);
         }
@@ -254,6 +262,7 @@ class EavIterator implements IteratorAggregate
 
                 Profiler::start('loop');
                 try {
+                    $this->eventManager->dispatch('tweakwise_iterator_processbatch', ['batch_size' => $this->batchSize, 'entity_code' => $this->entityCode]);
                     // Loop over all rows and combine them to one array for entity
                     foreach ($this->loopUnionRows($stmt) as $result) {
                         yield $result;
