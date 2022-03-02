@@ -262,7 +262,7 @@ class EavIterator implements IteratorAggregate
 
                 Profiler::start('loop');
                 try {
-                    $this->eventManager->dispatch('tweakwise_iterator_processbatch', ['batch_size' => $this->batchSize, 'entity_code' => $this->entityCode]);
+                    $this->eventManager->dispatch('tweakwise_iterator_processbatch', ['batch_size' => count($entityIds), 'entity_code' => $this->entityCode]);
                     // Loop over all rows and combine them to one array for entity
                     foreach ($this->loopUnionRows($stmt) as $result) {
                         yield $result;
