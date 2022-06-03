@@ -11,6 +11,7 @@ namespace Emico\TweakwiseExport\Model\Write;
 use DateTime;
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\Profiler;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManager;
 use Magento\Framework\Composer\ComposerInformation;
 
@@ -115,8 +116,9 @@ class Writer
 
     /**
      * @param resource $resource
+     * @param null|StoreInterface $store
      */
-    public function write($resource): void
+    public function write($resource, $store = null): void
     {
         try {
             Profiler::start('write');
@@ -124,7 +126,7 @@ class Writer
             $this->startDocument();
             $xml = $this->getXml();
             foreach ($this->writers as $writer) {
-                $writer->write($this, $xml);
+                $writer->write($this, $xml, $store);
             }
             $this->endDocument();
         } finally {

@@ -20,6 +20,10 @@
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="store_level_export_enabled" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Store Level Export</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="schedule" translate="label" type="text" sortOrder="11" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Schedule</label>
                     <comment>Leave empty to disable export by cron.</comment>
