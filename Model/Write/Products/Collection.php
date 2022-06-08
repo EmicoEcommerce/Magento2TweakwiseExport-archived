@@ -54,7 +54,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * @return ExportEntity[]|ArrayIterator
      */
-    public function getIterator()
+    public function getIterator() : \Traversable
     {
         return new ArrayIterator($this->entities);
     }

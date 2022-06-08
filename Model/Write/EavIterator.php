@@ -242,9 +242,9 @@ class EavIterator implements IteratorAggregate
     }
 
     /**
-     * @Return \AppendIterator
+     * @return \Traversable
      */
-    public function getIterator()
+    public function getIterator() : \Traversable
     {
         while ($entityIds = $this->getEntityBatch()) {
             try {
