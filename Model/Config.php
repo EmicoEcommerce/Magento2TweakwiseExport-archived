@@ -11,6 +11,7 @@ namespace Emico\TweakwiseExport\Model;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\DeploymentConfig;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\Store;
 use RuntimeException;
@@ -21,6 +22,7 @@ class Config
      * Config path constants
      */
     public const PATH_ENABLED = 'tweakwise/export/enabled';
+    public const PATH_STORE_LEVEL_EXPORT_ENABLED = 'tweakwise/export/store_level_export_enabled';
     public const PATH_REAL_TIME = 'tweakwise/export/real_time';
     public const PATH_VALIDATE = 'tweakwise/export/validate';
     public const PATH_ARCHIVE = 'tweakwise/export/archive';
@@ -37,7 +39,7 @@ class Config
     /**
      * default feed filename
      */
-    public const FEED_FILE_NAME = 'tweakwise.xml';
+    public const FEED_FILE_NAME = 'tweakwise%s.xml';
 
     /**
      * @var ScopeConfigInterface
@@ -83,6 +85,15 @@ class Config
     public function isEnabled($store = null): bool
     {
         return (bool) $this->config->isSetFlag(self::PATH_ENABLED, ScopeInterface::SCOPE_STORE, $store);
+    }
+
+    /**
+     * @param Store|int|string|null $store
+     * @return bool
+     */
+    public function isStoreLevelExportEnabled(): bool
+    {
+        return (bool) $this->config->isSetFlag(self::PATH_STORE_LEVEL_EXPORT_ENABLED);
     }
 
     /**
@@ -179,24 +190,26 @@ class Config
     /**
      * @return string
      */
-    public function getDefaultFeedFile(): string
+    public function getDefaultFeedFile(StoreInterface $store = null): string
     {
         $dir = $this->directoryList->getPath('var') . DIRECTORY_SEPARATOR . 'feeds';
         if (!is_dir($dir) && !mkdir($dir) && !is_dir($dir)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $dir));
         }
-
-        return $dir . DIRECTORY_SEPARATOR . self::FEED_FILE_NAME;
+        $storeCode = $store && $this->isStoreLevelExportEnabled() ? '-'.$store->getCode() : '';
+        $filename = sprintf(self::FEED_FILE_NAME , $storeCode);
+        return $dir . DIRECTORY_SEPARATOR . $filename;
     }
 
     /**
      * @param string|null $file
+     * @param StoreInterface|null $store
      * @return string
      */
-    public function getFeedLockFile($file = null): string
+    public function getFeedLockFile($file = null, $store = null): string
     {
         if (!$file) {
-            $file = $this->getDefaultFeedFile();
+            $file = $this->getDefaultFeedFile($store);
         }
 
         return $file . '.lock';
@@ -206,10 +219,10 @@ class Config
      * @param string|null $file
      * @return string
      */
-    public function getFeedTmpFile($file = null): string
+    public function getFeedTmpFile($file = null, StoreInterface  $store = null): string
     {
         if (!$file) {
-            $file = $this->getDefaultFeedFile();
+            $file = $this->getDefaultFeedFile($store);
         }
 
         return $file . '.tmp';

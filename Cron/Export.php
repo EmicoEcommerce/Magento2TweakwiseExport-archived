@@ -75,8 +75,17 @@ class Export
             return;
         }
 
-        $feedFile = $this->config->getDefaultFeedFile();
         $validate = $this->config->isValidate();
+        if ($this->config->isStoreLevelExportEnabled()){
+            foreach ($this->storeManager->getStores() as $store) {
+                if ($this->config->isEnabled($store)) {
+                    $feedFile = $this->config->getDefaultFeedFile($store);
+                    $this->export->generateToFile($feedFile, $validate, $store);
+                }
+            }
+            return;
+        }
+        $feedFile = $this->config->getDefaultFeedFile();
         $this->export->generateToFile($feedFile, $validate);
     }
 }
