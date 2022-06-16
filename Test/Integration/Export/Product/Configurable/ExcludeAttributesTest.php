@@ -17,6 +17,7 @@ use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 
 /**
+ * @IgnoreAnnotation("magentoDbIsolation")
  * @magentoDbIsolation enabled
  * @@magentoAppIsolation enabled
  */
@@ -35,7 +36,7 @@ class ExcludeAttributesTest extends ExportTest
     /**
      * {@inheritdoc}
      */
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->configurableProvider = $this->getObject(ConfigurableProvider::class);

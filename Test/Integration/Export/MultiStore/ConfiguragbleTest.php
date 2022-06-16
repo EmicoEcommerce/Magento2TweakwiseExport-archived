@@ -20,6 +20,8 @@ use Magento\CatalogInventory\Model\Configuration as StockConfiguration;
  *
  * @package Emico\TweakwiseExport\Test\Integration\Export\Product
  *
+ * @IgnoreAnnotation("magentoDataFixtureBeforeTransaction")
+ * @IgnoreAnnotation("magentoDbIsolation")
  * @magentoDataFixtureBeforeTransaction createMultiStoreFixture
  * @magentoDbIsolation enabled
  */
@@ -33,7 +35,7 @@ class ConfiguragbleTest extends MultiStoreTest
     /**
      * {@inheritdoc}
      */
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->configurableProvider = $this->getObject(ConfigurableProvider::class);

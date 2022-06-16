@@ -13,6 +13,7 @@ use Emico\TweakwiseExport\TestHelper\Data\Product\ConfigurableProvider;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 
 /**
+ * @IgnoreAnnotation("magentoDbIsolation")
  * @magentoDbIsolation enabled
  */
 class StatusTest extends ExportTest
@@ -25,7 +26,7 @@ class StatusTest extends ExportTest
     /**
      * {@inheritdoc}
      */
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->configurableProvider = $this->getObject(ConfigurableProvider::class);

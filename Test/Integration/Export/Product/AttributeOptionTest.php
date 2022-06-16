@@ -27,7 +27,7 @@ class AttributeOptionTest extends ExportTest
     /**
      * Make sure export is enabled and set some much used objects
      */
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
 
