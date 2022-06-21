@@ -13,7 +13,6 @@ use Emico\TweakwiseExport\TestHelper\Data\Product\ConfigurableProvider;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 
 /**
- * @IgnoreAnnotation("magentoDbIsolation")
  * @magentoDbIsolation enabled
  */
 class StatusTest extends ExportTest

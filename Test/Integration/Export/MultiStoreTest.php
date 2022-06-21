@@ -36,7 +36,7 @@ abstract class MultiStoreTest extends ExportTest
     /**
      * {@inheritdoc}
      */
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->storeProvider = $this->getObject(StoreProvider::class);

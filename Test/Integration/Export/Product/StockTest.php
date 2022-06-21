@@ -12,7 +12,6 @@ use Emico\TweakwiseExport\Test\Integration\ExportTest;
 use Magento\CatalogInventory\Model\Configuration as StockConfiguration;
 
 /**
- * @IgnoreAnnotation("magentoDbIsolation")
  * @magentoDbIsolation enabled
  */
 class StockTest extends ExportTest

@@ -17,7 +17,6 @@ use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 
 /**
- * @IgnoreAnnotation("magentoDbIsolation")
  * @magentoDbIsolation enabled
  * @@magentoAppIsolation enabled
  */

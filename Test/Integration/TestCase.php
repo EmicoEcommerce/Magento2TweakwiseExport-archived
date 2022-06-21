@@ -9,8 +9,8 @@
 namespace Emico\TweakwiseExport\Test\Integration;
 
 use Magento\Store\Model\ScopeInterface;
-use Magento\TestFramework\Helper\Bootstrap;
 use Magento\Framework\App\Config\MutableScopeConfigInterface;
+use Magento\TestFramework\Helper\Bootstrap;
 use Magento\TestFramework\ObjectManager;
 
 /**

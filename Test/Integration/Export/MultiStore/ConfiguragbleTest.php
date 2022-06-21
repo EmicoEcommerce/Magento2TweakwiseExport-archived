@@ -20,8 +20,6 @@ use Magento\CatalogInventory\Model\Configuration as StockConfiguration;
  *
  * @package Emico\TweakwiseExport\Test\Integration\Export\Product
  *
- * @IgnoreAnnotation("magentoDataFixtureBeforeTransaction")
- * @IgnoreAnnotation("magentoDbIsolation")
  * @magentoDataFixtureBeforeTransaction createMultiStoreFixture
  * @magentoDbIsolation enabled
  */

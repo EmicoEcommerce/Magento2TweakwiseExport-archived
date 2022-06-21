@@ -11,7 +11,6 @@ namespace Emico\TweakwiseExport\Test\Integration\Export\Product;
 use Emico\TweakwiseExport\Test\Integration\ExportTest;
 
 /**
- * @IgnoreAnnotation("magentoDbIsolation")
  * @magentoDbIsolation enabled
  */
 class BasicTest extends ExportTest
