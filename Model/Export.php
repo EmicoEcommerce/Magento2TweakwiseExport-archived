@@ -218,7 +218,7 @@ class Export
             }
 
             $this->touchFeedGenerateDate($store);
-            //$this->triggerTweakwiseImport();
+            $this->triggerTweakwiseImport();
         }, $store);
     }
 
