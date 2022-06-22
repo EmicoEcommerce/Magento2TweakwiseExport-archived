@@ -274,7 +274,7 @@ class Products implements WriterInterface
             $value = $this->normalizeExponent($value);
         }
 
-        if (!empty($value)) {
+        if ($value !== null) {
             return html_entity_decode($value, ENT_NOQUOTES | ENT_HTML5);
         }
 
