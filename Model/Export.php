@@ -14,6 +14,8 @@ use Emico\TweakwiseExport\Model\Validate\Validator;
 use Emico\TweakwiseExport\Model\Write\Writer;
 use Exception;
 use Magento\Framework\Profiler;
+use Magento\Store\Api\Data\StoreInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Zend\Http\Client as HttpClient;
 
 /**
@@ -51,29 +53,37 @@ class Export
     protected $log;
 
     /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
+
+    /**
      * Export constructor.
      *
      * @param Config $config
      * @param Validator $validator
      * @param Writer $writer
      * @param Logger $log
+     * @param StoreManagerInterface $storeManager
      */
-    public function __construct(Config $config, Validator $validator, Writer $writer, Logger $log)
+    public function __construct(Config $config, Validator $validator, Writer $writer, Logger $log, StoreManagerInterface $storeManager)
     {
         $this->config = $config;
         $this->validator = $validator;
         $this->writer = $writer;
         $this->log = $log;
+        $this->storeManager = $storeManager;
     }
 
     /**
      * @param callable $action
+     * @param StoreInterface $store
      * @throws Exception
      */
-    protected function executeLocked(callable $action): void
+    protected function executeLocked(callable $action, StoreInterface $store = null): void
     {
         Profiler::start('tweakwise::export');
-        $lockFile = $this->config->getFeedLockFile();
+        $lockFile = $this->config->getFeedLockFile(null, $store);
 
         try {
             $lockHandle = @fopen($lockFile, 'wb');
@@ -103,14 +113,15 @@ class Export
      * Generate and write feed content to handle
      *
      * @param resource $targetHandle
+     * @param StoreInterface $store
      * @throws Exception
      */
-    public function generateFeed($targetHandle): void
+    public function generateFeed($targetHandle, $store): void
     {
-        $this->executeLocked(function () use ($targetHandle) {
+        $this->executeLocked(function () use ($targetHandle, $store) {
             $this->writer->write($targetHandle);
-            $this->touchFeedGenerateDate();
-        });
+            $this->touchFeedGenerateDate($store);
+        }, $store);
     }
 
     /**
@@ -121,11 +132,15 @@ class Export
      */
     public function getFeed($targetHandle): void
     {
+        $store = null;
+        if ($this->config->isStoreLevelExportEnabled()){
+            $store = $this->storeManager->getStore();
+        }
         if ($this->config->isRealTime()) {
-            $this->generateFeed($targetHandle);
+            $this->generateFeed($targetHandle, $store);
         }
 
-        $feedFile = $this->config->getDefaultFeedFile();
+        $feedFile = $this->config->getDefaultFeedFile($store);
         if (file_exists($feedFile)) {
             $sourceHandle = @fopen($feedFile, 'rb');
             if (!$sourceHandle) {
@@ -137,7 +152,7 @@ class Export
             }
             fclose($sourceHandle);
         } else {
-            $this->generateToFile($feedFile, $this->config->isValidate());
+            $this->generateToFile($feedFile, $this->config->isValidate(), $store);
             $this->getFeed($targetHandle);
         }
     }
@@ -145,12 +160,13 @@ class Export
     /**
      * @param string $feedFile
      * @param bool $validate
+     * @param null|StoreInterface $store
      * @throws Exception
      */
-    public function generateToFile($feedFile, $validate): void
+    public function generateToFile($feedFile, $validate, $store = null): void
     {
-        $this->executeLocked(function () use ($feedFile, $validate) {
-            $tmpFeedFile = $this->config->getFeedTmpFile($feedFile);
+        $this->executeLocked(function () use ($feedFile, $validate, $store) {
+            $tmpFeedFile = $this->config->getFeedTmpFile($feedFile, $store);
             $sourceHandle = @fopen($tmpFeedFile, 'wb');
 
             if (!$sourceHandle) {
@@ -160,7 +176,7 @@ class Export
             try {
                 // Write
                 try {
-                    $this->writer->write($sourceHandle);
+                    $this->writer->write($sourceHandle, $store);
                     $this->log->debug('Feed exported to ' . $tmpFeedFile);
                 } finally {
                     fclose($sourceHandle);
@@ -201,9 +217,9 @@ class Export
                 }
             }
 
-            $this->touchFeedGenerateDate();
+            $this->touchFeedGenerateDate($store);
             $this->triggerTweakwiseImport();
-        });
+        }, $store);
     }
 
     /**
@@ -227,10 +243,12 @@ class Export
     }
 
     /**
+     * @param null|StoreInterface $store
+     *
      * Update last modified time from feed file
      */
-    protected function touchFeedGenerateDate(): void
+    protected function touchFeedGenerateDate($store = null): void
     {
-        touch($this->config->getDefaultFeedFile());
+        touch($this->config->getDefaultFeedFile($store));
     }
 }

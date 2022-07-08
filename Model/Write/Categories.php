@@ -13,6 +13,7 @@ use Emico\TweakwiseExport\Model\Helper;
 use Emico\TweakwiseExport\Model\Logger;
 use Emico\TweakwiseExport\Model\Write\Categories\Iterator;
 use Magento\Framework\Profiler;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManager;
 
@@ -69,15 +70,23 @@ class Categories implements WriterInterface
     /**
      * @param Writer $writer
      * @param XMLWriter $xml
+     * @param StoreInterface|null $store
      */
-    public function write(Writer $writer, XMLWriter $xml): void
+    public function write(Writer $writer, XMLWriter $xml, StoreInterface  $store = null): void
     {
         $xml->startElement('categories');
         $writer->flush();
 
         $this->writeCategory($xml, 0, ['entity_id' => 1, 'name' => 'Root', 'position' => 0]);
+
+        $stores = [];
+        if ($store){
+            $stores[] = $store;
+        } else {
+            $stores = $this->storeManager->getStores();
+        }
         /** @var Store $store */
-        foreach ($this->storeManager->getStores() as $store) {
+        foreach ($stores as $store) {
             if ($this->config->isEnabled($store)) {
                 $profileKey = 'categories::' . $store->getCode();
                 try {

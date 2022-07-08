@@ -14,7 +14,9 @@ use Emico\TweakwiseExport\Profiler\Driver\ConsoleDriver;
 use Exception;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Profiler;
+use Magento\Store\Model\StoreManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -39,17 +41,22 @@ class ExportCommand extends Command
     protected $state;
 
     /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
+    /**
      * ExportCommand constructor.
      *
      * @param Config $config
      * @param Export $export
      * @param State $state
      */
-    public function __construct(Config $config, Export $export, State $state)
+    public function __construct(Config $config, Export $export, State $state, StoreManagerInterface $storeManager)
     {
         $this->config = $config;
         $this->export = $export;
         $this->state = $state;
+        $this->storeManager = $storeManager;
         parent::__construct();
     }
 
@@ -59,7 +66,8 @@ class ExportCommand extends Command
     protected function configure(): void
     {
         $this->setName('tweakwise:export')
-            ->addArgument('file', InputArgument::OPTIONAL, 'Export to specific file', $this->config->getDefaultFeedFile())
+            ->addOption('file', 'f', InputArgument::OPTIONAL, 'Export to specific file')
+            ->addOption('store', 's', InputArgument::OPTIONAL, 'Export specific store')
             ->addOption(
                 'validate',
                 'c',
@@ -80,21 +88,47 @@ class ExportCommand extends Command
                 Profiler::enable();
                 Profiler::add(new ConsoleDriver($output));
             }
+            $isStoreLevelExportEnabled = $this->config->isStoreLevelExportEnabled();
+            $storeCode = (string) $input->getOption('store');
+            $stores = [];
+            if ($storeCode && $isStoreLevelExportEnabled){
+                try {
+                    $stores[] = $this->storeManager->getStore($storeCode);
 
-            $feedFile = (string) $input->getArgument('file');
-            $validate = (string) $input->getOption('validate');
-            if ($validate !== 'y' && $validate !== 'n' && $validate !== "") {
-                $output->writeln('Validate option can only contain y or n');
-                return;
+                } catch (NoSuchEntityException $exception){
+                    $output->writeln('Store does not exist');
+                    return -1;
+                }
+            } else {
+                $stores = $this->storeManager->getStores();
             }
 
-            $validate = $validate === "" ? $this->config->isValidate() : $validate === 'y';
+            foreach ($stores as $store) {
+                if (!$this->config->isEnabled($store)) {
+                    continue;
+                }
+                $feedFile = (string)$input->getOption('file');
+                if (!$feedFile) {
+                    $feedFile = $this->config->getDefaultFeedFile($store);
+                }
 
-            $startTime = microtime(true);
-            $this->export->generateToFile($feedFile, $validate);
-            $generateTime = round(microtime(true) - $startTime, 2);
-            $memoryUsage = round(memory_get_peak_usage(true) / 1024 / 1024, 2);
-            $output->writeln(sprintf('Feed written to %s in %ss using %sMb memory', $feedFile, $generateTime, $memoryUsage));
+                $validate = (string)$input->getOption('validate');
+                if ($validate !== 'y' && $validate !== 'n' && $validate !== "") {
+                    $output->writeln('Validate option can only contain y or n');
+
+                    return;
+                }
+
+                $validate = $validate === "" ? $this->config->isValidate() : $validate === 'y';
+
+                $startTime = microtime(true);
+                $this->export->generateToFile($feedFile, $validate, $store);
+                $generateTime = round(microtime(true) - $startTime, 2);
+                $memoryUsage  = round(memory_get_peak_usage(true) / 1024 / 1024,
+                    2);
+                $output->writeln(sprintf('Feed written to %s in %ss using %sMb memory',
+                    $feedFile, $generateTime, $memoryUsage));
+            }
         });
 
     }

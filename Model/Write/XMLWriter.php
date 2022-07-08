@@ -24,6 +24,8 @@ class XMLWriter extends BaseXMLWriter
      * @param mixed $value
      * @return $this
      */
+
+    #[\ReturnTypeWillChange]
     public function writeElement($elementName, $value = null)
     {
         parent::startElement($elementName);

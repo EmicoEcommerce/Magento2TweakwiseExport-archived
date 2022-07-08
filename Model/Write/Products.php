@@ -18,6 +18,7 @@ use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Eav\Model\Entity\Attribute\Source\SourceInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Profiler;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManager;
 
@@ -87,13 +88,20 @@ class Products implements WriterInterface
     /**
      * @param Writer $writer
      * @param XMLWriter $xml
+     * @param StoreInterface|null $store
      */
-    public function write(Writer $writer, XMLWriter $xml): void
+    public function write(Writer $writer, XMLWriter $xml, StoreInterface  $store = null): void
     {
         $xml->startElement('items');
 
+        $stores = [];
+        if ($store) {
+            $stores[] = $store;
+        } else {
+            $stores = $this->storeManager->getStores();
+        }
         /** @var Store $store */
-        foreach ($this->storeManager->getStores() as $store) {
+        foreach ($stores as $store) {
             if ($this->config->isEnabled($store)) {
                 $profileKey = 'products::' . $store->getCode();
                 try {
@@ -266,7 +274,11 @@ class Products implements WriterInterface
             $value = $this->normalizeExponent($value);
         }
 
-        return html_entity_decode($value, ENT_NOQUOTES | ENT_HTML5);
+        if ($value !== null) {
+            return html_entity_decode($value, ENT_NOQUOTES | ENT_HTML5);
+        }
+
+        return '';
     }
 
     /**
