@@ -88,48 +88,70 @@ class ExportCommand extends Command
                 Profiler::enable();
                 Profiler::add(new ConsoleDriver($output));
             }
+
             $isStoreLevelExportEnabled = $this->config->isStoreLevelExportEnabled();
             $storeCode = (string) $input->getOption('store');
-            $stores = [];
-            if ($storeCode && $isStoreLevelExportEnabled){
-                try {
-                    $stores[] = $this->storeManager->getStore($storeCode);
+            $store = null;
 
-                } catch (NoSuchEntityException $exception){
-                    $output->writeln('Store does not exist');
-                    return -1;
-                }
-            } else {
-                $stores = $this->storeManager->getStores();
+            $validate = (string)$input->getOption('validate');
+            if ($validate !== 'y' && $validate !== 'n' && $validate !== "") {
+                $output->writeln('Validate option can only contain y or n');
+
+                return -1;
             }
 
-            foreach ($stores as $store) {
-                if (!$this->config->isEnabled($store)) {
-                    continue;
+            $validate = $validate === "" ? $this->config->isValidate() : $validate === 'y';
+            $startTime = microtime(true);
+            $feedFile = (string)$input->getOption('file');
+
+            if ($isStoreLevelExportEnabled) {
+                if (!$storeCode) {
+                    $output->writeln('<error>Store level export enabled please provide --store <store-code></error>');
+
+                    return -1;
                 }
-                $feedFile = (string)$input->getOption('file');
+
+                try {
+                    $store = $this->storeManager->getStore($storeCode);
+                } catch (NoSuchEntityException $exception) {
+                    $output->writeln('<error>Store does not exist</error>');
+
+                    return -1;
+                }
+
+                if (!$this->config->isEnabled($store)) {
+                    $output->writeln('<error>Tweakwise export does not enabled in this store</error>');
+
+                    return -1;
+                }
+
                 if (!$feedFile) {
                     $feedFile = $this->config->getDefaultFeedFile($store);
                 }
 
-                $validate = (string)$input->getOption('validate');
-                if ($validate !== 'y' && $validate !== 'n' && $validate !== "") {
-                    $output->writeln('Validate option can only contain y or n');
-
-                    return;
+                $output->writeln("<info>generatig feed for {$store->getCode()}</info>");
+                $this->export->generateToFile($feedFile, $validate, $store);
+                $output->writeln("<info>feed file: {$feedFile}</info>");
+            } else {
+                if ($storeCode) {
+                    $output->writeln('<error>Store level export disabled, remove --store parameter</error>');
+                    return -1;
                 }
 
-                $validate = $validate === "" ? $this->config->isValidate() : $validate === 'y';
+                if (!$feedFile) {
+                    $feedFile = $this->config->getDefaultFeedFile();
+                }
 
-                $startTime = microtime(true);
-                $this->export->generateToFile($feedFile, $validate, $store);
-                $generateTime = round(microtime(true) - $startTime, 2);
-                $memoryUsage  = round(memory_get_peak_usage(true) / 1024 / 1024,
-                    2);
-                $output->writeln(sprintf('Feed written to %s in %ss using %sMb memory',
-                    $feedFile, $generateTime, $memoryUsage));
+                $output->writeln("<info>generating single feed for export enabled stores</info>");
+                $this->export->generateToFile($feedFile, $validate);
+                $output->writeln("<info>feed file: {$feedFile}</info>");
             }
-        });
 
+            $generateTime = round(microtime(true) - $startTime, 2);
+            $memoryUsage  = round(memory_get_peak_usage(true) / 1024 / 1024,
+                2);
+            $output->writeln(sprintf('Feed written to %s in %ss using %sMb memory',
+                $feedFile, $generateTime, $memoryUsage));
+        });
     }
 }
