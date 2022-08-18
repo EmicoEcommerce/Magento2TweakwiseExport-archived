@@ -96,6 +96,11 @@ class EavIterator implements IteratorAggregate
     protected $entityBatchOrder = [];
 
     /**
+     * @var array $entityData
+     */
+    protected $entityData = [];
+
+    /**
      * EavIterator constructor.
      *
      * @param int $batchSize
@@ -265,6 +270,7 @@ class EavIterator implements IteratorAggregate
                     $this->eventManager->dispatch('tweakwise_iterator_processbatch', ['batch_size' => count($entityIds), 'entity_code' => $this->entityCode]);
                     // Loop over all rows and combine them to one array for entity
                     foreach ($this->loopUnionRows($stmt) as $result) {
+                        $result = array_merge($result, $this->entityData[$result['entity_id']]);
                         yield $result;
                     }
                 } finally {
@@ -285,7 +291,7 @@ class EavIterator implements IteratorAggregate
         if (!isset($this->entitySet[$storeId])) {
             $select = $this->getConnection()->select();
             $select->from($this->getEntityType()->getEntityTable());
-            $select->reset('columns')->columns('entity_id');
+            $select->reset('columns')->columns(['entity_id', 'created_at', 'updated_at']);
             $this->addEntityBatchOrder($select);
 
             if ($this->getEntityIds()) {
@@ -293,8 +299,10 @@ class EavIterator implements IteratorAggregate
             }
 
             $result = $select->query()->fetchAll();
-            $result = array_column($result, 'entity_id');
-            $this->entitySet[$storeId] = new \ArrayIterator(array_chunk($result, $this->batchSize));
+            $entityIds = array_column($result, 'entity_id');
+            $this->entitySet[$storeId] = new \ArrayIterator(array_chunk($entityIds, $this->batchSize));
+            array_flip($entityIds);
+            $this->entityData = array_combine($entityIds, $result);
         }
 
         $return = $this->entitySet[$storeId]->current();
