@@ -1,5 +1,5 @@
 {
-    "name": "emico/tweakwise-export",
+    "name": "tweakwise/magento2-tweakwise-export",
     "license": "OSL-3.0",
     "description": "Magento 2 module for Tweakwise export",
     "minimum-stability": "dev",

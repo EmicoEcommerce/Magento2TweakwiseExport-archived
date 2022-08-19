@@ -205,11 +205,11 @@ class Writer
     {
         $installedPackages = $this->composerInformation
             ->getInstalledMagentoPackages();
-        if (!isset($installedPackages['emico/tweakwise-export']['version'])) {
+        if (!isset($installedPackages['tweakwise/magento2-tweakwise-export']['version'])) {
             // This should never be the case
             return '';
         }
-        $version = $installedPackages['emico/tweakwise-export']['version'];
+        $version = $installedPackages['tweakwise/magento2-tweakwise-export']['version'];
 
         return sprintf('Magento2TweakwiseExport %s', $version);
     }

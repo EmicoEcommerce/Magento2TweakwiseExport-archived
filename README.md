@@ -1,17 +1,7 @@
-[![Build Status](https://travis-ci.org/EmicoEcommerce/Magento2TweakwiseExport.svg?branch=master)](https://travis-ci.org/EmicoEcommerce/Magento2TweakwiseExport)
-[![Code Climate](https://codeclimate.com/github/EmicoEcommerce/Magento2TweakwiseExport.png)](https://codeclimate.com/github/EmicoEcommerce/Magento2TweakwiseExport)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/84dd3eaef04d4569adbd7930f24f23fd)](https://www.codacy.com/app/Fgruntjes/Magento2TweakwiseExport?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=EmicoEcommerce/Magento2TweakwiseExport&amp;utm_campaign=Badge_Grade)
-
 ## Installation
 Install package using composer
 ```sh
-composer config minimum-stability dev
-composer require emico/tweakwise-export
-```
-
-Install package using zip file
-```sh
-Extract tweakwise-export.zip src folder to app/code/Emico/TweakwiseExport/
+composer require tweakwise/magento2-tweakwise-export
 ```
 
 Run installers
@@ -40,6 +30,7 @@ Arguments:
  file                  Export to specific file (default: "var/feeds/tweakwise.xml")
 
 Options:
+ --store storeId       Only possible if Store Level Export is enabled.
  --validate (-c)       Validate feed and rollback if fails.
  --help (-h)           Display this help message
  --quiet (-q)          Do not output any message
@@ -50,7 +41,7 @@ Options:
  --no-interaction (-n) Do not ask any interactive question
 ```
 
-## Feed structure
+## Feed structure (multistore feed)
 The feed contains some header information followed by categories and then products. Tweakwise does not natively support multiple stores, in order to circumvent this all categories and products are prefixed with 1000{store_id}.
 If a product (with id 1178) is active and visible in multiple stores (say 1, 5 and 8) then it will appear three times in the feed with ids: 100011178, 100051178 and 100081178.
 The data on that product depends on the attribute values of the specific store. In short an entity is available in the feed as ``1000{store_id}{entity_id}``
@@ -68,6 +59,7 @@ If you find an issue with data retrieval please create an issue on github.
 
 
 ## Export Settings
+- Store Level Export: Generate 1 file for all (eneabled) stores, or seperate feeds per store
 - Enabled: If products of that store should be exported to tweakwise, note that if this is false for some store then navigation and search should also be disabled for that store.
 - Schedule: Cron schedule for generating the feed. We strongly encourage you to register the export task on the server crontab instead of using the Magento cron.
 - Schedule export: Generate the feed on the next cron run.
@@ -83,9 +75,3 @@ If you find an issue with data retrieval please create an issue on github.
 Magento has multiple visibility settings, tweakwise only knows visible products meaning that if a product is in the feed then it will be visible while navigating and searching.
 The magento visibility setting is exported in the feed so you can add a hidden filter to your tweakwise template to artificially use the correct settings.
 If you do this then exclude the visibility attribute from child products (see "Export Settings").
-
-## Events
-Currently there are no events documented, this will be done in the coming version(s).
-
-## Profiling
-For profiling use the standard Magento profiler, more info will be provided in the coming version(s).
