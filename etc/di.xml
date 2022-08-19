@@ -1,34 +1,34 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Tweakwise & Emico (https://www.tweakwise.com/ & https://www.emico.nl/) - All Rights Reserved
+ * Tweakwise (https://www.tweakwise.com/) - All Rights Reserved
  *
- * @copyright Copyright (c) 2017-2017 Tweakwise.com B.V. (https://www.tweakwise.com)
+ * @copyright Copyright (c) 2017-2022 Tweakwise.com B.V. (https://www.tweakwise.com)
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <!-- Implement your own review provider if you want reviews from a different source -->
-    <preference for="Emico\TweakwiseExport\Model\Review\ReviewProviderInterface"
-                type="Emico\TweakwiseExport\Model\Review\MagentoReviewProvider"
+    <preference for="Tweakwise\Magento2TweakwiseExport\Model\Review\ReviewProviderInterface"
+                type="Tweakwise\Magento2TweakwiseExport\Model\Review\MagentoReviewProvider"
     />
 
     <type name="Magento\Framework\Console\CommandListInterface">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="emicoTweakwiseExportCommand" xsi:type="object">Emico\TweakwiseExport\Console\Command\ExportCommand</item>
+                <item name="TweakwiseMagento2TweakwiseExportCommand" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Console\Command\ExportCommand</item>
             </argument>
         </arguments>
     </type>
 
-    <type name="Emico\TweakwiseExport\Model\Export">
+    <type name="Tweakwise\Magento2TweakwiseExport\Model\Export">
         <arguments>
-            <argument name="validator" xsi:type="object">Emico\TweakwiseExport\Model\Validate\Validator\Proxy</argument>
-            <argument name="writer" xsi:type="object">Emico\TweakwiseExport\Model\Write\Writer\Proxy</argument>
+            <argument name="validator" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Validate\Validator\Proxy</argument>
+            <argument name="writer" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Writer\Proxy</argument>
         </arguments>
     </type>
 
-    <type name="Emico\TweakwiseExport\Model\CacheHandler">
+    <type name="Tweakwise\Magento2TweakwiseExport\Model\CacheHandler">
         <arguments>
             <argument name="cacheTypes" xsi:type="array">
                 <item name="block_html" xsi:type="string">block_html</item>
@@ -38,25 +38,25 @@
         </arguments>
     </type>
 
-    <type name="Emico\TweakwiseExport\Console\Command\ExportCommand">
+    <type name="Tweakwise\Magento2TweakwiseExport\Console\Command\ExportCommand">
         <arguments>
-            <argument name="validator" xsi:type="object">Emico\TweakwiseExport\Model\Validate\Validator\Proxy</argument>
-            <argument name="export" xsi:type="object">Emico\TweakwiseExport\Model\Export\Proxy</argument>
+            <argument name="validator" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Validate\Validator\Proxy</argument>
+            <argument name="export" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Export\Proxy</argument>
         </arguments>
     </type>
 
-    <type name="Emico\TweakwiseExport\Model\Write\Writer">
+    <type name="Tweakwise\Magento2TweakwiseExport\Model\Write\Writer">
         <arguments>
             <argument name="storeManager" xsi:type="object">Magento\Store\Model\StoreManager\Proxy</argument>
             <argument name="appState" xsi:type="object">Magento\Framework\App\State\Proxy</argument>
             <argument name="writers" xsi:type="array">
-                <item name="categories" xsi:type="object">Emico\TweakwiseExport\Model\Write\Categories</item>
-                <item name="products" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products</item>
+                <item name="categories" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Categories</item>
+                <item name="products" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Products</item>
             </argument>
         </arguments>
     </type>
 
-    <type name="Emico\TweakwiseExport\Model\Write\Categories\Iterator">
+    <type name="Tweakwise\Magento2TweakwiseExport\Model\Write\Categories\Iterator">
         <arguments>
             <!-- update batchSize if memory is less important then speed -->
             <argument name="attributes" xsi:type="array">
@@ -70,48 +70,48 @@
         </arguments>
     </type>
 
-    <type name="Emico\TweakwiseExport\Model\Write\Products\Iterator">
+    <type name="Tweakwise\Magento2TweakwiseExport\Model\Write\Products\Iterator">
         <arguments>
             <!-- update batchSize if memory is less important then speed -->
             <argument name="collectionDecorators" xsi:type="array">
-                <item name="children" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Children</item>
-                <item name="stock_data" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData</item>
-                <item name="children_attributes" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\ChildrenAttributes</item>
-                <item name="category_reference" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\CategoryReference</item>
-                <item name="price" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Price</item>
-                <item name="website_link" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\WebsiteLink</item>
-                <item name="review" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Review</item>
+                <item name="children" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\Children</item>
+                <item name="stock_data" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData</item>
+                <item name="children_attributes" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\ChildrenAttributes</item>
+                <item name="category_reference" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\CategoryReference</item>
+                <item name="price" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\Price</item>
+                <item name="website_link" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\WebsiteLink</item>
+                <item name="review" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\Review</item>
             </argument>
         </arguments>
     </type>
 
-    <type name="Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\Children">
+    <type name="Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\Children">
     </type>
 
     <!--
         If you have custom product types register them here.
     -->
-    <type name="Emico\TweakwiseExport\Model\Write\Products\ExportEntityFactory">
+    <type name="Tweakwise\Magento2TweakwiseExport\Model\Write\Products\ExportEntityFactory">
         <arguments>
             <argument name="typeMap" xsi:type="array">
-                <item name="configurable" xsi:type="string">Emico\TweakwiseExport\Model\Write\Products\ExportEntityConfigurable</item>
-                <item name="grouped" xsi:type="string">Emico\TweakwiseExport\Model\Write\Products\ExportEntityGrouped</item>
-                <item name="bundle" xsi:type="string">Emico\TweakwiseExport\Model\Write\Products\ExportEntityBundle</item>
+                <item name="configurable" xsi:type="string">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\ExportEntityConfigurable</item>
+                <item name="grouped" xsi:type="string">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\ExportEntityGrouped</item>
+                <item name="bundle" xsi:type="string">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\ExportEntityBundle</item>
             </argument>
         </arguments>
     </type>
 
-    <type name="Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData">
+    <type name="Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData">
         <arguments>
             <argument name="metaData" xsi:type="object">Magento\Framework\App\ProductMetadataInterface</argument>
             <argument name="stockMapProviders" xsi:type="array">
-                <item name="stockItemMapProvider" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockItemMapProvider\Proxy</item>
-                <item name="sourceItemMapProvider" xsi:type="object">Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\SourceItemMapProvider\Proxy</item>
+                <item name="stockItemMapProvider" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockItemMapProvider\Proxy</item>
+                <item name="sourceItemMapProvider" xsi:type="object">Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\SourceItemMapProvider\Proxy</item>
             </argument>
         </arguments>
     </type>
 
-    <type name="Emico\TweakwiseExport\Model\ProductAttributes">
+    <type name="Tweakwise\Magento2TweakwiseExport\Model\ProductAttributes">
         <arguments>
             <argument name="attributeBlacklist" xsi:type="array">
                 <!-- Add your own attributes if needed-->

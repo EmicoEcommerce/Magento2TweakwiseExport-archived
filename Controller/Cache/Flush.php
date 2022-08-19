@@ -1,14 +1,10 @@
 <?php
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2019.
- */
 
-namespace Emico\TweakwiseExport\Controller\Cache;
+namespace Tweakwise\Magento2TweakwiseExport\Controller\Cache;
 
-use Emico\TweakwiseExport\Model\CacheHandler;
-use Emico\TweakwiseExport\Model\Config;
-use Emico\TweakwiseExport\Model\RequestValidator;
+use Tweakwise\Magento2TweakwiseExport\Model\CacheHandler;
+use Tweakwise\Magento2TweakwiseExport\Model\Config;
+use Tweakwise\Magento2TweakwiseExport\Model\RequestValidator;
 use Magento\Framework\App\ActionInterface;
 use Magento\Framework\App\Response\Http;
 use Magento\Framework\App\ResponseInterface;
@@ -19,7 +15,7 @@ use Magento\Framework\App\Response\HttpFactory as ResponseFactory;
 /**
  * Class Flush, handle cache flush request from tweakwise platform
  *
- * @package Emico\TweakwiseExport\Controller\Cache
+ * @package Tweakwise\Magento2TweakwiseExport\Controller\Cache
  */
 class Flush implements ActionInterface
 {

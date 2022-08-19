@@ -1,21 +1,17 @@
 <?php
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
 
-namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
-use Emico\TweakwiseExport\Exception\InvalidArgumentException;
-use Emico\TweakwiseExport\Model\DbResourceHelper;
-use Emico\TweakwiseExport\Model\Helper;
-use Emico\TweakwiseExport\Model\Write\EavIteratorFactory;
-use Emico\TweakwiseExport\Model\Write\Products\Collection;
-use Emico\TweakwiseExport\Model\Write\Products\CollectionFactory;
-use Emico\TweakwiseExport\Model\Write\Products\CompositeExportEntityInterface;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntityChild;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntityFactory;
-use Emico\TweakwiseExport\Model\Write\Products\IteratorInitializer;
+use Tweakwise\Magento2TweakwiseExport\Exception\InvalidArgumentException;
+use Tweakwise\Magento2TweakwiseExport\Model\DbResourceHelper;
+use Tweakwise\Magento2TweakwiseExport\Model\Helper;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\EavIteratorFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\Collection;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CompositeExportEntityInterface;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\ExportEntityChild;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\ExportEntityFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\IteratorInitializer;
 use Magento\Bundle\Model\Product\Type as Bundle;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Type as ProductType;
@@ -23,13 +19,13 @@ use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Framework\DataObject;
 use Magento\GroupedProduct\Model\Product\Type\Grouped;
 use Magento\GroupedProduct\Model\ResourceModel\Product\Link;
-use Emico\TweakwiseExport\Model\ChildOptions;
+use Tweakwise\Magento2TweakwiseExport\Model\ChildOptions;
 use Magento\Store\Model\Store;
-use Emico\TweakwiseExport\Model\Config as EmicoConfig;
+use Tweakwise\Magento2TweakwiseExport\Model\Config as TweakwsieConfig;
 
 /**
  * Class Children
- * @package Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator
+ * @package Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator
  */
 class Children implements DecoratorInterface
 {
@@ -89,7 +85,7 @@ class Children implements DecoratorInterface
      * @param Helper $helper
      * @param DbResourceHelper $dbResource
      * @param int $batchSize
-     * @param EmicoConfig $config
+     * @param TweakwiseConfig $config
      */
     public function __construct(
         ProductType $productType,
@@ -99,7 +95,7 @@ class Children implements DecoratorInterface
         CollectionFactory $collectionFactory,
         Helper $helper,
         DbResourceHelper $dbResource,
-        EmicoConfig $config
+        TweakwiseConfig $config
     ) {
         $this->productType = $productType;
         $this->eavIteratorFactory = $eavIteratorFactory;

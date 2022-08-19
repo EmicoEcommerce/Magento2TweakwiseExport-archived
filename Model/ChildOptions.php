@@ -1,17 +1,12 @@
 <?php
 
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2020.
- */
-
-namespace Emico\TweakwiseExport\Model;
+namespace Tweakwise\Magento2TweakwiseExport\Model;
 
 /**
  * Used solely for stock calculation for bundle products
  *
  * Class ChildOptions
- * @package Emico\TweakwiseExport\Model
+ * @package Tweakwise\Magento2TweakwiseExport\Model
  */
 class ChildOptions
 {

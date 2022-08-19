@@ -1,10 +1,6 @@
 <?php
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
 
-namespace Emico\TweakwiseExport\Model;
+namespace Tweakwise\Magento2TweakwiseExport\Model;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;

@@ -1,13 +1,9 @@
 <?php
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
 
-namespace Emico\TweakwiseExport\Model\Write\Products;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products;
 
-use Emico\TweakwiseExport\Model\ChildOptions;
-use Emico\TweakwiseExport\Model\Config;
+use Tweakwise\Magento2TweakwiseExport\Model\ChildOptions;
+use Tweakwise\Magento2TweakwiseExport\Model\Config;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogInventory\Api\StockConfigurationInterface;
 use Magento\Store\Model\Store;

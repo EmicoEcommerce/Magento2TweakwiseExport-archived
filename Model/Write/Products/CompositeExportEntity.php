@@ -1,15 +1,10 @@
 <?php
 
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2020.
- */
-
-namespace Emico\TweakwiseExport\Model\Write\Products;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products;
 
 /**
  * Class CompositeExportEntity
- * @package Emico\TweakwiseExport\Model\Write\Products
+ * @package Tweakwise\Magento2TweakwiseExport\Model\Write\Products
  */
 class CompositeExportEntity extends ExportEntity implements CompositeExportEntityInterface
 {

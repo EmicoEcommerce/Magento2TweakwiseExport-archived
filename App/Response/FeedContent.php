@@ -1,15 +1,15 @@
 <?php
 /**
- * Tweakwise & Emico (https://www.tweakwise.com/ & https://www.emico.nl/) - All Rights Reserved
+ * Tweakwise (https://www.tweakwise.com/) - All Rights Reserved
  *
- * @copyright Copyright (c) 2017-2017 Tweakwise.com B.V. (https://www.tweakwise.com)
+ * @copyright Copyright (c) 2017-2022 Tweakwise.com B.V. (https://www.tweakwise.com)
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Emico\TweakwiseExport\App\Response;
+namespace Tweakwise\Magento2TweakwiseExport\App\Response;
 
-use Emico\TweakwiseExport\Model\Export;
-use Emico\TweakwiseExport\Model\Logger;
+use Tweakwise\Magento2TweakwiseExport\Model\Export;
+use Tweakwise\Magento2TweakwiseExport\Model\Logger;
 use Exception;
 
 /**
@@ -17,7 +17,7 @@ use Exception;
  *
  * To string wrapper so output is not stored in memory but written to output on get content
  *
- * @package Emico\TweakwiseExport\App\Response
+ * @package Tweakwise\Magento2TweakwiseExport\App\Response
  */
 class FeedContent
 {

@@ -1,13 +1,9 @@
 <?php
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
 
-namespace Emico\TweakwiseExport\TestHelper\FeedData;
+namespace Tweakwise\Magento2TweakwiseExport\TestHelper\FeedData;
 
 use ArrayAccess;
-use Emico\TweakwiseExport\Test\TestCase;
+use Tweakwise\Magento2TweakwiseExport\Test\TestCase;
 use SimpleXMLElement;
 
 class ProductData

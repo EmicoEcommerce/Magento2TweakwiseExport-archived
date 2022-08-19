@@ -4,7 +4,7 @@ What is the purpose of this issue? Explain the background context.
 
 Environment
 --
-- [ ] PHP Version: (5.6|7.0|7.1)
+- [ ] PHP Version: (7.4|8.0|8.1)
 - [ ] Magento Version:
 - [ ] Magento Enterprise: (yes|no)
 - [ ] Tweakwise Export Version:
@@ -13,7 +13,7 @@ Environment
 
 Steps to reproduce
 --
-1. Install Magento from `develop` branch.
+1. Install Magento from `master` branch.
 2. [Example] Export configurable product with multiple children and 2 configurable attributes to Tweakwise.
 4. ...
 

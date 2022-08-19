@@ -1,18 +1,13 @@
 <?php
 
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2020.
- */
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products;
 
-namespace Emico\TweakwiseExport\Model\Write\Products;
-
-use Emico\TweakwiseExport\Model\StockItem;
+use Tweakwise\Magento2TweakwiseExport\Model\StockItem;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 
 /**
  * Class ExportEntityBundle
- * @package Emico\TweakwiseExport\Model\Write\Products
+ * @package Tweakwise\Magento2TweakwiseExport\Model\Write\Products
  */
 class ExportEntityBundle extends CompositeExportEntity
 {

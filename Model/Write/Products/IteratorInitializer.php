@@ -1,17 +1,13 @@
 <?php
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
 
-namespace Emico\TweakwiseExport\Model\Write\Products;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products;
 
-use Emico\TweakwiseExport\Model\ProductAttributes;
-use Emico\TweakwiseExport\Model\Write\EavIterator;
+use Tweakwise\Magento2TweakwiseExport\Model\ProductAttributes;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\EavIterator;
 
 /**
  * Class IteratorInitializer
- * @package Emico\TweakwiseExport\Model\Write\Products
+ * @package Tweakwise\Magento2TweakwiseExport\Model\Write\Products
  */
 class IteratorInitializer
 {

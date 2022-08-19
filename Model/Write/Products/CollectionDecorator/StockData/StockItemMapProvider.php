@@ -1,19 +1,13 @@
 <?php
-/** @noinspection PhpDeprecationInspection */
 
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData;
 
-namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData;
-
-use Emico\TweakwiseExport\Model\StockItem;
-use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Tweakwise\Magento2TweakwiseExport\Model\StockItem;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\Collection;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 use Magento\CatalogInventory\Api\StockItemCriteriaInterfaceFactory;
 use Magento\CatalogInventory\Api\StockItemRepositoryInterface;
-use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
 
 class StockItemMapProvider implements StockMapProviderInterface
 {

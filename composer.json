@@ -21,7 +21,7 @@
             "registration.php"
         ],
         "psr-4": {
-            "Emico\\TweakwiseExport\\": ""
+            "Tweakwise\\Magento2TweakwiseExport\\": ""
         }
     }
 }

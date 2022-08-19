@@ -1,15 +1,11 @@
 <?php
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2019.
- */
 
-namespace Emico\TweakwiseExport\Model\Review;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Review;
 
 /**
  * Class ProductSummary
  * There is no Magento native review interface or summary interface, hence this class
- * @package Emico\TweakwiseExport\Model\Review
+ * @package Tweakwise\Magento2TweakwiseExport\Model\Review
  */
 class ProductReviewSummary
 {

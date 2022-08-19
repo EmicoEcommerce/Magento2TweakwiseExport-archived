@@ -1,13 +1,9 @@
 <?php
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
 
-namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
-use Emico\TweakwiseExport\Model\DbResourceHelper;
-use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Tweakwise\Magento2TweakwiseExport\Model\DbResourceHelper;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\Collection;
 use Magento\Store\Model\StoreManagerInterface;
 use Zend_Db_Statement_Exception;
 

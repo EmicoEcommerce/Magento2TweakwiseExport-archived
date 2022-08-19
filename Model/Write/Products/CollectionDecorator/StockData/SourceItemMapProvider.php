@@ -1,20 +1,16 @@
 <?php
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2019.
- */
 
-namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData;
 
-use Emico\TweakwiseExport\Model\StockItem;
-use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
-use Emico\TweakwiseExport\Model\Write\Products\Collection;
-use Emico\TweakwiseExport\Model\DbResourceHelper;
+use Tweakwise\Magento2TweakwiseExport\Model\StockItem;
+use Tweakwise\Magento2TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\Collection;
+use Tweakwise\Magento2TweakwiseExport\Model\DbResourceHelper;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\InventoryApi\Api\Data\SourceInterface;
-use Emico\TweakwiseExport\Model\StockSourceProviderFactory;
-use Emico\TweakwiseExport\Model\StockResolverFactory;
-use Emico\TweakwiseExport\Model\DefaultStockProviderInterfaceFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\StockSourceProviderFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\StockResolverFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\DefaultStockProviderInterfaceFactory;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
@@ -24,7 +20,7 @@ use Zend_Db_Expr;
 
 /**
  * Class DefaultImplementation
- * @package Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData
+ * @package Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData
  */
 class SourceItemMapProvider implements StockMapProviderInterface
 {

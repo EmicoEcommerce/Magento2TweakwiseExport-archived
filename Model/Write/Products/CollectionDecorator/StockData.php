@@ -1,18 +1,14 @@
 <?php
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
 
-namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
-use Emico\TweakwiseExport\Model\Config;
-use Emico\TweakwiseExport\Model\Write\Products\Collection;
-use Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockMapProviderInterface;
-use Emico\TweakwiseExport\Model\Write\Products\CompositeExportEntityInterface;
-use Emico\TweakwiseExport\Model\Write\Products\ExportEntity;
+use Tweakwise\Magento2TweakwiseExport\Model\Config;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\Collection;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator\StockData\StockMapProviderInterface;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CompositeExportEntityInterface;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\ExportEntity;
 use Magento\Framework\App\ProductMetadataInterface;
-use Emico\TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\StockItemFactory as TweakwiseStockItemFactory;
 use Magento\Framework\Module\Manager;
 
 class StockData implements DecoratorInterface

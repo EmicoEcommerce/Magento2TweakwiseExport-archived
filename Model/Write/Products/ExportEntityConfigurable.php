@@ -1,17 +1,12 @@
 <?php
 
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2020.
- */
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products;
 
-namespace Emico\TweakwiseExport\Model\Write\Products;
-
-use Emico\TweakwiseExport\Traits\Stock\HasStockThroughChildren;
+use Tweakwise\Magento2TweakwiseExport\Traits\Stock\HasStockThroughChildren;
 
 /**
  * Class ExportEntityConfigurable
- * @package Emico\TweakwiseExport\Model\Write\Products
+ * @package Tweakwise\Magento2TweakwiseExport\Model\Write\Products
  */
 class ExportEntityConfigurable extends CompositeExportEntity
 {

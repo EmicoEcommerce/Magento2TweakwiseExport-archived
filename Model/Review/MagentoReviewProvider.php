@@ -1,18 +1,14 @@
 <?php
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2019.
- */
 
-namespace Emico\TweakwiseExport\Model\Review;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Review;
 
-use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\Collection;
 use Magento\Review\Model\ResourceModel\Review\Summary\CollectionFactory as SummaryCollectionFactory;
 use Magento\Review\Model\Review\Summary;
 
 /**
  * Class MagentoReviewProvider
- * @package Emico\TweakwiseExport\Model\Review
+ * @package Tweakwise\Magento2TweakwiseExport\Model\Review
  */
 class MagentoReviewProvider implements ReviewProviderInterface
 {

@@ -1,20 +1,16 @@
 <?php
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2019.
- */
 
-namespace Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator;
 
-use Emico\TweakwiseExport\Exception\InvalidArgumentException;
-use Emico\TweakwiseExport\Model\Review\ProductReviewSummary;
-use Emico\TweakwiseExport\Model\Review\ReviewProviderInterface;
-use Emico\TweakwiseExport\Model\Write\Products\Collection;
+use Tweakwise\Magento2TweakwiseExport\Exception\InvalidArgumentException;
+use Tweakwise\Magento2TweakwiseExport\Model\Review\ProductReviewSummary;
+use Tweakwise\Magento2TweakwiseExport\Model\Review\ReviewProviderInterface;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Products\Collection;
 
 /**
  * Class Review
  * Add product reviews to feed
- * @package Emico\TweakwiseExport\Model\Write\Products\CollectionDecorator
+ * @package Tweakwise\Magento2TweakwiseExport\Model\Write\Products\CollectionDecorator
  */
 class Review implements DecoratorInterface
 {

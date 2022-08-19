@@ -1,12 +1,12 @@
 <?php
 /**
- * Tweakwise & Emico (https://www.tweakwise.com/ & https://www.emico.nl/) - All Rights Reserved
+ * Tweakwise (https://www.tweakwise.com/) - All Rights Reserved
  *
- * @copyright Copyright (c) 2017-2017 Tweakwise.com B.V. (https://www.tweakwise.com)
+ * @copyright Copyright (c) 2017-2022 Tweakwise.com B.V. (https://www.tweakwise.com)
  * @license   Proprietary and confidential, Unauthorized copying of this file, via any medium is strictly prohibited
  */
 
-namespace Emico\TweakwiseExport\Test\Integration;
+namespace Tweakwise\Magento2TweakwiseExport\Test\Integration;
 
 use Magento\Store\Model\ScopeInterface;
 use Magento\Framework\App\Config\MutableScopeConfigInterface;
@@ -16,9 +16,9 @@ use Magento\TestFramework\ObjectManager;
 /**
  * Class TestCase
  *
- * @package Emico\TweakwiseExport\Test\Integration
+ * @package Tweakwise\Magento2TweakwiseExport\Test\Integration
  */
-abstract class TestCase extends \Emico\TweakwiseExport\Test\TestCase
+abstract class TestCase extends \Tweakwise\Magento2TweakwiseExport\Test\TestCase
 {
     /**
      * @param string $type

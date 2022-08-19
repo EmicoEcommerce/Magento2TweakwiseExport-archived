@@ -1,10 +1,6 @@
 <?php
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
 
-namespace Emico\TweakwiseExport\TestHelper\Data;
+namespace Tweakwise\Magento2TweakwiseExport\TestHelper\Data;
 
 use ReflectionClass;
 use ReflectionException;

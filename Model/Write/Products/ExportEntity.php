@@ -1,13 +1,9 @@
 <?php
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
 
-namespace Emico\TweakwiseExport\Model\Write\Products;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products;
 
-use Emico\TweakwiseExport\Exception\InvalidArgumentException;
-use Emico\TweakwiseExport\Model\StockItem;
+use Tweakwise\Magento2TweakwiseExport\Exception\InvalidArgumentException;
+use Tweakwise\Magento2TweakwiseExport\Model\StockItem;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 use Magento\CatalogInventory\Api\StockConfigurationInterface;

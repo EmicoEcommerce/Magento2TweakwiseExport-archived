@@ -1,19 +1,19 @@
 <?php
 /**
- * Tweakwise & Emico (https://www.tweakwise.com/ & https://www.emico.nl/) - All Rights Reserved
+ * Tweakwise (https://www.tweakwise.com/) - All Rights Reserved
  *
- * @copyright Copyright (c) 2017-2017 Tweakwise.com B.V. (https://www.tweakwise.com)
+ * @copyright Copyright (c) 2017-2022 Tweakwise.com B.V. (https://www.tweakwise.com)
  * @license   Proprietary and confidential, Unauthorized copying of this file, via any medium is strictly prohibited
  */
 
-namespace Emico\TweakwiseExport\TestHelper;
+namespace Tweakwise\Magento2TweakwiseExport\TestHelper;
 
-use Emico\TweakwiseExport\Model\Helper;
-use Emico\TweakwiseExport\Test\TestCase;
-use Emico\TweakwiseExport\TestHelper\FeedData\CategoryData;
-use Emico\TweakwiseExport\TestHelper\FeedData\CategoryDataFactory;
-use Emico\TweakwiseExport\TestHelper\FeedData\ProductData;
-use Emico\TweakwiseExport\TestHelper\FeedData\ProductDataFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\Helper;
+use Tweakwise\Magento2TweakwiseExport\Test\TestCase;
+use Tweakwise\Magento2TweakwiseExport\TestHelper\FeedData\CategoryData;
+use Tweakwise\Magento2TweakwiseExport\TestHelper\FeedData\CategoryDataFactory;
+use Tweakwise\Magento2TweakwiseExport\TestHelper\FeedData\ProductData;
+use Tweakwise\Magento2TweakwiseExport\TestHelper\FeedData\ProductDataFactory;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 

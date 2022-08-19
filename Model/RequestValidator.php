@@ -1,13 +1,9 @@
 <?php
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2019.
- */
 
-namespace Emico\TweakwiseExport\Model;
+namespace Tweakwise\Magento2TweakwiseExport\Model;
 
 use Magento\Framework\App\RequestInterface;
-use Emico\TweakwiseExport\Model\Config;
+use Tweakwise\Magento2TweakwiseExport\Model\Config;
 
 class RequestValidator
 {

@@ -1,25 +1,25 @@
 <?php
 /**
- * Tweakwise & Emico (https://www.tweakwise.com/ & https://www.emico.nl/) - All Rights Reserved
+ * Tweakwise (https://www.tweakwise.com/) - All Rights Reserved
  *
- * @copyright Copyright (c) 2017-2017 Tweakwise.com B.V. (https://www.tweakwise.com)
+ * @copyright Copyright (c) 2017-2022 Tweakwise.com B.V. (https://www.tweakwise.com)
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Emico\TweakwiseExport\Model\Write\Categories;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Categories;
 
-use Emico\TweakwiseExport\Model\Helper;
-use Emico\TweakwiseExport\Model\Write\EavIterator;
+use Tweakwise\Magento2TweakwiseExport\Model\Helper;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\EavIterator;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Event\Manager;
 use Magento\Framework\Model\ResourceModel\Db\Context as DbContext;
-use Emico\TweakwiseExport\Model\Config as EmicoConfig;
+use Tweakwise\Magento2TweakwiseExport\Model\Config as TweakwiseConfig;
 
 /**
  * Class Iterator
- * @package Emico\TweakwiseExport\Model\Write\Categories
+ * @package Tweakwise\Magento2TweakwiseExport\Model\Write\Categories
  */
 class Iterator extends EavIterator
 {
@@ -48,7 +48,7 @@ class Iterator extends EavIterator
      * @param EavConfig $eavConfig
      * @param DbContext $dbContext
      * @param array|string[] $attributes
-     * @param EmicoConfig $config
+     * @param TweakwiseConfig $config
      */
     public function __construct(
         Helper $helper,
@@ -56,7 +56,7 @@ class Iterator extends EavIterator
         DbContext $dbContext,
         Manager $eventManager,
         $attributes,
-        EmicoConfig $config
+        TweakwiseConfig $config
     ) {
         parent::__construct(
             $helper,

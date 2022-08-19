@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Tweakwise & Emico (https://www.tweakwise.com/ & https://www.emico.nl/) - All Rights Reserved
+ * Tweakwise (https://www.tweakwise.com/) - All Rights Reserved
  *
- * @copyright Copyright (c) 2017-2017 Tweakwise.com B.V. (https://www.tweakwise.com)
+ * @copyright Copyright (c) 2017-2022 Tweakwise.com B.V. (https://www.tweakwise.com)
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
@@ -12,7 +12,7 @@
         <section id="tweakwise" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Tweakwise</label>
             <tab>catalog</tab>
-            <resource>Emico_TweakwiseExport::config</resource>
+            <resource>Tweakwise_Magento2TweakwiseExport::config</resource>
             <group id="export" translate="label" type="text" sortOrder="1000" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Export</label>
                 <comment>Tweakwise Export version v4.2.0</comment>
@@ -34,14 +34,14 @@
                 </field>
                 <field id="export_state" translate="label,comment" type="label" sortOrder="12" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>State</label>
-                    <frontend_model>Emico\TweakwiseExport\Block\Config\Form\Field\ExportState</frontend_model>
+                    <frontend_model>Tweakwise\Magento2TweakwiseExport\Block\Config\Form\Field\ExportState</frontend_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
                 </field>
                 <field id="start" translate="label,comment" type="label" sortOrder="12" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Schedule export</label>
-                    <frontend_model>Emico\TweakwiseExport\Block\Config\Form\Field\ExportStart</frontend_model>
+                    <frontend_model>Tweakwise\Magento2TweakwiseExport\Block\Config\Form\Field\ExportStart</frontend_model>
                     <comment>Start export on next cron run</comment>
                     <depends>
                         <field id="enabled">1</field>
@@ -107,7 +107,7 @@
                 <field id="exclude_child_attributes" translate="label,comment" type="multiselect" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Exclude child attributes</label>
                     <comment>Attributes which should not be combined in parent.</comment>
-                    <source_model>Emico\TweakwiseExport\Model\Config\Source\ProductAttributes</source_model>
+                    <source_model>Tweakwise\Magento2TweakwiseExport\Model\Config\Source\ProductAttributes</source_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>
@@ -116,7 +116,7 @@
                 <field id="price_field" translate="label,comment" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Price field</label>
                     <comment>Select which field is used as "price" in Tweakwise, selection will select each price field in order and return the first nonzero value. Prices are exported from price index table, note that catalogrule prices are available in field "min_price" so it could be that this value is lowed then for example "final_price". If your configurable / bundle products do not have a price attribute filled this will be zero.</comment>
-                    <source_model>Emico\TweakwiseExport\Model\Config\Source\PriceField</source_model>
+                    <source_model>Tweakwise\Magento2TweakwiseExport\Model\Config\Source\PriceField</source_model>
                     <depends>
                         <field id="enabled">1</field>
                     </depends>

@@ -1,14 +1,10 @@
 <?php
-/**
- * @author Emico <info@emico.nl>
- * @copyright (c) Emico B.V. 2017
- */
 
-namespace Emico\TweakwiseExport\Model\Write\Products;
+namespace Tweakwise\Magento2TweakwiseExport\Model\Write\Products;
 
 use ArrayIterator;
 use Countable;
-use Emico\TweakwiseExport\Exception\InvalidArgumentException;
+use Tweakwise\Magento2TweakwiseExport\Exception\InvalidArgumentException;
 use IteratorAggregate;
 use Magento\Store\Model\Store;
 

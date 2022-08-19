@@ -1,17 +1,13 @@
 <?php
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2019.
- */
 
-namespace Emico\TweakwiseExport\Model;
+namespace Tweakwise\Magento2TweakwiseExport\Model;
 
 use Magento\Framework\App\Cache\Manager;
 
 /**
  * Class CacheHandler flush caches after tweakwise publish task
  *
- * @package Emico\TweakwiseExport\Model
+ * @package Tweakwise\Magento2TweakwiseExport\Model
  */
 class CacheHandler
 {

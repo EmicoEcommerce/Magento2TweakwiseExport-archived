@@ -1,16 +1,16 @@
 <?php
 /**
- * Tweakwise & Emico (https://www.tweakwise.com/ & https://www.emico.nl/) - All Rights Reserved
+ * Tweakwise (https://www.tweakwise.com/) - All Rights Reserved
  *
- * @copyright Copyright (c) 2017-2017 Tweakwise.com B.V. (https://www.tweakwise.com)
+ * @copyright Copyright (c) 2017-2022 Tweakwise.com B.V. (https://www.tweakwise.com)
  * @license   Proprietary and confidential, Unauthorized copying of this file, via any medium is strictly prohibited
  */
 
-namespace Emico\TweakwiseExport\Test\Integration\Export\MultiStore;
+namespace Tweakwise\Magento2TweakwiseExport\Test\Integration\Export\MultiStore;
 
-use Emico\TweakwiseExport\Model\Config;
-use Emico\TweakwiseExport\Test\Integration\Export\MultiStoreTest;
-use Emico\TweakwiseExport\TestHelper\Data\Product\ConfigurableProvider;
+use Tweakwise\Magento2TweakwiseExport\Model\Config;
+use Tweakwise\Magento2TweakwiseExport\Test\Integration\Export\MultiStoreTest;
+use Tweakwise\Magento2TweakwiseExport\TestHelper\Data\Product\ConfigurableProvider;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\CatalogInventory\Model\Configuration as StockConfiguration;
@@ -18,7 +18,7 @@ use Magento\CatalogInventory\Model\Configuration as StockConfiguration;
 /**
  * Class BasicTest
  *
- * @package Emico\TweakwiseExport\Test\Integration\Export\Product
+ * @package Tweakwise\Magento2TweakwiseExport\Test\Integration\Export\Product
  *
  * @magentoDataFixtureBeforeTransaction createMultiStoreFixture
  * @magentoDbIsolation enabled

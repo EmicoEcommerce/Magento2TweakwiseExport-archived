@@ -1,11 +1,6 @@
 <?php
 
-/**
- * @author : Edwin Jacobs, email: ejacobs@emico.nl.
- * @copyright : Copyright Emico B.V. 2020.
- */
-
-namespace Emico\TweakwiseExport\Model;
+namespace Tweakwise\Magento2TweakwiseExport\Model;
 
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Simplexml\Element;
@@ -16,7 +11,7 @@ use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
  * setup:di:compile fails when there is a reference to a non existing Interface or Class in the constructor
  *
  * Class StockResolverFactory
- * @package Emico\TweakwiseExport\Model
+ * @package Tweakwise\Magento2TweakwiseExport\Model
  */
 class DefaultStockProviderInterfaceFactory
 {

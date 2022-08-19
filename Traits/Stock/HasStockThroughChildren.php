@@ -1,18 +1,13 @@
 <?php
 
-/**
- * @author : Herant Awadisan, email: hawadisan@emico.nl.
- * @copyright : Copyright Emico B.V. 2021.
- */
+namespace Tweakwise\Magento2TweakwiseExport\Traits\Stock;
 
-namespace Emico\TweakwiseExport\Traits\Stock;
-
-use Emico\TweakwiseExport\Model\StockItem;
+use Tweakwise\Magento2TweakwiseExport\Model\StockItem;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 
 /**
  * Trait HasChildren
- * @package Emico\TweakwiseExport\Traits
+ * @package Tweakwise\Magento2TweakwiseExport\Traits
  */
 trait HasStockThroughChildren
 {

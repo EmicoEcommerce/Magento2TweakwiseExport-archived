@@ -1,21 +1,21 @@
 <?php
 /**
- * Tweakwise & Emico (https://www.tweakwise.com/ & https://www.emico.nl/) - All Rights Reserved
+ * Tweakwise (https://www.tweakwise.com/) - All Rights Reserved
  *
- * @copyright Copyright (c) 2017-2017 Tweakwise.com B.V. (https://www.tweakwise.com)
+ * @copyright Copyright (c) 2017-2022 Tweakwise.com B.V. (https://www.tweakwise.com)
  * @license   Proprietary and confidential, Unauthorized copying of this file, via any medium is strictly prohibited
  */
 
-namespace Emico\TweakwiseExport\Test\Integration;
+namespace Tweakwise\Magento2TweakwiseExport\Test\Integration;
 
 use DateTime;
-use Emico\TweakwiseExport\Model\Config;
-use Emico\TweakwiseExport\Model\Export;
-use Emico\TweakwiseExport\Model\Write\Writer;
-use Emico\TweakwiseExport\TestHelper\Data\CategoryProvider;
-use Emico\TweakwiseExport\TestHelper\Data\ProductProvider;
-use Emico\TweakwiseExport\TestHelper\FeedData;
-use Emico\TweakwiseExport\TestHelper\FeedDataFactory;
+use Tweakwise\Magento2TweakwiseExport\Model\Config;
+use Tweakwise\Magento2TweakwiseExport\Model\Export;
+use Tweakwise\Magento2TweakwiseExport\Model\Write\Writer;
+use Tweakwise\Magento2TweakwiseExport\TestHelper\Data\CategoryProvider;
+use Tweakwise\Magento2TweakwiseExport\TestHelper\Data\ProductProvider;
+use Tweakwise\Magento2TweakwiseExport\TestHelper\FeedData;
+use Tweakwise\Magento2TweakwiseExport\TestHelper\FeedDataFactory;
 use Magento\Eav\Model\Config as EavConfig;
 
 abstract class ExportTest extends TestCase
