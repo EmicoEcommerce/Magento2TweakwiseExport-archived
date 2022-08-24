@@ -14,6 +14,11 @@ Install package using zip file
 Extract tweakwise-export.zip src folder to app/code/Emico/TweakwiseExport/
 ```
 
+If 'Store Level Export' enabled single store feed  can be generated using the command line.
+```sh
+php bin/magento tweakwise:export --store '<storecode>'
+```
+
 Run installers
 ```sh
 php bin/magento setup:upgrade
@@ -68,6 +73,7 @@ If you find an issue with data retrieval please create an issue on github.
 
 
 ## Export Settings
+- Store Level Export: Enables generating seperate feed for each store
 - Enabled: If products of that store should be exported to tweakwise, note that if this is false for some store then navigation and search should also be disabled for that store.
 - Schedule: Cron schedule for generating the feed. We strongly encourage you to register the export task on the server crontab instead of using the Magento cron.
 - Schedule export: Generate the feed on the next cron run.
