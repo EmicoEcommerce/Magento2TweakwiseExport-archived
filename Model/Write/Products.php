@@ -181,6 +181,7 @@ class Products implements WriterInterface
         foreach ($data['attributes'] as $attributeKeyValue) {
             $this->writeAttribute($xml, $storeId, $attributeKeyValue['attribute'], $attributeKeyValue['value']);
         }
+
         $xml->endElement(); // attributes
 
         $xml->endElement(); // </item>
