@@ -133,7 +133,7 @@ class Categories implements WriterInterface
             // Always export store root category whether it is enabled or not
             if ($parentId === 1) {
                 // Skip category if not root of current store
-                if ($data['entity_id'] !== $storeRootCategoryId) {
+                if ((int) $data['entity_id'] !== $storeRootCategoryId) {
                     continue;
                 }
 
