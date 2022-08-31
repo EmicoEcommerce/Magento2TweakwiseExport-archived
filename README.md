@@ -1,3 +1,7 @@
+# This package is abandoned and no longer maintained. For the replacement package see tweakwise/magento2-tweakwise-export package instead.
+
+---
+
 [![Build Status](https://travis-ci.org/EmicoEcommerce/Magento2TweakwiseExport.svg?branch=master)](https://travis-ci.org/EmicoEcommerce/Magento2TweakwiseExport)
 [![Code Climate](https://codeclimate.com/github/EmicoEcommerce/Magento2TweakwiseExport.png)](https://codeclimate.com/github/EmicoEcommerce/Magento2TweakwiseExport)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/84dd3eaef04d4569adbd7930f24f23fd)](https://www.codacy.com/app/Fgruntjes/Magento2TweakwiseExport?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=EmicoEcommerce/Magento2TweakwiseExport&amp;utm_campaign=Badge_Grade)
